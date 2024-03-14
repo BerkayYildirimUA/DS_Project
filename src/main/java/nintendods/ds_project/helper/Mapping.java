@@ -15,7 +15,7 @@ public class Mapping {
      * @param outMax the new upper bound
      * @return a number between [outMin, outMax]
      */
-    public static long map(long x, long inMin, long inMax, long outMin, long outMax) {
+    public static int map(double x, double inMin, double inMax, double outMin, double outMax) {
 
         if(x < inMin)
             return outMin;
@@ -23,10 +23,10 @@ public class Mapping {
         if(x > inMax)
             return outMax;
 
-        if((inMax - inMin) + outMin == 0){
+        if((inMax - inMin) == 0){
             return 0;
         }
 
-        return (x - inMin) * (outMax - outMin) / (inMax - inMin) + outMin;
+        return (int)((x - inMin) * (outMax - outMin) / (inMax - inMin) + outMin);
     }
 }
