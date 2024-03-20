@@ -21,5 +21,5 @@
     - create/delete file --> api call for update
     - get file api call
     - get request(name) --> file
- 
+    - Possibility: JPArepo instead of list
 - Base node classes
