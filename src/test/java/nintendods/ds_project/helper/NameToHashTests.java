@@ -15,7 +15,7 @@ public class NameToHashTests {
         // We know the algo for the String.hashCode().
         // the value "" = 0
         // Algo is s[0]*31^(n-1) with s[0] = 0 and n = 1 so 0*38^0 = 0
-        String checkString1 = "Robbe";
+        String checkString1 = "";
 
         int id1 = NameToHash.convert(checkString1);
 

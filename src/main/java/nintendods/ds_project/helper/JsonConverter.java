@@ -15,7 +15,7 @@ public class JsonConverter {
     public String toJson(Object ob){
         try {
             Gson gson = new Gson();
-            String json = gson.toJson(ob);
+            return gson.toJson(ob);
         }
         catch (Exception ex){
             System.out.println(ex);

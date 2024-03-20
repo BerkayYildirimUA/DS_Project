@@ -23,20 +23,16 @@ public class JsonTests {
             throw new RuntimeException(e);
         };
 
-        System.out.println(jsonParser.toJson(node));
-
-        //assertEquals(actualValue, checkValue);
+        assertEquals("{\"address\":\"127.0.0.1\",\"port\":20}", jsonParser.toJson(node));
     }
 
     @Test
     public void checkSimpleParse(){
         JsonConverter jsonParser = new JsonConverter("file.json");
 
-        String json = "{\"address\":\"127.0.0.1\",\"port\":20}";
-
-        System.out.println(jsonParser.toObject(json, NodeModel.class).toString());
-
-        //assertEquals(actualValue, checkValue);
+        String json = "{\"address\":\"127.0.0.1\",\"port\":19}";
+        NodeModel node = (NodeModel) jsonParser.toObject(json, NodeModel.class);
+        assertEquals(19, node.getPort());
     }
 
 }
