@@ -15,18 +15,18 @@ public class Mapping {
      * @param outMax the new upper bound
      * @return a number between [outMin, outMax]
      */
-    public static int map(int x, int inMin, int inMax, int outMin, int outMax) {
+    public static int map(double x, double inMin, double inMax, double outMin, double outMax) {
 
         if(x < inMin)
-            return outMin;
+            return (int) outMin;
 
         if(x > inMax)
-            return outMax;
+            return (int) outMax;
 
         if((inMax - inMin) == 0){
             return 0;
         }
 
-        return (int) (((x - inMin) * (outMax - outMin)) / ((inMax - inMin) + outMin)*1.0);
+        return (int) (((x - inMin) * (outMax - outMin)) / ((inMax - inMin) + outMin));
     }
 }

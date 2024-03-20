@@ -10,6 +10,7 @@ public class NameToHash{
     //private final int maxHashValue = 32768;
 
     public static int convert(String fileName){
+        //System.out.println(fileName.hashCode());
         int hash = (int)Mapping.map(fileName.hashCode(), -2147483647, 2147483647, 0, 32768);
         return hash;
     }
