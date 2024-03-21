@@ -23,11 +23,28 @@ public class NameServerDatabase {
     public int getNodeID(String name){
         Integer tempID = NameToHash.convert(name);
 
+        Integer floor = nodeID_to_nodeIP.floorKey(tempID);
+        Integer ceiling = nodeID_to_nodeIP.ceilingKey(tempID);
 
-        System.out.println(nodeID_to_nodeIP.floorKey(tempID));
-        System.out.println(nodeID_to_nodeIP.ceilingKey(tempID));
+        if (ceiling == null) { // if no upper key, then we loop back to beginning
+            ceiling = nodeID_to_nodeIP.firstKey();
+        }
 
-        return 0;
+        if (floor == null) { // if no lower key, then we loop to end
+            floor = nodeID_to_nodeIP.lastKey();
+        }
+
+        int distToFloor = (tempID - floor + 32768) % 32768; // Wrap-around distance to floor
+        int distToCeiling = (ceiling - tempID + 32768) % 32768; // Wrap-around distance to ceiling
+
+        int closestKey;
+        if (distToFloor <= distToCeiling) {
+            closestKey = floor;
+        } else {
+            closestKey = ceiling;
+        }
+
+        return closestKey;
     }
 
 }
