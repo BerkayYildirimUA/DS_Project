@@ -11,13 +11,16 @@ public class NameServerDatabase {
 
     public Integer addNode(String name, InetAddress inetAddress){
         Integer nodeID = NameToHash.convert(name);
-        System.out.println(name + ": " + nodeID);
         nodeID_to_nodeIP.put(nodeID, inetAddress);
         return nodeID;
     }
 
-    public InetAddress getNodeIP(Integer nodeID){
+    public InetAddress getNodeIPfromID(Integer nodeID){
         return nodeID_to_nodeIP.get(nodeID);
+    }
+
+    public InetAddress getNodeIPfromName(String name){
+        return getNodeIPfromID(getNodeID(name));
     }
 
     public int getNodeID(String name){
