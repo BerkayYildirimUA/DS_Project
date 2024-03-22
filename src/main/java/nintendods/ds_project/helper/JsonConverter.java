@@ -8,15 +8,25 @@ import java.lang.reflect.Type;
 import java.util.Scanner;
 
 public class JsonConverter {
-    private String fileLocation = "";
+    private String fileName = "";
 
-    public JsonConverter(String fileLocation) {
-        this.fileLocation = fileLocation;
+    /***
+     * Constructor with the file name as parameter
+     * Will create the file if not existent
+     * @param fileName
+     */
+    public JsonConverter(String fileName) {
+        this.fileName = fileName;
 
         //check that file exists and create if necessary
         this.checkFileExistance();
     }
 
+    /***
+     * Creates a json string format of a given Object
+     * @param ob the object to be converted to a json string
+     * @return the json string created from the given object
+     */
     public String toJson(Object ob){
         try {
             Gson gson = new Gson();
@@ -28,16 +38,26 @@ public class JsonConverter {
         return "";
     }
 
-    public Object toObject(String jsonString, Object ob){
+    /***
+     * Converts a json string to a given object skeleton
+     * @param jsonString The json string
+     * @param ob the object structure as Object.class
+     * @return An Object or null if json conversion has failed.
+     */
+    public Object toObject(String jsonString, Type ob){
         Gson gson = new Gson();
-        return gson.fromJson(jsonString, (Type) ob);
+        return gson.fromJson(jsonString, ob);
     }
 
+    /***
+     * Write a json string to a file that's being assigned at the constructor.
+     * @param json the json string
+     */
     public void toFile(String json){
         this.checkFileExistance();
 
         try{
-            FileWriter fw = new FileWriter(this.fileLocation);
+            FileWriter fw = new FileWriter(this.fileName);
             fw.write(json);
             fw.close();
         }
@@ -46,17 +66,26 @@ public class JsonConverter {
         }
     }
 
+    /***
+     * Writes an Object to a file that's being assigned at the constructor.
+     * @param ob the object that needs to be written to the file
+     */
     public void toFile(Object ob){
         this.checkFileExistance();
         String data = this.toJson(ob);
         this.toFile(data);
     }
 
-    public Object fromFile(Object ob){
+    /***
+     * Extracts an object from a file that's being assigned at the constructor.
+     * @param ob the object skeleton as Object.class
+     * @return the Object or else null if the json conversion failed
+     */
+    public Object fromFile(Type ob){
         this.checkFileExistance();
         String data = "";
         try {
-            File file = new File(this.fileLocation);
+            File file = new File(this.fileName);
             Scanner reader = new Scanner(file);
             while (reader.hasNextLine()) {
                 data = reader.nextLine();
@@ -75,7 +104,7 @@ public class JsonConverter {
 
     private void checkFileExistance(){
         try {
-            File file = new File(this.fileLocation);
+            File file = new File(this.fileName);
             if (!file.exists())
                 file.createNewFile();
         }
