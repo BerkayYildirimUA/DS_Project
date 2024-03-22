@@ -147,4 +147,28 @@ public class JsonTests {
 
         assertEquals(listOfNodes.size(), listOfNodesReceived.size());
     }
+
+    @Test
+    public void checkListOfObjectsFromFile(){
+        JsonConverter jsonParser = new JsonConverter("file.json");
+
+        List<ABaseNode> listOfNodes = new ArrayList<>();
+
+        try {
+            listOfNodes.add(new NodeModel(InetAddress.getByName("127.0.0.1"), 20));
+            listOfNodes.add(new NodeModel(InetAddress.getByName("127.0.0.2"), 21));
+            listOfNodes.add(new NodeModel(InetAddress.getByName("127.0.0.3"), 22));
+            listOfNodes.add(new NodeModel(InetAddress.getByName("127.0.0.4"), 23));
+        } catch (UnknownHostException e) {
+            throw new RuntimeException(e);
+        }
+
+        jsonParser.toFile(listOfNodes);
+
+        Type type = new TypeToken<ArrayList<NodeModel>>() {}.getType();
+
+        List<ABaseNode> listOfNodesReceived = (List<ABaseNode>) jsonParser.fromFile(type);
+
+        assertEquals(listOfNodes.size(), listOfNodesReceived.size());
+    }
 }
