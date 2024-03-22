@@ -1,8 +1,12 @@
+# 6-DS project
+
+This projects will create a ring topology with clients. A Naming server that will manage the resources and namings of the nodes files in the ring topology
+
 # Tasks
 
 - Robbe:
   - [x] Algorithm for file names convertion to hash value
-  - [x] Save to JSON
+  - [x] Save to JSON to a file
 
 - Tom:
   - [x] API
