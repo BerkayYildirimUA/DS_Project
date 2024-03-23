@@ -26,7 +26,7 @@ public class JsonTests {
         JsonConverter jsonParser = new JsonConverter("file.json");
         ABaseNode node;
         try {
-            node = new NodeModel(InetAddress.getByName("127.0.0.1"), 20, "Node1", NameToHash.convert("Node1"));
+            node = new NodeModel(InetAddress.getByName("127.0.0.1"), 20, "Node1");
         } catch (UnknownHostException e) {
             throw new RuntimeException(e);
         };
@@ -80,7 +80,7 @@ public class JsonTests {
 
         ABaseNode node;
         try {
-            node = new NodeModel(InetAddress.getByName("127.0.0.1"), 20,"Node1", NameToHash.convert("Node1"));
+            node = new NodeModel(InetAddress.getByName("127.0.0.1"), 20,"Node1");
         } catch (UnknownHostException e) {
             throw new RuntimeException(e);
         };
@@ -125,7 +125,7 @@ public class JsonTests {
 
         try {
             for (int i = 0; i < 4; i++)
-                listOfNodes.add(new NodeModel(InetAddress.getByName(String.format("127.0.0.%d", i)), 20+i,String.format("node%d", i), NameToHash.convert(String.format("node%d", i))));
+                listOfNodes.add(new NodeModel(InetAddress.getByName(String.format("127.0.0.%d", i)), 20+i,String.format("node%d", i)));
 
         } catch (UnknownHostException e) {
             throw new RuntimeException(e);
@@ -145,7 +145,7 @@ public class JsonTests {
 
         try {
             for (int i = 0; i < 4; i++)
-                listOfNodes.add(new NodeModel(InetAddress.getByName(String.format("127.0.0.%d", i)), 20+i,String.format("node%d", i), NameToHash.convert(String.format("node%d", i))));
+                listOfNodes.add(new NodeModel(InetAddress.getByName(String.format("127.0.0.%d", i)), 20+i,String.format("node%d", i)));
         } catch (UnknownHostException e) {
             throw new RuntimeException(e);
         }
@@ -170,7 +170,7 @@ public class JsonTests {
 
         try {
             for (int i = 0; i < 4; i++)
-                listOfNodes.add(new NodeModel(InetAddress.getByName(String.format("127.0.0.%d", i)), 20+i,String.format("node%d", i), NameToHash.convert(String.format("node%d", i))));
+                listOfNodes.add(new NodeModel(InetAddress.getByName(String.format("127.0.0.%d", i)), 20+i,String.format("node%d", i)));
         } catch (UnknownHostException e) {
             throw new RuntimeException(e);
         }

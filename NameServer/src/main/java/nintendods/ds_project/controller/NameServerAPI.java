@@ -17,8 +17,9 @@ public class NameServerAPI {
     private final NameServerDatabase nodesDatabase = new NameServerDatabase();
     private final JsonConverter jsonConverter = new JsonConverter("DataBase.json");
 
-    @GetMapping("/files")
-    public ResponseEntity<NameServerDatabase> getNodes() { return ResponseEntity.status(HttpStatus.OK).body(nodesDatabase); }
+    //Not yet implemented
+    //@GetMapping("/files")
+    //public ResponseEntity<NameServerDatabase> getNodes() { return ResponseEntity.status(HttpStatus.OK).body(nodesDatabase); }
 
     @GetMapping("/files/{file_name}")
     public ResponseEntity<String> getFileAddressByName(@PathVariable("file_name") String name) {
