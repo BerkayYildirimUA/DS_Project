@@ -1,4 +1,4 @@
-package nintendods.ds_project.helper;
+package nintendods.ds_project.utility;
 
 import com.google.gson.reflect.TypeToken;
 import nintendods.ds_project.model.ABaseNode;
@@ -8,8 +8,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
 import java.lang.reflect.Type;
 import java.net.InetAddress;
 import java.net.UnknownHostException;

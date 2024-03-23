@@ -1,4 +1,4 @@
-package nintendods.ds_project.helper;
+package nintendods.ds_project.utility;
 
 import com.google.gson.Gson;
 import java.io.File;
@@ -7,6 +7,10 @@ import java.io.*;
 import java.lang.reflect.Type;
 import java.util.Scanner;
 
+/**
+ * A utility class for converting objects to JSON format and vice versa,
+ * as well as writing JSON data to files and reading JSON data from files.
+ */
 public class JsonConverter {
     private String fileName = "";
 
@@ -24,7 +28,7 @@ public class JsonConverter {
         this.checkFileExistance();
     }
 
-    /***
+    /**
      * Converts the provided object to its JSON representation using the Gson library.
      * @param ob The object to be converted to JSON.
      * @return JSON string representing the provided object.
@@ -107,7 +111,9 @@ public class JsonConverter {
         return this.toObject(data, ob);
     }
 
-    
+    /**
+     * Checks if the file specified by fileName exists, and creates it if it doesn't.
+     */
     private void checkFileExistance(){
         try {
             File file = new File(this.fileName);

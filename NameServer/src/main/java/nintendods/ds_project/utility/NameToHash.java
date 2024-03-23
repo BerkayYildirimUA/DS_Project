@@ -1,4 +1,4 @@
-package nintendods.ds_project.helper;
+package nintendods.ds_project.utility;
 
 public class NameToHash{
     /**
@@ -6,9 +6,7 @@ public class NameToHash{
      * @param fileName contains the string representation of the filename
      * @return an integer from 0 to 32768
      */
-
     public static int convert(String fileName){
-        int hash = (int) Interpolate.map(fileName.hashCode(), -2147483647, 2147483647, 0, 32768);
-        return hash;
+        return Interpolate.map(fileName.hashCode(), -2147483647, 2147483647, 0, 32768);
     }
 }

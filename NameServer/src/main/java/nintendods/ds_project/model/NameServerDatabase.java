@@ -1,6 +1,6 @@
 package nintendods.ds_project.model;
 import nintendods.ds_project.Exeptions.NameServerFullExeption;
-import nintendods.ds_project.helper.NameToHash;
+import nintendods.ds_project.utility.NameToHash;
 
 import java.net.InetAddress;
 import java.util.*;
@@ -101,5 +101,4 @@ public class NameServerDatabase {
 
         return closestKey;
     }
-
 }

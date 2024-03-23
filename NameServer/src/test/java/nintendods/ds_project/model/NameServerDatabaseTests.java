@@ -1,7 +1,7 @@
 package nintendods.ds_project.model;
 
 import nintendods.ds_project.Exeptions.NameServerFullExeption;
-import nintendods.ds_project.helper.NameToHash;
+import nintendods.ds_project.utility.NameToHash;
 import org.junit.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
