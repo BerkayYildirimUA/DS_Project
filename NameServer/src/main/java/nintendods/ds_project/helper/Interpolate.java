@@ -1,6 +1,6 @@
 package nintendods.ds_project.helper;
 
-public class Mapping {
+public class Interpolate {
 
     /**
      * Returns a mapping number from 2 min and max to another min and max. If the actual number goes below or above the

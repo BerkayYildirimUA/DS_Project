@@ -10,10 +10,12 @@ import java.util.Scanner;
 public class JsonConverter {
     private String fileName = "";
 
-    /***
-     * Constructor with the file name as parameter
-     * Will create the file if not existent
-     * @param fileName
+    /**
+     * Constructor for the JsonConverter class.
+     * Initializes the object with the provided fileName.
+     * It checks if the file exists, and creates it if necessary.
+     *
+     * @param fileName The name of the file to be used for JSON generations.
      */
     public JsonConverter(String fileName) {
         this.fileName = fileName;
@@ -23,9 +25,9 @@ public class JsonConverter {
     }
 
     /***
-     * Creates a json string format of a given Object
-     * @param ob the object to be converted to a json string
-     * @return the json string created from the given object
+     * Converts the provided object to its JSON representation using the Gson library.
+     * @param ob The object to be converted to JSON.
+     * @return JSON string representing the provided object.
      */
     public String toJson(Object ob){
         try {
@@ -38,20 +40,23 @@ public class JsonConverter {
         return "";
     }
 
-    /***
-     * Converts a json string to a given object skeleton
-     * @param jsonString The json string
-     * @param ob the object structure as Object.class
-     * @return An Object or null if json conversion has failed.
+    /**
+     * Converts the provided JSON string to an object of the specified type using the Gson library.
+     *
+     * @param jsonString The JSON string to be converted to an object.
+     * @param ob The type of object to which the JSON string should be converted.
+     * @return An object of the specified type representing the JSON string.
      */
     public Object toObject(String jsonString, Type ob){
         Gson gson = new Gson();
         return gson.fromJson(jsonString, ob);
     }
 
-    /***
-     * Write a json string to a file that's being assigned at the constructor.
-     * @param json the json string
+    /**
+     * Writes the provided JSON string to a file.
+     * If the file does not exist, it is created.
+     *
+     * @param json The JSON string to be written to the file.
      */
     public void toFile(String json){
         this.checkFileExistance();
@@ -78,8 +83,8 @@ public class JsonConverter {
 
     /***
      * Extracts an object from a file that's being assigned at the constructor.
-     * @param ob the object skeleton as Object.class
-     * @return the Object or else null if the json conversion failed
+     * @param ob the object skeleton as Object.class.
+     * @return the Object or else null if the json conversion failed.
      */
     public Object fromFile(Type ob){
         this.checkFileExistance();
@@ -102,6 +107,7 @@ public class JsonConverter {
         return this.toObject(data, ob);
     }
 
+    
     private void checkFileExistance(){
         try {
             File file = new File(this.fileName);

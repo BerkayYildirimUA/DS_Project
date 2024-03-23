@@ -9,7 +9,7 @@ This projects will create a ring topology with clients. A Naming server that wil
   - [x] Save to JSON to a file
 
 - Tom:
-  - [x] API
+  - [] API
 
 - Berkay
   - Name server:
@@ -20,8 +20,8 @@ This projects will create a ring topology with clients. A Naming server that wil
 
 - Ahmad
   - Node (client node)
-    - [x] id, ip
-    - [x] local list of files & replica/remote of files
+    - [] id, ip
+    - [] local list of files & replica/remote of files
     - [] create/delete file --> api call for update
     - [] get file api call
     - [] get request(name) --> file

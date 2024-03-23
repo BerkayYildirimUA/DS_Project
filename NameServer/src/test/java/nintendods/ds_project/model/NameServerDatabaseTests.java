@@ -1,14 +1,12 @@
 package nintendods.ds_project.model;
 
 import nintendods.ds_project.Exeptions.NameServerFullExeption;
-import nintendods.ds_project.helper.Mapping;
 import nintendods.ds_project.helper.NameToHash;
 import org.junit.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.lang.reflect.Field;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.Random;
 import java.util.TreeMap;
 
@@ -174,6 +172,5 @@ public class NameServerDatabaseTests {
                 return candidate;
             }
         }
-
     }
 }

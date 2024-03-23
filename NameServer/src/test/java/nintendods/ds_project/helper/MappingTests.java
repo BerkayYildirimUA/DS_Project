@@ -14,7 +14,7 @@ public class MappingTests {
         int newMin = 0;
         int newMax = 10;
 
-        int checkValue = Mapping.map(100, oldMin, oldMax, newMin, newMax);
+        int checkValue = Interpolate.map(100, oldMin, oldMax, newMin, newMax);
         int actualValue = 10;
 
         assertEquals(actualValue, checkValue);
@@ -28,7 +28,7 @@ public class MappingTests {
         int newMin = 0;
         int newMax = 10;
 
-        int checkValue = Mapping.map(50, oldMin, oldMax, newMin, newMax);
+        int checkValue = Interpolate.map(50, oldMin, oldMax, newMin, newMax);
         int actualValue = 0;
 
         assertEquals(actualValue, checkValue);
@@ -41,12 +41,12 @@ public class MappingTests {
         int newMin = 0;
         int newMax = 10;
 
-        int checkValue = Mapping.map(0, oldMin, oldMax, newMin, newMax);
+        int checkValue = Interpolate.map(0, oldMin, oldMax, newMin, newMax);
         int actualValue = newMin;
 
         assertEquals(actualValue, checkValue);
 
-        checkValue = Mapping.map(150, oldMin, oldMax, newMin, newMax);
+        checkValue = Interpolate.map(150, oldMin, oldMax, newMin, newMax);
         actualValue = newMax;
 
         assertEquals(actualValue, checkValue);
@@ -60,7 +60,7 @@ public class MappingTests {
         int newMin = 0;
         int newMax = 0;
 
-        int checkValue = Mapping.map(0, oldMin, oldMax, newMin, newMax);
+        int checkValue = Interpolate.map(0, oldMin, oldMax, newMin, newMax);
         int actualValue = newMin;
 
         assertEquals(actualValue, checkValue);
