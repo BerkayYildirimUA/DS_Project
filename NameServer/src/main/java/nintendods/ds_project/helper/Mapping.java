@@ -17,16 +17,16 @@ public class Mapping {
      */
     public static int map(double x, double inMin, double inMax, double outMin, double outMax) {
 
-        if(x < inMin)
+        if(x <= inMin)
             return (int) outMin;
 
-        if(x > inMax)
+        if(x >= inMax)
             return (int) outMax;
 
         if((inMax - inMin) == 0){
             return 0;
         }
 
-        return (int) (((x - inMin) * (outMax - outMin)) / ((inMax - inMin) + outMin));
+        return (int) Math.round(((x - inMin) * (outMax - outMin)) / (inMax - inMin) + outMin); // if you do double -> int, then the numbers behind the comma get cut of. So 1.9 becomes 1, which means that getting outMax is nearly impossible unless x=inMax
     }
 }
