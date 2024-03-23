@@ -159,6 +159,24 @@ public class NameServerDatabaseTests {
         assertEquals(nameServerDatabase.getClosestNodeIP(createStringWithKnownHash(12)), address3);
     }
 
+
+    @Test
+    public void getNodeIDTest_Exists() throws Exception {
+        NameServerDatabase nameServerDatabase = new NameServerDatabase();
+
+        InetAddress address1 = InetAddress.getByName("10.10.10.10");
+        InetAddress address2 = InetAddress.getByName("10.10.10.11");
+        InetAddress address3 = InetAddress.getByName("10.10.10.12");
+
+        ABaseNode node = new NodeModel(InetAddress.getByName("10.10.10.10"), 10, "name1");
+
+        nameServerDatabase.addNode(node)
+
+        assertEquals(true, nameServerDatabase.exists(node));
+        assertEquals(nameServerDatabase.getClosestNodeIP(createStringWithKnownHash(12)), address1);
+    }
+
+
     /**
      * creates random string whos hash after NameToHash.convert is the asked number.
      * @param wantedHash

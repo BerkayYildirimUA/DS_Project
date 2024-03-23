@@ -4,6 +4,6 @@ import java.net.InetAddress;
 
 public class NameServerModel extends ABaseNode{
     public NameServerModel(InetAddress address, int port) {
-        super(address, port);
+        super(address, port, "NameServer");
     }
 }

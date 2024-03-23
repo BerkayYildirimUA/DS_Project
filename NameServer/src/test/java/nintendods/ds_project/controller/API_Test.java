@@ -28,7 +28,7 @@ public class API_Test {
 
     @Test
     public void postNodeModelTest() throws Exception {
-        NodeModel node = new NodeModel(InetAddress.getLocalHost(), 13, Objects.hash(String.format("node%d", 13)));
+        NodeModel node = new NodeModel(InetAddress.getLocalHost(), 13, "node13", Objects.hash(String.format("node%d", 13)));
         Gson gson = new Gson();
 
         mockMvc.perform(MockMvcRequestBuilders
@@ -56,8 +56,8 @@ public class API_Test {
     @Test
     public void getNodeModelTest() throws Exception {
         List<NodeModel> nodes = new ArrayList<>();
-        for (int i = 1; i < 37; i+=7) nodes.add(new NodeModel(InetAddress.getLocalHost(), i, Objects.hash(String.format("node%d", i))));
-        NodeModel node = new NodeModel(InetAddress.getLocalHost(), 15, Objects.hash(String.format("node%d", 15)));
+        for (int i = 1; i < 37; i+=7) nodes.add(new NodeModel(InetAddress.getLocalHost(), i,String.format("node%d", i), Objects.hash(String.format("node%d", i))));
+        NodeModel node = new NodeModel(InetAddress.getLocalHost(), 15,String.format("node%d", 15), Objects.hash(String.format("node%d", 15)));
         Gson gson = new Gson();
 
         nodes.forEach(nodeModel -> {

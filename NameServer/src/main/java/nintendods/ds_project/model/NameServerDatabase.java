@@ -48,6 +48,10 @@ public class NameServerDatabase {
         nodeID_to_nodeIP.entrySet().removeIf(entry -> entry.getValue().equals(inetAddress));
     }
 
+    public boolean exists(ABaseNode node){
+        return nodeID_to_nodeIP.containsKey(NameToHash.convert(node.getName()));
+    }
+
     public InetAddress getNodeIPfromID(Integer nodeID){
         return nodeID_to_nodeIP.get(nodeID);
     }

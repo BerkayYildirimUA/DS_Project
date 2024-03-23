@@ -26,7 +26,7 @@ public class JsonTests {
         JsonConverter jsonParser = new JsonConverter("file.json");
         ABaseNode node;
         try {
-            node = new NodeModel(InetAddress.getByName("127.0.0.1"), 20);
+            node = new NodeModel(InetAddress.getByName("127.0.0.1"), 20, "Node1", NameToHash.convert("Node1"));
         } catch (UnknownHostException e) {
             throw new RuntimeException(e);
         };
@@ -34,7 +34,7 @@ public class JsonTests {
         File myObj = new File("file.json");
         myObj.delete();
 
-        assertEquals("{\"address\":\"127.0.0.1\",\"port\":20}", jsonParser.toJson(node));
+        assertEquals("{\"id\":16960,\"address\":\"127.0.0.1\",\"port\":20,\"name\":\"Node1\"}", jsonParser.toJson(node));
     }
 
     @Test
@@ -80,7 +80,7 @@ public class JsonTests {
 
         ABaseNode node;
         try {
-            node = new NodeModel(InetAddress.getByName("127.0.0.1"), 20);
+            node = new NodeModel(InetAddress.getByName("127.0.0.1"), 20,"Node1", NameToHash.convert("Node1"));
         } catch (UnknownHostException e) {
             throw new RuntimeException(e);
         };
@@ -124,20 +124,18 @@ public class JsonTests {
         List<ABaseNode> listOfNodes = new ArrayList<>();
 
         try {
-            listOfNodes.add(new NodeModel(InetAddress.getByName("127.0.0.1"), 20));
-            listOfNodes.add(new NodeModel(InetAddress.getByName("127.0.0.2"), 21));
-            listOfNodes.add(new NodeModel(InetAddress.getByName("127.0.0.3"), 22));
-            listOfNodes.add(new NodeModel(InetAddress.getByName("127.0.0.4"), 23));
+            for (int i = 0; i < 4; i++)
+                listOfNodes.add(new NodeModel(InetAddress.getByName(String.format("127.0.0.%d", i)), 20+i,String.format("node%d", i), NameToHash.convert(String.format("node%d", i))));
+
         } catch (UnknownHostException e) {
             throw new RuntimeException(e);
         }
-        String expected = "[{\"address\":\"127.0.0.1\",\"port\":20},{\"address\":\"127.0.0.2\",\"port\":21},{\"address\":\"127.0.0.3\",\"port\":22},{\"address\":\"127.0.0.4\",\"port\":23}]";
+        String expected = "[{\"id\":17185,\"address\":\"127.0.0.0\",\"port\":20,\"name\":\"node0\"},{\"id\":17185,\"address\":\"127.0.0.1\",\"port\":21,\"name\":\"node1\"},{\"id\":17185,\"address\":\"127.0.0.2\",\"port\":22,\"name\":\"node2\"},{\"id\":17185,\"address\":\"127.0.0.3\",\"port\":23,\"name\":\"node3\"}]";
 
         String jsonString = jsonParser.toJson(listOfNodes);
 
         assertEquals(expected, jsonString);
     }
-
 
     @Test
     public void checkListOfObjectsRevert(){
@@ -146,10 +144,8 @@ public class JsonTests {
         List<ABaseNode> listOfNodes = new ArrayList<>();
 
         try {
-            listOfNodes.add(new NodeModel(InetAddress.getByName("127.0.0.1"), 20));
-            listOfNodes.add(new NodeModel(InetAddress.getByName("127.0.0.2"), 21));
-            listOfNodes.add(new NodeModel(InetAddress.getByName("127.0.0.3"), 22));
-            listOfNodes.add(new NodeModel(InetAddress.getByName("127.0.0.4"), 23));
+            for (int i = 0; i < 4; i++)
+                listOfNodes.add(new NodeModel(InetAddress.getByName(String.format("127.0.0.%d", i)), 20+i,String.format("node%d", i), NameToHash.convert(String.format("node%d", i))));
         } catch (UnknownHostException e) {
             throw new RuntimeException(e);
         }
@@ -173,10 +169,8 @@ public class JsonTests {
         List<ABaseNode> listOfNodes = new ArrayList<>();
 
         try {
-            listOfNodes.add(new NodeModel(InetAddress.getByName("127.0.0.1"), 20));
-            listOfNodes.add(new NodeModel(InetAddress.getByName("127.0.0.2"), 21));
-            listOfNodes.add(new NodeModel(InetAddress.getByName("127.0.0.3"), 22));
-            listOfNodes.add(new NodeModel(InetAddress.getByName("127.0.0.4"), 23));
+            for (int i = 0; i < 4; i++)
+                listOfNodes.add(new NodeModel(InetAddress.getByName(String.format("127.0.0.%d", i)), 20+i,String.format("node%d", i), NameToHash.convert(String.format("node%d", i))));
         } catch (UnknownHostException e) {
             throw new RuntimeException(e);
         }
