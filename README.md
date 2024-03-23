@@ -13,10 +13,10 @@ This projects will create a ring topology with clients. A Naming server that wil
 
 - Berkay
   - Name server:
-    - [] Map(int, ip)
-    - [] get ip from filename
-    - [] Add/Remove nodes from map
-    - [] Algorithm to look up NodeID for gotten hashID (Xor, extends/implemts)
+    - [x] Map(int, ip)
+    - [x] get ip from filename
+    - [x] Add/Remove nodes from map
+    - [x] Algorithm to look up NodeID for gotten hashID (Xor, extends/implemts)
 
 - Ahmad
   - Node (client node)
