@@ -51,7 +51,7 @@ public class NameServerAPI {
         //}
 
         try {
-            nodesDatabase.addNode(newNode.getName(), newNode.getAddress());
+            nodesDatabase.addNode(newNode);
         }
         catch (NameServerFullExeption ex){
             System.out.println(ex);
