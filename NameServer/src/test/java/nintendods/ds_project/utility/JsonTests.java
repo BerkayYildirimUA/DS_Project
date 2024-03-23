@@ -31,6 +31,9 @@ public class JsonTests {
             throw new RuntimeException(e);
         };
 
+        File myObj = new File("file.json");
+        myObj.delete();
+
         assertEquals("{\"address\":\"127.0.0.1\",\"port\":20}", jsonParser.toJson(node));
     }
 
@@ -40,6 +43,10 @@ public class JsonTests {
 
         String json = "{\"address\":\"127.0.0.1\",\"port\":19}";
         NodeModel node = (NodeModel) jsonParser.toObject(json, NodeModel.class);
+
+        File myObj = new File("file.json");
+        myObj.delete();
+
         assertEquals(19, node.getPort());
     }
 
@@ -57,6 +64,8 @@ public class JsonTests {
                 data = data + myReader.nextLine();
             }
             myReader.close();
+
+            myObj.delete();
         } catch (FileNotFoundException e) {
             System.out.println("An error occurred.");
             e.printStackTrace();
@@ -80,8 +89,13 @@ public class JsonTests {
 
         ABaseNode nodeFromFile = (NodeModel) jsonParser.fromFile(NodeModel.class);
 
+        File myObj = new File("file.json");
+        myObj.delete();
+
         assertEquals(node.getAddress(), nodeFromFile.getAddress());
         assertEquals(node.getPort(), nodeFromFile.getPort());
+
+
     }
 
     @Test
@@ -98,6 +112,9 @@ public class JsonTests {
 
         ABaseNode node = (NodeModel)jsonParser.fromFile(NodeModel.class);
         assertNull(node);
+
+        File myObj = new File("file.json");
+        myObj.delete();
     }
 
     @Test
@@ -143,6 +160,9 @@ public class JsonTests {
 
         List<ABaseNode> listOfNodesReceived = (List<ABaseNode>) jsonParser.toObject(expected, type);
 
+        File myObj = new File("file.json");
+        myObj.delete();
+
         assertEquals(listOfNodes.size(), listOfNodesReceived.size());
     }
 
@@ -166,6 +186,9 @@ public class JsonTests {
         Type type = new TypeToken<ArrayList<NodeModel>>() {}.getType();
 
         List<ABaseNode> listOfNodesReceived = (List<ABaseNode>) jsonParser.fromFile(type);
+
+        File myObj = new File("file.json");
+        myObj.delete();
 
         assertEquals(listOfNodes.size(), listOfNodesReceived.size());
     }

@@ -1,5 +1,6 @@
 package nintendods.ds_project.utility;
 
+
 public class NameToHash{
     /**
      * Create a hash between 0 and 32768 based on the fileName string value

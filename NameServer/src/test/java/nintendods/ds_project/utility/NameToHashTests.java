@@ -21,9 +21,4 @@ public class NameToHashTests {
 
         assertEquals(32768/2, id1); // should give half of the full range.
     }
-
-    @Test
-    public void checkMapFunction(){
-
-    }
 }

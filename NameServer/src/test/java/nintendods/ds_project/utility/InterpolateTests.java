@@ -5,7 +5,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
-public class MappingTests {
+public class InterpolateTests {
     @Test
     public void checkMappingUpperLimit(){
         int oldMin = 50;
@@ -64,5 +64,22 @@ public class MappingTests {
         int actualValue = newMin;
 
         assertEquals(actualValue, checkValue);
+    }
+
+    @Test
+    public void checkExactBounds(){
+        int oldMin = 0;
+        int oldMax = 20;
+
+        int newMin = 5;
+        int newMax = 15;
+
+        int checkValue1 = Interpolate.map(0, oldMin, oldMax, newMin, newMax);
+        int checkValue2 = Interpolate.map(20, oldMin, oldMax, newMin, newMax);
+        int actualValue1 = newMin;
+        int actualValue2 = newMax;
+
+        assertEquals(actualValue1, checkValue1);
+        assertEquals(actualValue2, checkValue2);
     }
 }

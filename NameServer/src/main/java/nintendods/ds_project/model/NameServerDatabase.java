@@ -5,7 +5,6 @@ import nintendods.ds_project.utility.NameToHash;
 import java.net.InetAddress;
 import java.util.*;
 
-
 public class NameServerDatabase {
 
     public NameServerDatabase() {
