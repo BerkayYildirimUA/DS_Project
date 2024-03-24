@@ -53,36 +53,68 @@ public class NameServerAPITests {
     }
 
     // Conflict because NameServerDatabase has no "getAllNodes" method
-//    @Test
-//    public void getNodeModelTest() throws Exception {
-//        List<NodeModel> nodes = new ArrayList<>();
-//        for (int i = 1; i < 37; i+=7) nodes.add(new NodeModel(InetAddress.getLocalHost(), i,String.format("node%d", i)));
-//        NodeModel node = new NodeModel(InetAddress.getLocalHost(), 15,String.format("node%d", 15));
-//        Gson gson = new Gson();
-//
-//        nodes.forEach(nodeModel -> {
-//            try {
-//                mockMvc.perform(MockMvcRequestBuilders
-//                        .post("/files")
-//                        .contentType(MediaType.APPLICATION_JSON)
-//                        .content(gson.toJson(nodeModel))
-//                ).andExpect(MockMvcResultMatchers.status().isOk());
-//            } catch (Exception e) {
-//                throw new RuntimeException(e);
-//            }
-//        });
-//
-//        mockMvc.perform(MockMvcRequestBuilders
-//                .get("/files")
-//                .contentType(MediaType.APPLICATION_JSON)
-//        ).andExpect(MockMvcResultMatchers.status().isOk())
-//        .andExpect(result -> {
-//            List response = gson.fromJson(result.getResponse().getContentAsString(), List.class);
-//            List<NodeModel> responseNodes = new ArrayList<>();
-//            for (Object responseNode: response){ responseNodes.add(gson.fromJson(responseNode.toString(), NodeModel.class)); }
-//            assert(responseNodes.stream().anyMatch(data -> data.getId() == node.getId()));
-//
-//            System.out.println("node returned from get request is correct");
-//        });
-//    }
+    @Test
+    public void getNodeModelTest() throws Exception {
+        NodeModel node = new NodeModel(InetAddress.getLocalHost(), 37, String.format("node%d", 37));
+        Gson gson = new Gson();
+
+        mockMvc.perform(MockMvcRequestBuilders
+                .post("/files")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(gson.toJson(node))
+        );
+
+
+        mockMvc.perform(MockMvcRequestBuilders
+                .get("/files/{id}", node.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+        ).andExpect(MockMvcResultMatchers.status().isOk())
+        .andExpect(result -> {
+            ResponseObject response = gson.fromJson(result.getResponse().getContentAsString(), ResponseObject.class);
+            NodeModel data = gson.fromJson(response.getData().toString(), NodeModel.class);
+
+            assertEquals(node.getId(), data.getId());
+            System.out.println("id is correct");
+
+            assertEquals(node.getAddress().getHostAddress(), data.getAddress().getHostAddress());
+            System.out.println("address is correct");
+
+            assertEquals(node.getPort(), data.getPort());
+            System.out.println("port is correct");
+
+            System.out.println("node returned from get request is correct");
+        });
+    }
+
+    @Test
+    public void deleteNodeModelTest() throws Exception {
+        NodeModel node = new NodeModel(InetAddress.getLocalHost(), 37, String.format("node%d", 37));
+        Gson gson = new Gson();
+
+        mockMvc.perform(MockMvcRequestBuilders
+                .post("/files")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(gson.toJson(node))
+        );
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .delete("/files/{id}", node.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                ).andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(result -> {
+                    ResponseObject response = gson.fromJson(result.getResponse().getContentAsString(), ResponseObject.class);
+                    NodeModel data = gson.fromJson(response.getData().toString(), NodeModel.class);
+
+                    assertEquals(node.getId(), data.getId());
+                    System.out.println("id is correct");
+
+                    assertEquals(node.getAddress().getHostAddress(), data.getAddress().getHostAddress());
+                    System.out.println("address is correct");
+
+                    assertEquals(node.getPort(), data.getPort());
+                    System.out.println("port is correct");
+
+                    System.out.println("node returned from delete request is correct");
+                });
+    }
 }

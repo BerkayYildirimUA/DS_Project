@@ -17,11 +17,16 @@ public class NameServerAPI {
     private final NameServerDatabase nodesDatabase = new NameServerDatabase();
     private final JsonConverter jsonConverter = new JsonConverter("DataBase.json");
 
-    //Not yet implemented
-    //@GetMapping("/files")
-    //public ResponseEntity<NameServerDatabase> getNodes() { return ResponseEntity.status(HttpStatus.OK).body(nodesDatabase); }
+    @GetMapping("/files/{id}")
+    public ResponseEntity<String> getFileById(@PathVariable("id") int id) {
+        NodeModel node = (NodeModel) nodesDatabase.getNodefromID(id);
+        ResponseObject<NodeModel> response = new ResponseObject<>(node);
 
-    @GetMapping("/files/{file_name}")
+        if (node != null)   return ResponseEntity.status(HttpStatus.OK).body(jsonConverter.toJson(response));
+        else                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+    }
+
+    @GetMapping("/files/{file_name}/address")
     public ResponseEntity<String> getFileAddressByName(@PathVariable("file_name") String name) {
         InetAddress ip = nodesDatabase.getClosestNodeIP(name);
 
@@ -38,17 +43,14 @@ public class NameServerAPI {
             return ResponseEntity.status(HttpStatus.NO_CONTENT).body(jsonConverter.toJson(response));
         }
 
-        // TODO: lijkt replicatie van onderstaande? als ID al bestaat, dan bestaat de node ook.
-        //  Of de node heeft dezelfde naam als een andere node wat problematisch is.
+        //TODO: check ofdat we mss beter checken op andere velden van existance in de datatbase.
+        // Enkel de id is uniek. De naam kan hetzelfde zijn en de port/ip moeten wij toekenen,
+        // dus erop filteren is nuteloos want als dat niet juist is,
+        // is er gewoon iets mis bij de allocatie en moet dat daar opgelost worden.
         if (nodesDatabase.exists(newNode)) {
-            response.setMessage("Item already exists");
+            response.setMessage(String.format("Item with id = %d already exists", newNode.getId()));
             return ResponseEntity.status(HttpStatus.CONFLICT).body(jsonConverter.toJson(response));
         }
-        //TODO: check ofdat we mss beter checken op andere velden van existance in de datatbase.
-        //if (nodesDatabase.exists(newNode)) {
-        //    response.setMessage(String.format("Item with id = %d already exists", newNode.getId()));
-        //    return ResponseEntity.status(HttpStatus.CONFLICT).body(jsonConverter.toJson(response));
-        //}
 
         try {
             nodesDatabase.addNode(newNode);
@@ -59,6 +61,20 @@ public class NameServerAPI {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(jsonConverter.toJson(response));
         }
 
+        return ResponseEntity.status(HttpStatus.OK).body(jsonConverter.toJson(response));
+    }
+
+    @DeleteMapping("/files/{id}")
+    public ResponseEntity<String> deleteFileById(@PathVariable("id") int id) {
+        NodeModel node = (NodeModel) nodesDatabase.getNodefromID(id);
+        ResponseObject<NodeModel> response = new ResponseObject<>(node);
+
+        if (node == null) {
+            response.setMessage(String.format("Item with id = %d does not exists", node.getId()));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(jsonConverter.toJson(response));
+        }
+
+        nodesDatabase.deleteNode(node);
         return ResponseEntity.status(HttpStatus.OK).body(jsonConverter.toJson(response));
     }
 }
