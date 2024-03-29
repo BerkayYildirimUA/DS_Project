@@ -2,7 +2,7 @@ package nintendods.ds_project.utility;
 
 import com.google.gson.reflect.TypeToken;
 import nintendods.ds_project.model.ABaseNode;
-import nintendods.ds_project.model.NodeModel;
+import nintendods.ds_project.model.ClientNode;
 import org.junit.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -26,7 +26,7 @@ public class JsonTests {
         JsonConverter jsonParser = new JsonConverter("file.json");
         ABaseNode node;
         try {
-            node = new NodeModel(InetAddress.getByName("127.0.0.1"), 20, "Node1");
+            node = new ClientNode(InetAddress.getByName("127.0.0.1"), 20, "Node1");
         } catch (UnknownHostException e) {
             throw new RuntimeException(e);
         };
@@ -42,7 +42,7 @@ public class JsonTests {
         JsonConverter jsonParser = new JsonConverter("file.json");
 
         String json = "{\"address\":\"127.0.0.1\",\"port\":19}";
-        NodeModel node = (NodeModel) jsonParser.toObject(json, NodeModel.class);
+        ClientNode node = (ClientNode) jsonParser.toObject(json, ClientNode.class);
 
         File myObj = new File("file.json");
         myObj.delete();
@@ -80,14 +80,14 @@ public class JsonTests {
 
         ABaseNode node;
         try {
-            node = new NodeModel(InetAddress.getByName("127.0.0.1"), 20,"Node1");
+            node = new ClientNode(InetAddress.getByName("127.0.0.1"), 20,"Node1");
         } catch (UnknownHostException e) {
             throw new RuntimeException(e);
         };
 
         jsonParser.toFile(node);
 
-        ABaseNode nodeFromFile = (NodeModel) jsonParser.fromFile(NodeModel.class);
+        ABaseNode nodeFromFile = (ClientNode) jsonParser.fromFile(ClientNode.class);
 
         File myObj = new File("file.json");
         myObj.delete();
@@ -110,7 +110,7 @@ public class JsonTests {
 
         file.delete();
 
-        ABaseNode node = (NodeModel)jsonParser.fromFile(NodeModel.class);
+        ABaseNode node = (ClientNode)jsonParser.fromFile(ClientNode.class);
         assertNull(node);
 
         File myObj = new File("file.json");
@@ -125,7 +125,7 @@ public class JsonTests {
 
         try {
             for (int i = 0; i < 4; i++)
-                listOfNodes.add(new NodeModel(InetAddress.getByName(String.format("127.0.0.%d", i)), 20+i,String.format("node%d", i)));
+                listOfNodes.add(new ClientNode(InetAddress.getByName(String.format("127.0.0.%d", i)), 20+i,String.format("node%d", i)));
 
         } catch (UnknownHostException e) {
             throw new RuntimeException(e);
@@ -145,14 +145,14 @@ public class JsonTests {
 
         try {
             for (int i = 0; i < 4; i++)
-                listOfNodes.add(new NodeModel(InetAddress.getByName(String.format("127.0.0.%d", i)), 20+i,String.format("node%d", i)));
+                listOfNodes.add(new ClientNode(InetAddress.getByName(String.format("127.0.0.%d", i)), 20+i,String.format("node%d", i)));
         } catch (UnknownHostException e) {
             throw new RuntimeException(e);
         }
 
         String expected = "[{\"address\":\"127.0.0.1\",\"port\":20},{\"address\":\"127.0.0.2\",\"port\":21},{\"address\":\"127.0.0.3\",\"port\":22},{\"address\":\"127.0.0.4\",\"port\":23}]";
 
-        Type type = new TypeToken<ArrayList<NodeModel>>() {}.getType();
+        Type type = new TypeToken<ArrayList<ClientNode>>() {}.getType();
 
         List<ABaseNode> listOfNodesReceived = (List<ABaseNode>) jsonParser.toObject(expected, type);
 
@@ -170,14 +170,14 @@ public class JsonTests {
 
         try {
             for (int i = 0; i < 4; i++)
-                listOfNodes.add(new NodeModel(InetAddress.getByName(String.format("127.0.0.%d", i)), 20+i,String.format("node%d", i)));
+                listOfNodes.add(new ClientNode(InetAddress.getByName(String.format("127.0.0.%d", i)), 20+i,String.format("node%d", i)));
         } catch (UnknownHostException e) {
             throw new RuntimeException(e);
         }
 
         jsonParser.toFile(listOfNodes);
 
-        Type type = new TypeToken<ArrayList<NodeModel>>() {}.getType();
+        Type type = new TypeToken<ArrayList<ClientNode>>() {}.getType();
 
         List<ABaseNode> listOfNodesReceived = (List<ABaseNode>) jsonParser.fromFile(type);
 

@@ -1,7 +1,7 @@
 package nintendods.ds_project.controller;
 
 import com.google.gson.Gson;
-import nintendods.ds_project.model.NodeModel;
+import nintendods.ds_project.model.ClientNode;
 import nintendods.ds_project.model.message.ResponseObject;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +25,7 @@ public class NameServerAPITests {
 
     @Test
     public void postNodeModelTest() throws Exception {
-        NodeModel node = new NodeModel(InetAddress.getLocalHost(), 13, "node13");
+        ClientNode node = new ClientNode(InetAddress.getLocalHost(), 13, "node13");
         Gson gson = new Gson();
 
         mockMvc.perform(MockMvcRequestBuilders
@@ -35,7 +35,7 @@ public class NameServerAPITests {
                 ).andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(result -> {
                     ResponseObject response = gson.fromJson(result.getResponse().getContentAsString(), ResponseObject.class);
-                    NodeModel data = gson.fromJson(response.getData().toString(), NodeModel.class);
+                    ClientNode data = gson.fromJson(response.getData().toString(), ClientNode.class);
 
                     assertEquals(node.getId(), data.getId());
                     System.out.println("id is correct");
@@ -53,7 +53,7 @@ public class NameServerAPITests {
     // Conflict because NameServerDatabase has no "getAllNodes" method
     @Test
     public void getNodeModelTest() throws Exception {
-        NodeModel node = new NodeModel(InetAddress.getLocalHost(), 37, String.format("node%d", 37));
+        ClientNode node = new ClientNode(InetAddress.getLocalHost(), 37, String.format("node%d", 37));
         Gson gson = new Gson();
 
         mockMvc.perform(MockMvcRequestBuilders
@@ -69,7 +69,7 @@ public class NameServerAPITests {
         ).andExpect(MockMvcResultMatchers.status().isOk())
         .andExpect(result -> {
             ResponseObject response = gson.fromJson(result.getResponse().getContentAsString(), ResponseObject.class);
-            NodeModel data = gson.fromJson(response.getData().toString(), NodeModel.class);
+            ClientNode data = gson.fromJson(response.getData().toString(), ClientNode.class);
 
             assertEquals(node.getId(), data.getId());
             System.out.println("id is correct");
@@ -86,7 +86,7 @@ public class NameServerAPITests {
 
     @Test
     public void deleteNodeModelTest() throws Exception {
-        NodeModel node = new NodeModel(InetAddress.getLocalHost(), 37, String.format("node%d", 37));
+        ClientNode node = new ClientNode(InetAddress.getLocalHost(), 37, String.format("node%d", 37));
         Gson gson = new Gson();
 
         mockMvc.perform(MockMvcRequestBuilders
@@ -101,7 +101,7 @@ public class NameServerAPITests {
                 ).andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(result -> {
                     ResponseObject response = gson.fromJson(result.getResponse().getContentAsString(), ResponseObject.class);
-                    NodeModel data = gson.fromJson(response.getData().toString(), NodeModel.class);
+                    ClientNode data = gson.fromJson(response.getData().toString(), ClientNode.class);
 
                     assertEquals(node.getId(), data.getId());
                     System.out.println("id is correct");

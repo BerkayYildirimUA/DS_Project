@@ -1,7 +1,7 @@
 package nintendods.ds_project.controller;
 
 import nintendods.ds_project.Exeptions.NameServerFullExeption;
-import nintendods.ds_project.model.NodeModel;
+import nintendods.ds_project.model.ClientNode;
 import nintendods.ds_project.model.message.ResponseObject;
 import nintendods.ds_project.database.NodeDB;
 import nintendods.ds_project.service.NodeDBService;
@@ -19,8 +19,8 @@ public class NameServerAPI {
 
     @GetMapping("/files/{id}")
     public ResponseEntity<String> getFileById(@PathVariable("id") int id) {
-        NodeModel node = (NodeModel) nodeDB.getNodefromID(id);
-        ResponseObject<NodeModel> response = new ResponseObject<>(node);
+        ClientNode node = (ClientNode) nodeDB.getNodefromID(id);
+        ResponseObject<ClientNode> response = new ResponseObject<>(node);
 
         if (node != null)   return ResponseEntity.status(HttpStatus.OK).body(jsonConverter.toJson(response));
         else                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
@@ -35,8 +35,8 @@ public class NameServerAPI {
     }
 
     @PostMapping("/files")
-    public ResponseEntity<String> postFile(@RequestBody NodeModel newNode) {
-        ResponseObject<NodeModel> response = new ResponseObject<>(newNode);
+    public ResponseEntity<String> postFile(@RequestBody ClientNode newNode) {
+        ResponseObject<ClientNode> response = new ResponseObject<>(newNode);
 
         if (newNode == null) {
             response.setMessage("No item was given in body");
@@ -66,8 +66,8 @@ public class NameServerAPI {
 
     @DeleteMapping("/files/{id}")
     public ResponseEntity<String> deleteFileById(@PathVariable("id") int id) {
-        NodeModel node = (NodeModel) nodeDB.getNodefromID(id);
-        ResponseObject<NodeModel> response = new ResponseObject<>(node);
+        ClientNode node = (ClientNode) nodeDB.getNodefromID(id);
+        ResponseObject<ClientNode> response = new ResponseObject<>(node);
 
         if (node == null) {
             response.setMessage(String.format("Item with id = %d does not exists", node.getId()));

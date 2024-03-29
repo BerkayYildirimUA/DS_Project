@@ -21,9 +21,9 @@ public class NameServerDatabaseTests {
     public void getNodeIDTest_BasicClosest() throws Exception {
         NodeDB nodeDB = new NodeDB();
 
-        NodeModel node1 = new NodeModel(InetAddress.getByName("10.10.10.11"), 100, createStringWithKnownHash(10));
-        NodeModel node2 = new NodeModel(InetAddress.getByName("10.10.10.12"), 100, createStringWithKnownHash(32000));
-        NodeModel node3 = new NodeModel(InetAddress.getByName("10.10.10.13"), 100, createStringWithKnownHash(15));
+        ClientNode node1 = new ClientNode(InetAddress.getByName("10.10.10.11"), 100, createStringWithKnownHash(10));
+        ClientNode node2 = new ClientNode(InetAddress.getByName("10.10.10.12"), 100, createStringWithKnownHash(32000));
+        ClientNode node3 = new ClientNode(InetAddress.getByName("10.10.10.13"), 100, createStringWithKnownHash(15));
 
         nodeDB.addNode(node1);
         nodeDB.addNode(node2);
@@ -37,9 +37,9 @@ public class NameServerDatabaseTests {
     public void getNodeIDTest_WrapFromTop() throws Exception {
         NodeDB nodeDB = new NodeDB();
 
-        NodeModel node1 = new NodeModel(InetAddress.getByName("10.10.10.10"), 100, createStringWithKnownHash(10));
-        NodeModel node2 = new NodeModel(InetAddress.getByName("10.10.10.11"), 100, createStringWithKnownHash(32000));
-        NodeModel node3 = new NodeModel(InetAddress.getByName("10.10.10.12"), 100, createStringWithKnownHash(15));
+        ClientNode node1 = new ClientNode(InetAddress.getByName("10.10.10.10"), 100, createStringWithKnownHash(10));
+        ClientNode node2 = new ClientNode(InetAddress.getByName("10.10.10.11"), 100, createStringWithKnownHash(32000));
+        ClientNode node3 = new ClientNode(InetAddress.getByName("10.10.10.12"), 100, createStringWithKnownHash(15));
 
         nodeDB.addNode(node1);
         nodeDB.addNode(node2);
@@ -53,9 +53,9 @@ public class NameServerDatabaseTests {
     public void getNodeIDTest_WrapFromBottom() throws Exception {
         NodeDB nodeDB = new NodeDB();
 
-        NodeModel node1 = new NodeModel(InetAddress.getByName("10.10.10.10"), 100, createStringWithKnownHash(10000));
-        NodeModel node2 = new NodeModel(InetAddress.getByName("10.10.10.11"), 100, createStringWithKnownHash(32000));
-        NodeModel node3 = new NodeModel(InetAddress.getByName("10.10.10.12"), 100, createStringWithKnownHash(15000));
+        ClientNode node1 = new ClientNode(InetAddress.getByName("10.10.10.10"), 100, createStringWithKnownHash(10000));
+        ClientNode node2 = new ClientNode(InetAddress.getByName("10.10.10.11"), 100, createStringWithKnownHash(32000));
+        ClientNode node3 = new ClientNode(InetAddress.getByName("10.10.10.12"), 100, createStringWithKnownHash(15000));
 
         nodeDB.addNode(node1);
         nodeDB.addNode(node2);
@@ -69,9 +69,9 @@ public class NameServerDatabaseTests {
     public void getNodeIDTest_ExactMatch() throws Exception {
         NodeDB nodeDB = new NodeDB();
 
-        NodeModel node1 = new NodeModel(InetAddress.getByName("10.10.10.10"), 100, createStringWithKnownHash(10000));
-        NodeModel node2 = new NodeModel(InetAddress.getByName("10.10.10.11"), 100, createStringWithKnownHash(32000));
-        NodeModel node3 = new NodeModel(InetAddress.getByName("10.10.10.12"), 100, createStringWithKnownHash(15000));
+        ClientNode node1 = new ClientNode(InetAddress.getByName("10.10.10.10"), 100, createStringWithKnownHash(10000));
+        ClientNode node2 = new ClientNode(InetAddress.getByName("10.10.10.11"), 100, createStringWithKnownHash(32000));
+        ClientNode node3 = new ClientNode(InetAddress.getByName("10.10.10.12"), 100, createStringWithKnownHash(15000));
 
         nodeDB.addNode(node1);
         nodeDB.addNode(node2);
@@ -85,9 +85,9 @@ public class NameServerDatabaseTests {
     public void getNodeIDTest_SameHash() throws Exception {
         NodeDB nodeDB = new NodeDB();
 
-        NodeModel node1 = new NodeModel(InetAddress.getByName("10.10.10.10"), 100, createStringWithKnownHash(10000));
-        NodeModel node2 = new NodeModel(InetAddress.getByName("10.10.10.11"), 100, createStringWithKnownHash(10000));
-        NodeModel node3 = new NodeModel(InetAddress.getByName("10.10.10.12"), 100, createStringWithKnownHash(10000));
+        ClientNode node1 = new ClientNode(InetAddress.getByName("10.10.10.10"), 100, createStringWithKnownHash(10000));
+        ClientNode node2 = new ClientNode(InetAddress.getByName("10.10.10.11"), 100, createStringWithKnownHash(10000));
+        ClientNode node3 = new ClientNode(InetAddress.getByName("10.10.10.12"), 100, createStringWithKnownHash(10000));
 
         nodeDB.addNode(node1);
         nodeDB.addNode(node2);
@@ -103,9 +103,9 @@ public class NameServerDatabaseTests {
     public void getNodeIDTest_SameHash_IDbackTo0() throws Exception {
         NodeDB nodeDB = new NodeDB();
 
-        NodeModel node1 = new NodeModel(InetAddress.getByName("10.10.10.10"), 100, createStringWithKnownHash(32768));
-        NodeModel node2 = new NodeModel(InetAddress.getByName("10.10.10.11"), 100, createStringWithKnownHash(32768));
-        NodeModel node3 = new NodeModel(InetAddress.getByName("10.10.10.12"), 100, createStringWithKnownHash(32768));
+        ClientNode node1 = new ClientNode(InetAddress.getByName("10.10.10.10"), 100, createStringWithKnownHash(32768));
+        ClientNode node2 = new ClientNode(InetAddress.getByName("10.10.10.11"), 100, createStringWithKnownHash(32768));
+        ClientNode node3 = new ClientNode(InetAddress.getByName("10.10.10.12"), 100, createStringWithKnownHash(32768));
 
         nodeDB.addNode(node1);
         nodeDB.addNode(node2);
@@ -125,22 +125,22 @@ public class NameServerDatabaseTests {
         // had to fill in the map directly because any other means would be really, really slow
         Field mapField = NodeDB.class.getDeclaredField("nodeID_to_nodeIP");
         mapField.setAccessible(true);
-        TreeMap<Integer, NodeModel> nodeID_to_nodeIP = (TreeMap<Integer, NodeModel>) mapField.get(nodeDB);
+        TreeMap<Integer, ClientNode> nodeID_to_nodeIP = (TreeMap<Integer, ClientNode>) mapField.get(nodeDB);
         for (int i = 0; i <= 32768; i++) {
-            nodeID_to_nodeIP.put(i, new NodeModel(address, 100, "stuffing"));
+            nodeID_to_nodeIP.put(i, new ClientNode(address, 100, "stuffing"));
         }
         mapField.setAccessible(false);
 
-        nodeDB.addNode(new NodeModel(address, 100, "ERROR"));
+        nodeDB.addNode(new ClientNode(address, 100, "ERROR"));
     }
 
     @Test
     public void getNodeIDTest_Delete() throws Exception {
         NodeDB nodeDB = new NodeDB();
 
-        NodeModel node1 = new NodeModel(InetAddress.getByName("10.10.10.10"), 100, createStringWithKnownHash(10));
-        NodeModel node2 = new NodeModel(InetAddress.getByName("10.10.10.11"), 100, createStringWithKnownHash(32000));
-        NodeModel node3 = new NodeModel(InetAddress.getByName("10.10.10.12"), 100, createStringWithKnownHash(15));
+        ClientNode node1 = new ClientNode(InetAddress.getByName("10.10.10.10"), 100, createStringWithKnownHash(10));
+        ClientNode node2 = new ClientNode(InetAddress.getByName("10.10.10.11"), 100, createStringWithKnownHash(32000));
+        ClientNode node3 = new ClientNode(InetAddress.getByName("10.10.10.12"), 100, createStringWithKnownHash(15));
 
         nodeDB.addNode(node1);
         nodeDB.addNode(node2);
@@ -160,7 +160,7 @@ public class NameServerDatabaseTests {
     public void getNodeIDTest_Exists() throws Exception {
         NodeDB nodeDB = new NodeDB();
 
-        NodeModel node1 = new NodeModel(InetAddress.getByName("10.10.10.10"), 10, "name1");
+        ClientNode node1 = new ClientNode(InetAddress.getByName("10.10.10.10"), 10, "name1");
 
         nodeDB.addNode(node1);
 

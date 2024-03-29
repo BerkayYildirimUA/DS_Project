@@ -3,27 +3,25 @@ package nintendods.ds_project.service;
 import nintendods.ds_project.Exeptions.NameServerFullExeption;
 import nintendods.ds_project.database.NodeDB;
 import nintendods.ds_project.model.ABaseNode;
-import nintendods.ds_project.model.NodeModel;
+import nintendods.ds_project.model.ClientNode;
 import nintendods.ds_project.model.message.MNObject;
+import nintendods.ds_project.model.message.UNAMObject;
 import nintendods.ds_project.utility.JsonConverter;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.InetAddress;
-import java.net.MulticastSocket;
-import java.net.UnknownHostException;
+import java.net.*;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 @Component
 public class MulticastHandler {
-    private static final String MULTICAST_ADDRESS = "223.0.0.1000";
+    private static final String MULTICAST_ADDRESS = "224.0.0.100";
     private static final int PORT = 12345;
-    private static final int BUFFER_SIZE = 20;
+    private static final int BUFFER_SIZE = 256;
 
     public MulticastHandler() {
-        BlockingQueue<String> packetQueue = new LinkedBlockingQueue<>();
+        BlockingQueue<String> packetQueue = new LinkedBlockingQueue<>(20);
 
         // Start the receiver thread
         Thread receiverThread = new Thread(() -> receivePackets(packetQueue));
@@ -65,22 +63,60 @@ public class MulticastHandler {
                 // Process the packet (example: print it)
                 System.out.println("Received packet: " + packet);
                 MNObject receivedObject = (MNObject) jsonConverter.toObject(packet, MNObject.class);
-                ABaseNode node = new NodeModel(receivedObject);
+                ABaseNode node = new ClientNode(receivedObject);
                 //Check database if node exist
-                if (nodeDB.exists(node)){
+                if (!nodeDB.exists(node)) {
                     //Add node to database
-                    nodeDB.addNode(node);
-                }
 
-                // Compose response to node
-                // amount of nodes present in ring
-                int amountNodes = nodeDB.
+                    // Compose response to node based on UNAMObject
+                    // amount of nodes present in ring
+                    int amountNodes = nodeDB.getSize();
+                    int currentNodeName = 0;
+                    int prevNodeHash = 0;
+                    int nextNodeHash = 0;
+
+                    if (amountNodes > 1) {
+                        // There are 2 or more nodes present.
+                        //Define the previous and next nodes for this specific node and compose UNAMObject.
+                        //TODO: find the lowest and highest node ID's in the database.
+                        // This is not yet implemented inside the database!
+
+                    } else if(amountNodes < 1) {
+                        // No nodes present in the database
+
+                        ClientNode temp = null;
+                        if (node instanceof ClientNode)
+                            temp = (ClientNode) node;
+                        currentNodeName = temp.getId();
+                        prevNodeHash = temp.getId();
+                        nextNodeHash = temp.getId();
+                    }
+                    else{
+                        //Not defined in the documentation?
+                    }
+
+                    //Add to database
+                    nodeDB.addNode(node);
+
+                    // Send out the multicast message over UDP with the timestamp as ID.
+                    long messageId = System.currentTimeMillis();
+
+                    UNAMObject unicastMessage = new UNAMObject(messageId, currentNodeName, prevNodeHash, nextNodeHash, amountNodes);
+
+                    //Setup the UDP sender and send out.
+                    UDPClient client = new UDPClient(node.getAddress(),node.getPort(), 256);
+                    client.SendMessage(jsonConverter.toJson(unicastMessage));
+                }
 
             } catch (InterruptedException e) {
                 e.printStackTrace();
             } catch (UnknownHostException e) {
                 throw new RuntimeException(e);
             } catch (NameServerFullExeption e) {
+                throw new RuntimeException(e);
+            } catch (SocketException e) {
+                throw new RuntimeException(e);
+            } catch (IOException e) {
                 throw new RuntimeException(e);
             }
         }

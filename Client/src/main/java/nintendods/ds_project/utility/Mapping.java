@@ -1,4 +1,4 @@
-package nintendods.ds_project.helper;
+package nintendods.ds_project.utility;
 
 public class Mapping {
 

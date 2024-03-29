@@ -7,7 +7,7 @@ public class NodeDBService {
     private static NodeDB nodeDB = null;
 
     public static NodeDB getNodeDB() {
-        if(nodeDB != null)
+        if(nodeDB == null)
             nodeDB = new NodeDB();
 
         return nodeDB;

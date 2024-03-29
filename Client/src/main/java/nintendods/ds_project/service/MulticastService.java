@@ -1,6 +1,6 @@
 package nintendods.ds_project.service;
 
-import nintendods.ds_project.helper.JsonConverter;
+import nintendods.ds_project.utility.JsonConverter;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -8,12 +8,12 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
-public class MulticastSender {
+public class MulticastService {
     private DatagramSocket socket;
     private InetAddress group;
     private int port;
     private byte[] buf;
-    public MulticastSender(String multicastAddress, int port ) throws UnknownHostException{
+    public MulticastService(String multicastAddress, int port ) throws UnknownHostException{
         this.group = InetAddress.getByName(multicastAddress);
         this.port = port;
     }
