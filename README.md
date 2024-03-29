@@ -35,13 +35,13 @@ The nodes are organized in ring topology. If a node joins or leaves, it needs to
 On failure of a node, the network must be self healing.
 
 ## Discovery and Bootstrap
-  ### Naming Server
-  - [] needs to have a method to recieve a multicast
-    - [] When receiving a multicast, add the node (if not exist) to the database
-  ### Node
-  - [] needs to be able to transmit a multicast (eg broadcast) to all the nodes on the network on startup.
-  - [] needs to be able to recieve a multicast.
-    - [] When receiving a multicast, update local database on previous and next node in the ring.
+  ### Naming Server (Robbe)
+  - [] needs to have a method to recieve a broadcast
+    - [] When receiving a broadcast, add the node (if not exist) to the database
+  ### Node (Robbe)
+  - [] needs to be able to transmit a broadcast to all the nodes on the network on startup.
+  - [] needs to be able to recieve a broadcast.
+    - [] When receiving a broadcast, update local database on previous and next node in the ring.
     - [] Sent the changes to the new node (it's own ID so the new node can configure this as next/prev node)
 
 ## Shutdown
@@ -59,7 +59,7 @@ On failure of a node, the network must be self healing.
 ## Failure
 ### Naming Server
   - Needs to be able to receive a request for the closest ID's of nodes based on the received node id.
-    - This means, send out 2 node objects 
+    - This means, send out 2 node objects to the requester
 
 ### Node
   - needs to have a failback method at every exception to transmit the ID's to the next and previous.
