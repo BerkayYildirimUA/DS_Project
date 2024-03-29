@@ -1,11 +1,13 @@
 package nintendods.ds_project.model;
 
+import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 
 import java.net.InetAddress;
 import java.net.Socket;
 
+@Entity
 public abstract class ABaseNode {
     private InetAddress address;
     private int port;

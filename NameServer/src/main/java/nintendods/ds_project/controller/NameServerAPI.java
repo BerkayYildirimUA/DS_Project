@@ -1,9 +1,10 @@
 package nintendods.ds_project.controller;
 
 import nintendods.ds_project.Exeptions.NameServerFullExeption;
-import nintendods.ds_project.model.NameServerDatabase;
 import nintendods.ds_project.model.NodeModel;
 import nintendods.ds_project.model.ResponseObject;
+import nintendods.ds_project.database.NodeDB;
+import nintendods.ds_project.service.NodeDBService;
 import nintendods.ds_project.utility.JsonConverter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,13 +14,12 @@ import java.net.InetAddress;
 
 @RestController
 public class NameServerAPI {
-
-    private final NameServerDatabase nodesDatabase = new NameServerDatabase();
-    private final JsonConverter jsonConverter = new JsonConverter("DataBase.json");
+    JsonConverter jsonConverter = new JsonConverter("Database.json");
+    NodeDB nodeDB = NodeDBService.getNodeDB();
 
     @GetMapping("/files/{id}")
     public ResponseEntity<String> getFileById(@PathVariable("id") int id) {
-        NodeModel node = (NodeModel) nodesDatabase.getNodefromID(id);
+        NodeModel node = (NodeModel) nodeDB.getNodefromID(id);
         ResponseObject<NodeModel> response = new ResponseObject<>(node);
 
         if (node != null)   return ResponseEntity.status(HttpStatus.OK).body(jsonConverter.toJson(response));
@@ -28,7 +28,7 @@ public class NameServerAPI {
 
     @GetMapping("/files/{file_name}/address")
     public ResponseEntity<String> getFileAddressByName(@PathVariable("file_name") String name) {
-        InetAddress ip = nodesDatabase.getClosestNodeIP(name);
+        InetAddress ip = nodeDB.getClosestNodeIP(name);
 
         if (ip != null) return ResponseEntity.status(HttpStatus.OK).body(ip.getHostAddress());
         else            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
@@ -47,13 +47,13 @@ public class NameServerAPI {
         // Enkel de id is uniek. De naam kan hetzelfde zijn en de port/ip moeten wij toekenen,
         // dus erop filteren is nuteloos want als dat niet juist is,
         // is er gewoon iets mis bij de allocatie en moet dat daar opgelost worden.
-        if (nodesDatabase.exists(newNode)) {
+        if (nodeDB.exists(newNode)) {
             response.setMessage(String.format("Item with id = %d already exists", newNode.getId()));
             return ResponseEntity.status(HttpStatus.CONFLICT).body(jsonConverter.toJson(response));
         }
 
         try {
-            nodesDatabase.addNode(newNode);
+            nodeDB.addNode(newNode);
         }
         catch (NameServerFullExeption ex){
             System.out.println(ex);
@@ -66,7 +66,7 @@ public class NameServerAPI {
 
     @DeleteMapping("/files/{id}")
     public ResponseEntity<String> deleteFileById(@PathVariable("id") int id) {
-        NodeModel node = (NodeModel) nodesDatabase.getNodefromID(id);
+        NodeModel node = (NodeModel) nodeDB.getNodefromID(id);
         ResponseObject<NodeModel> response = new ResponseObject<>(node);
 
         if (node == null) {
@@ -74,7 +74,7 @@ public class NameServerAPI {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(jsonConverter.toJson(response));
         }
 
-        nodesDatabase.deleteNode(node);
+        nodeDB.deleteNode(node);
         return ResponseEntity.status(HttpStatus.OK).body(jsonConverter.toJson(response));
     }
 }

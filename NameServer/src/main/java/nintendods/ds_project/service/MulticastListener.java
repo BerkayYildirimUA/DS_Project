@@ -9,7 +9,6 @@ import java.net.MulticastSocket;
 
 @Component
 public class MulticastListener extends Thread {
-
     private MulticastSocket socket = null;
     private byte[] buf = new byte[256];
 
@@ -19,6 +18,7 @@ public class MulticastListener extends Thread {
             InetAddress group = null;
             group = InetAddress.getByName("224.0.0.100");
             socket.joinGroup(group);
+            System.out.println("Listening for multicasts");
 
             while (true) {
                 DatagramPacket packet = new DatagramPacket(buf, buf.length);

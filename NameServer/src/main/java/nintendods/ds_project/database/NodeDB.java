@@ -1,14 +1,20 @@
-package nintendods.ds_project.model;
+package nintendods.ds_project.database;
 import nintendods.ds_project.Exeptions.NameServerFullExeption;
+import nintendods.ds_project.model.ABaseNode;
 import nintendods.ds_project.utility.NameToHash;
+import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Service;
 
 import java.net.InetAddress;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class NameServerDatabase {
 
-    public NameServerDatabase() {
+
+@Repository
+public class NodeDB {
+
+    public NodeDB() {
         nodeID_to_nodeIP = new TreeMap<>();
     }
 
