@@ -8,13 +8,12 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
-public class MulticastService {
+public class MulticastSender {
     private DatagramSocket socket;
     private InetAddress group;
     private int port;
     private byte[] buf;
-
-    public MulticastService(String multicastAddress, int port ) throws UnknownHostException{
+    public MulticastSender(String multicastAddress, int port ) throws UnknownHostException{
         this.group = InetAddress.getByName(multicastAddress);
         this.port = port;
     }

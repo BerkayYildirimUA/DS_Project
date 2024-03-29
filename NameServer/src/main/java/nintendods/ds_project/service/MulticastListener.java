@@ -6,13 +6,12 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
-import java.net.UnknownHostException;
 
 @Component
 public class MulticastListener extends Thread {
 
-    protected MulticastSocket socket = null;
-    protected byte[] buf = new byte[256];
+    private MulticastSocket socket = null;
+    private byte[] buf = new byte[256];
 
     public void run() {
         try {
