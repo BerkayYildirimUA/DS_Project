@@ -34,7 +34,7 @@ public class DsProjectApplication {
 
             while(true) {
                 //send out the node's object
-                mp.multicastSend(new MNObject(udp_id, node.getAddress(), node.getName()));
+                mp.multicastSend(new MNObject(udp_id, node.getAddress(),node.getPort(), node.getName()));
 
                 //wait for receiving the amount of nodes in the network and the prev and the next node in the network
 

@@ -2,7 +2,7 @@ package nintendods.ds_project.controller;
 
 import nintendods.ds_project.Exeptions.NameServerFullExeption;
 import nintendods.ds_project.model.NodeModel;
-import nintendods.ds_project.model.ResponseObject;
+import nintendods.ds_project.model.message.ResponseObject;
 import nintendods.ds_project.database.NodeDB;
 import nintendods.ds_project.service.NodeDBService;
 import nintendods.ds_project.utility.JsonConverter;

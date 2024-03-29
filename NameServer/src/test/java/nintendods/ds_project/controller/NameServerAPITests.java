@@ -2,7 +2,7 @@ package nintendods.ds_project.controller;
 
 import com.google.gson.Gson;
 import nintendods.ds_project.model.NodeModel;
-import nintendods.ds_project.model.ResponseObject;
+import nintendods.ds_project.model.message.ResponseObject;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -13,8 +13,6 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.net.*;
-import java.util.ArrayList;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

@@ -1,4 +1,4 @@
-package nintendods.ds_project.model;
+package nintendods.ds_project.model.message;
 
 public class ResponseObject<T> {
     String message = "";

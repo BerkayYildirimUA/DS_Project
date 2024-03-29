@@ -70,7 +70,9 @@ public class NodeDB {
     public InetAddress getClosestNodeIP(String name){
         return getNodefromID(getClosestNodeID(name)).getAddress();
     }
-
+    public int getSize(){
+        return this.nodeID_to_nodeIP.size();
+    }
 
     public Set<ABaseNode> getNodefromName(String name){
         return nodeID_to_nodeIP.values().stream().filter(value -> value.getName().equals(name)).collect(Collectors.toSet());
