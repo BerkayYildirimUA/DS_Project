@@ -1,28 +1,46 @@
 package nintendods.ds_project;
 
-import nintendods.ds_project.service.MulticastPublisher;
-import org.springframework.boot.SpringApplication;
+import nintendods.ds_project.model.MulticastObject;
+import nintendods.ds_project.model.Node;
+import nintendods.ds_project.service.MulticastService;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.ServerSocket;
 
 @SpringBootApplication(exclude = {DataSourceAutoConfiguration.class })
 @RestController
 public class DsProjectApplication {
 
-    public static void main(String[] args) {
-        MulticastPublisher mp = new MulticastPublisher();
+    static Node node;
 
+    public static void main(String[] args) throws IOException {
+        MulticastService mp = null;
+        ServerSocket serverSocket = null;
         try {
-            int x = 0;
+            // startup server socket for file transfer
+            serverSocket = new ServerSocket(0);
+
+            node = new Node(InetAddress.getLocalHost(), serverSocket, InetAddress.getLocalHost().getHostName());
+            mp = new MulticastService("224.0.0.100", 12345);
+
+            // Een id aan het packet zodat de ontvangers weten (bij verlies van packet) dat bv. 2 dezelfde packets met dezelfde timestamp, identiek zijn.
+
+            long udp_id = System.currentTimeMillis();
+
             while(true) {
-                mp.multicast("Hallo Jonge " + x);
-                x++;
+                //send out the node's object
+                mp.multicastSend(new MulticastObject(udp_id, node.getAddress(), node.getName()));
+
+                //wait for receiving the amount of nodes in the network and the prev and the next node in the network
+
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
+            serverSocket.close();
             throw new RuntimeException(e);
         }
 

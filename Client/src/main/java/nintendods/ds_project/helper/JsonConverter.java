@@ -10,16 +10,18 @@ import java.util.Scanner;
 public class JsonConverter {
     private String fileName = "";
 
-    /***
-     * Constructor with the file name as parameter
-     * Will create the file if not existent
-     * @param fileName
-     */
+    public JsonConverter() {
+    }
+
     public JsonConverter(String fileName) {
         this.fileName = fileName;
 
         //check that file exists and create if necessary
-        this.checkFileExistance();
+        try {
+            this.checkFileExistance();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /***
@@ -54,9 +56,8 @@ public class JsonConverter {
      * @param json the json string
      */
     public void toFile(String json){
-        this.checkFileExistance();
-
         try{
+            this.checkFileExistance();
             FileWriter fw = new FileWriter(this.fileName);
             fw.write(json);
             fw.close();
@@ -71,7 +72,11 @@ public class JsonConverter {
      * @param ob the object that needs to be written to the file
      */
     public void toFile(Object ob){
-        this.checkFileExistance();
+        try {
+            this.checkFileExistance();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         String data = this.toJson(ob);
         this.toFile(data);
     }
@@ -82,9 +87,11 @@ public class JsonConverter {
      * @return the Object or else null if the json conversion failed
      */
     public Object fromFile(Type ob){
-        this.checkFileExistance();
+
+
         String data = "";
         try {
+            this.checkFileExistance();
             File file = new File(this.fileName);
             Scanner reader = new Scanner(file);
             while (reader.hasNextLine()) {
@@ -96,20 +103,21 @@ public class JsonConverter {
         } catch (FileNotFoundException e) {
             System.out.println("An error occurred.");
             e.printStackTrace();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
 
         // decompose to an object
         return this.toObject(data, ob);
     }
 
-    private void checkFileExistance(){
-        try {
-            File file = new File(this.fileName);
-            if (!file.exists())
-                file.createNewFile();
-        }
-        catch (IOException ex){
-            System.out.println(ex);
-        }
+    private void checkFileExistance() throws IOException{
+        if(fileName.equals(""))
+            throw new IOException("No file specified!");
+
+        File file = new File(this.fileName);
+        if (!file.exists())
+            file.createNewFile();
+
     }
 }

@@ -9,15 +9,21 @@ import java.net.Socket;
 public abstract class ABaseNode {
     private InetAddress address;
     private int port;
+    private String name;
 
-    public ABaseNode(InetAddress address, int port){
+    public ABaseNode(InetAddress address, int port, String name){
         setAddress(address);
         setPort(port);
+        setName(name);
     }
     
     //alt + insert
 
-    public InetAddress getAddress() {
+    public String getAddress() {
+        return address.getHostAddress();
+    }
+
+    public InetAddress getAddressFull() {
         return address;
     }
 
@@ -31,5 +37,12 @@ public abstract class ABaseNode {
 
     public void setPort(int port) {
         this.port = port;
+    }
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }
