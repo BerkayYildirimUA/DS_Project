@@ -31,11 +31,12 @@ public class DsProjectApplication {
         UNAMObject settings = ds.discover(node); //Blocking method
 
         //Check if ID matches
-        
-
-        //set the parameters in the client node
-        node.setNextId(settings.getNextNodeId());
-        node.setPrevId(settings.getPrevNodeId());
+        if(settings.getNodeHashId() == node.getId())
+        {
+            //set the parameters in the client node
+            node.setNextId(settings.getNextNodeId());
+            node.setPrevId(settings.getPrevNodeId());
+        }
 
 
 

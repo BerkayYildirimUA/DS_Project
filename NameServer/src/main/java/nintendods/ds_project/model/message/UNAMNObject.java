@@ -1,14 +1,9 @@
 package nintendods.ds_project.model.message;
 
-/**
- * UNAM or Unicast Node After Multicast is a message object that will be sent to
- * the node that has transmitted a multicast to join the ring topology.
- */
-public class UNAMObject extends AMessage {
+public class UNAMNObject extends UNAMObject {
     private int nodeHashId;
     private int prevNodeId;
     private int nextNodeId;
-    private int amountOfNodes;
 
     /**
      * @param messageId The unique message ID
@@ -17,12 +12,11 @@ public class UNAMObject extends AMessage {
      * @param nextNodeId The next node ID (higher than nodeHashId)
      * @param amountOfNodes The amount of nodes present in the network (exclusive)
      */
-    public UNAMObject(long messageId, int nodeHashId, int prevNodeId, int nextNodeId, int amountOfNodes) {
-        super(messageId);
+    public UNAMNObject(long messageId,eMessageTypes type, int nodeHashId, int prevNodeId, int nextNodeId, int amountOfNodes) {
+        super(messageId, type, amountOfNodes);
         setNodeHashId(nodeHashId);
         setPrevNodeId(prevNodeId);
         setNextNodeId(nextNodeId);
-        setAmountOfNodes(amountOfNodes);
     }
 
     public int getNodeHashId() {
@@ -47,13 +41,5 @@ public class UNAMObject extends AMessage {
 
     public void setNextNodeId(int nextNodeId) {
         this.nextNodeId = nextNodeId;
-    }
-
-    public int getAmountOfNodes() {
-        return amountOfNodes;
-    }
-
-    public void setAmountOfNodes(int amountOfNodes) {
-        this.amountOfNodes = amountOfNodes;
     }
 }

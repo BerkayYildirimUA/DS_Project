@@ -5,48 +5,16 @@ package nintendods.ds_project.model.message;
  * the node that has transmitted a multicast to join the ring topology.
  */
 public class UNAMObject extends AMessage {
-    private int nodeHashId;
-    private int prevNodeId;
-    private int nextNodeId;
     private int amountOfNodes;
 
     /**
      * @param messageId The unique message ID
-     * @param nodeHashId The node hash ID where we send it to
-     * @param prevNodeId The previous node ID (lower than nodeHashId)
-     * @param nextNodeId The next node ID (higher than nodeHashId)
+     * @param type The type of unicast message defined in {@link eMessageTypes}
      * @param amountOfNodes The amount of nodes present in the network (exclusive)
      */
-    public UNAMObject(long messageId, int nodeHashId, int prevNodeId, int nextNodeId, int amountOfNodes) {
-        super(messageId);
-        setNodeHashId(nodeHashId);
-        setPrevNodeId(prevNodeId);
-        setNextNodeId(nextNodeId);
+    public UNAMObject(long messageId, eMessageTypes type, int amountOfNodes) {
+        super(messageId, type);
         setAmountOfNodes(amountOfNodes);
-    }
-
-    public int getNodeHashId() {
-        return nodeHashId;
-    }
-
-    public void setNodeHashId(int nodeHashId) {
-        this.nodeHashId = nodeHashId;
-    }
-
-    public int getPrevNodeId() {
-        return prevNodeId;
-    }
-
-    public void setPrevNodeId(int prevNodeId) {
-        this.prevNodeId = prevNodeId;
-    }
-
-    public int getNextNodeId() {
-        return nextNodeId;
-    }
-
-    public void setNextNodeId(int nextNodeId) {
-        this.nextNodeId = nextNodeId;
     }
 
     public int getAmountOfNodes() {

@@ -13,8 +13,8 @@ public class MNObject extends AMessage {
      * @param address The address of the multicaster node
      * @param name The name of the multicaster node
      */
-    public MNObject(long messageId, String address,int port, String name) {
-        super(messageId);
+    public MNObject(long messageId, eMessageTypes type, String address,int port, String name) {
+        super(messageId, type);
         setAddress(address);
         setName(name);
         setPort(port);

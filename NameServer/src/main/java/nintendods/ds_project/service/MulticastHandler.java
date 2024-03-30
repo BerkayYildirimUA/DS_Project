@@ -6,6 +6,7 @@ import nintendods.ds_project.model.ABaseNode;
 import nintendods.ds_project.model.ClientNode;
 import nintendods.ds_project.model.message.MNObject;
 import nintendods.ds_project.model.message.UNAMObject;
+import nintendods.ds_project.model.message.eMessageTypes;
 import nintendods.ds_project.utility.JsonConverter;
 import org.springframework.stereotype.Component;
 
@@ -63,45 +64,43 @@ public class MulticastHandler {
                 // Process the packet (example: print it)
                 System.out.println("Received packet: " + packet);
                 MNObject receivedObject = (MNObject) jsonConverter.toObject(packet, MNObject.class);
+
+                //Create the node and hash ID (cast to ClientNode to get the ID)
                 ABaseNode node = new ClientNode(receivedObject);
+
                 //Check database if node exist
                 if (!nodeDB.exists(node)) {
-                    //Add node to database
-
                     // Compose response to node based on UNAMObject
                     // amount of nodes present in ring
                     int amountNodes = nodeDB.getSize();
-                    int currentNodeName = 0;
-                    int prevNodeHash = 0;
-                    int nextNodeHash = 0;
 
-                    if (amountNodes > 1) {
-                        // There are 2 or more nodes present.
-                        //Define the previous and next nodes for this specific node and compose UNAMObject.
-                        //TODO: find the lowest and highest node ID's in the database.
-                        // This is not yet implemented inside the database!
 
-                    } else if(amountNodes < 1) {
-                        // No nodes present in the database
-
-                        ClientNode temp = null;
-                        if (node instanceof ClientNode)
-                            temp = (ClientNode) node;
-                        currentNodeName = temp.getId();
-                        prevNodeHash = temp.getId();
-                        nextNodeHash = temp.getId();
-                    }
-                    else{
-                        //Not defined in the documentation?
-                    }
+                    // Must happen inside the node itself
+//                    if (amountNodes > 1) {
+//                        // There are 2 or more nodes present.
+//
+//
+//                    } else if(amountNodes < 1) {
+//                        // No nodes present in the database
+//                        // respond the prev and next node as the same Hash id.
+//
+//                        ClientNode temp = null;
+//                        if (node instanceof ClientNode)
+//                            temp = (ClientNode) node;
+//                        currentNodeName = temp.getId();
+//                        prevNodeHash = temp.getId();
+//                        nextNodeHash = temp.getId();
+//                    }
+//                    else{
+//                        //Not defined in the documentation?
+//                    }
 
                     //Add to database
                     nodeDB.addNode(node);
 
                     // Send out the multicast message over UDP with the timestamp as ID.
                     long messageId = System.currentTimeMillis();
-
-                    UNAMObject unicastMessage = new UNAMObject(messageId, currentNodeName, prevNodeHash, nextNodeHash, amountNodes);
+                    UNAMObject unicastMessage = new UNAMObject(messageId, eMessageTypes.UnicastNamingServerToNode, amountNodes);
 
                     //Setup the UDP sender and send out.
                     UDPClient client = new UDPClient(node.getAddress(),node.getPort(), 256);
