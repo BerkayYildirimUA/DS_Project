@@ -75,7 +75,9 @@ public class MulticastHandler {
                     int amountNodes = nodeDB.getSize();
 
                     //Add to database
+                    //TODO: remove debug
                     nodeDB.addNode(node);
+                    System.out.println("Node " + node.getName() +" added");
 
                     // Send out the multicast message over UDP with the timestamp as ID.
                     long messageId = System.currentTimeMillis();
@@ -85,17 +87,19 @@ public class MulticastHandler {
                     UDPClient client = new UDPClient(node.getAddress(),node.getPort(), 256);
                     client.SendMessage(jsonConverter.toJson(unicastMessage));
                     client.SendMessage(jsonConverter.toJson(unicastMessage));
+                    System.out.println("Send out 2 packs of UNAMObjects ");
                 }
+                else System.out.println("Node already exists");
 
             } catch (InterruptedException e) {
                 e.printStackTrace();
             } catch (UnknownHostException e) {
                 throw new RuntimeException(e);
-            } catch (NameServerFullExeption e) {
-                throw new RuntimeException(e);
             } catch (SocketException e) {
                 throw new RuntimeException(e);
             } catch (IOException e) {
+                throw new RuntimeException(e);
+            } catch (NameServerFullExeption e) {
                 throw new RuntimeException(e);
             }
         }
