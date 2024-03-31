@@ -21,7 +21,11 @@ public class MulticastHandler {
     private static final int PORT = 12345;
     private static final int BUFFER_SIZE = 256;
 
-    public MulticastHandler() {
+    /**
+     * Handler keeps running and listening for multicasts from joining nodes.
+     * @throws RuntimeException
+     */
+    public MulticastHandler() throws RuntimeException {
         BlockingQueue<String> packetQueue = new LinkedBlockingQueue<>(20);
 
         // Start the receiver thread
@@ -51,7 +55,7 @@ public class MulticastHandler {
                     packetQueue.offer(message); // Add packet to the queue
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
     }
 
@@ -91,15 +95,7 @@ public class MulticastHandler {
                 }
                 else System.out.println("Node already exists");
 
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } catch (UnknownHostException e) {
-                throw new RuntimeException(e);
-            } catch (SocketException e) {
-                throw new RuntimeException(e);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            } catch (NameServerFullExeption e) {
+            } catch (InterruptedException | IOException | NameServerFullExeption e) {
                 throw new RuntimeException(e);
             }
         }

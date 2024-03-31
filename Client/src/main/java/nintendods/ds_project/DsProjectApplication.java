@@ -26,7 +26,7 @@ public class DsProjectApplication {
         node = new ClientNode(InetAddress.getLocalHost(), 21, "Robbe's client 1");
 
         //Set Discovery on
-        DiscoveryService ds = new DiscoveryService("224.0.0.100", 12345);
+        DiscoveryService ds = new DiscoveryService("224.0.0.100", 12345, 10000);
 
         try {
             node = ds.discover(node);

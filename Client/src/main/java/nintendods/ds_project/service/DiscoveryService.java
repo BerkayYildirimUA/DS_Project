@@ -15,6 +15,7 @@ public class DiscoveryService {
     private List<String> receivedMessages;
     private String multicastAddress = "224.0.0.100";
     private int multicastPort = 12345;
+    private int waitTimeDiscovery = 10000;
 
     /**
      * Create a Discovery service object.
@@ -25,11 +26,19 @@ public class DiscoveryService {
         this.receivedMessages = new ArrayList<>();
     }
 
-    public DiscoveryService(String multicastAddress, int multicastPort) {
+    /**
+     * Constructor for creating a DiscoveryService instance.
+     *
+     * @param multicastAddress The multicast address to be used for discovery.
+     * @param multicastPort The port number on which multicast communication will occur.
+     * @param waitTime The time duration the discovery service will wait for responses.
+     */
+    public DiscoveryService(String multicastAddress, int multicastPort, int waitTime) {
         //Setup the socket and get the port
         this.receivedMessages = new ArrayList<>();
         this.multicastAddress = multicastAddress;
         this.multicastPort = multicastPort;
+        this.waitTimeDiscovery = waitTime;
     }
 
     public ClientNode discover(ABaseNode node) throws Exception {
@@ -37,7 +46,13 @@ public class DiscoveryService {
         ServerSocket socket = new ServerSocket(0);
 
         //Set up the UDPServer
-        Thread udpListenerThread = new Thread(() -> udpListener(socket));
+        Thread udpListenerThread = new Thread(() -> {
+            try {
+                udpListener(socket);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
 
 
         //Send out the multicast
