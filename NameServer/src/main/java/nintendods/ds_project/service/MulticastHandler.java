@@ -74,27 +74,6 @@ public class MulticastHandler {
                     // amount of nodes present in ring
                     int amountNodes = nodeDB.getSize();
 
-
-                    // Must happen inside the node itself
-//                    if (amountNodes > 1) {
-//                        // There are 2 or more nodes present.
-//
-//
-//                    } else if(amountNodes < 1) {
-//                        // No nodes present in the database
-//                        // respond the prev and next node as the same Hash id.
-//
-//                        ClientNode temp = null;
-//                        if (node instanceof ClientNode)
-//                            temp = (ClientNode) node;
-//                        currentNodeName = temp.getId();
-//                        prevNodeHash = temp.getId();
-//                        nextNodeHash = temp.getId();
-//                    }
-//                    else{
-//                        //Not defined in the documentation?
-//                    }
-
                     //Add to database
                     nodeDB.addNode(node);
 
@@ -104,6 +83,7 @@ public class MulticastHandler {
 
                     //Setup the UDP sender and send out.
                     UDPClient client = new UDPClient(node.getAddress(),node.getPort(), 256);
+                    client.SendMessage(jsonConverter.toJson(unicastMessage));
                     client.SendMessage(jsonConverter.toJson(unicastMessage));
                 }
 

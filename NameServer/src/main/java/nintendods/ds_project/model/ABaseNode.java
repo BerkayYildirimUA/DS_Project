@@ -39,4 +39,13 @@ public abstract class ABaseNode {
     public void setName(String name) {
         this.name = name;
     }
+
+    @Override
+    public String toString() {
+        return "ABaseNode{" +
+                "address=" + address +
+                ", port=" + port +
+                ", name='" + name + '\'' +
+                '}';
+    }
 }

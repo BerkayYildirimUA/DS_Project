@@ -26,19 +26,15 @@ public class DsProjectApplication {
         node = new ClientNode(InetAddress.getLocalHost(), 21, "Robbe's client 1");
 
         //Set Discovery on
-        DiscoveryService ds = new DiscoveryService("223.0.0.100", 12345);
+        DiscoveryService ds = new DiscoveryService("224.0.0.100", 12345);
 
-        UNAMObject settings = ds.discover(node); //Blocking method
-
-        //Check if ID matches
-        if(settings.getNodeHashId() == node.getId())
-        {
-            //set the parameters in the client node
-            node.setNextId(settings.getNextNodeId());
-            node.setPrevId(settings.getPrevNodeId());
+        try {
+            node = ds.discover(node);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
 
-
+        System.out.println(node.toString());
 
         //MulticastService mp = null;
         //ServerSocket serverSocket = null;

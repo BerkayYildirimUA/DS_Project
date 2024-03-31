@@ -20,7 +20,8 @@ public class UDPServer {
         this.packet = new DatagramPacket(this.buffer, this.buffer.length);
     }
 
-    public String listen() throws IOException {
+    public String listen(int timeout) throws IOException {
+        serverSoc.setSoTimeout(timeout);
         this.serverSoc.receive(packet);
         var data = packet.getData(); //Blocking method
         return new String(data, 0, packet.getLength());
