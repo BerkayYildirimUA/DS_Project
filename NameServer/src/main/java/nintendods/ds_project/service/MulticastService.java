@@ -8,6 +8,9 @@ import nintendods.ds_project.model.message.MNObject;
 import nintendods.ds_project.model.message.UNAMObject;
 import nintendods.ds_project.model.message.eMessageTypes;
 import nintendods.ds_project.utility.JsonConverter;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -15,8 +18,13 @@ import java.net.*;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+
 @Component
-public class MulticastHandler {
+public class MulticastService {
+
+    final Logger logger = LoggerFactory.getLogger(MulticastService.class);
+
+
     private static final String MULTICAST_ADDRESS = "224.0.0.100";
     private static final int PORT = 12345;
     private static final int BUFFER_SIZE = 256;
@@ -25,7 +33,8 @@ public class MulticastHandler {
      * Handler keeps running and listening for multicasts from joining nodes.
      * @throws RuntimeException
      */
-    public MulticastHandler() throws RuntimeException {
+    public MulticastService() throws RuntimeException {
+        logger.info("Starting up MulticastService");
         BlockingQueue<String> packetQueue = new LinkedBlockingQueue<>(20);
 
         // Start the receiver thread
@@ -37,8 +46,9 @@ public class MulticastHandler {
         processorThread.start();
     }
 
-    private static void receivePackets(BlockingQueue<String> packetQueue) {
+    private void receivePackets(BlockingQueue<String> packetQueue) {
         try (MulticastSocket multicastSocket = new MulticastSocket(PORT)) {
+            logger.info("Start thread receivePackets");
             InetAddress group = InetAddress.getByName(MULTICAST_ADDRESS);
             multicastSocket.joinGroup(group);
 
@@ -47,6 +57,7 @@ public class MulticastHandler {
 
             while (true) {
                 multicastSocket.receive(packet);
+                logger.info("Received a packet in receivePackets thread");
                 String message = new String(packet.getData(), 0, packet.getLength());
 
                 //Only add if the message is not yet in the queue.
@@ -59,30 +70,32 @@ public class MulticastHandler {
         }
     }
 
-    private static void processPackets(BlockingQueue<String> packetQueue) {
+    private void processPackets(BlockingQueue<String> packetQueue) {
+        logger.info("Start thread processPackets");
         JsonConverter jsonConverter = new JsonConverter();
         NodeDB nodeDB = NodeDBService.getNodeDB();
         while (true) {
             try {
                 String packet = packetQueue.take(); // Retrieve packet from the queue
                 // Process the packet (example: print it)
-                System.out.println("Received packet: " + packet);
+                logger.info("process a packet in processPackets thread");
+                //System.out.println("Received packet: " + packet);
                 MNObject receivedObject = (MNObject) jsonConverter.toObject(packet, MNObject.class);
-
+                logger.info("packet from "+ receivedObject.getName());
                 //Create the node and hash ID (cast to ClientNode to get the ID)
                 ABaseNode node = new ClientNode(receivedObject);
 
                 //Check database if node exist
                 if (!nodeDB.exists(node)) {
+                    logger.info("Adding node " + node.getName() + " to DB");
                     // Compose response to node based on UNAMObject
                     // amount of nodes present in ring
                     int amountNodes = nodeDB.getSize();
 
                     //Add to database
-                    //TODO: remove debug
                     nodeDB.addNode(node);
-                    System.out.println("Node " + node.getName() +" added");
 
+                    logger.info("Sending unicast to " + node.getName() + " on address: " + node.getAddress().toString() + ", port: " + node.getPort());
                     // Send out the multicast message over UDP with the timestamp as ID.
                     long messageId = System.currentTimeMillis();
                     UNAMObject unicastMessage = new UNAMObject(messageId, eMessageTypes.UnicastNamingServerToNode, amountNodes);
@@ -90,10 +103,10 @@ public class MulticastHandler {
                     //Setup the UDP sender and send out.
                     UDPClient client = new UDPClient(node.getAddress(),node.getPort(), 256);
                     client.SendMessage(jsonConverter.toJson(unicastMessage));
-                    client.SendMessage(jsonConverter.toJson(unicastMessage));
-                    System.out.println("Send out 2 packs of UNAMObjects ");
+                    //client.SendMessage(jsonConverter.toJson(unicastMessage));
+                    client.close();
                 }
-                else System.out.println("Node already exists");
+                else logger.info("Node " + node.getName() + " already exists in DB");
 
             } catch (InterruptedException | IOException | NameServerFullExeption e) {
                 throw new RuntimeException(e);

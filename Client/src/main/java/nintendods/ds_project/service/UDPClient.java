@@ -9,7 +9,7 @@ public class UDPClient {
     private SocketAddress serverSoc = null;
     private byte[] buffer = null;
     private int bufferSize = 0;
-    public UDPClient(InetAddress address,int port, int buffSize) throws SocketException {
+    public UDPClient(InetAddress address, int port, int buffSize) throws SocketException {
         this.clientSoc = new DatagramSocket();
         this.serverSoc = new InetSocketAddress(address,port);
 

@@ -1,6 +1,6 @@
 package nintendods.ds_project;
 
-import nintendods.ds_project.service.MulticastHandler;
+import nintendods.ds_project.service.MulticastService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -10,5 +10,5 @@ import org.springframework.stereotype.Component;
 @Component
 public class MulticastStartup {
     @Autowired
-    private MulticastHandler multicastHandler;
+    private MulticastService multicastService;
 }

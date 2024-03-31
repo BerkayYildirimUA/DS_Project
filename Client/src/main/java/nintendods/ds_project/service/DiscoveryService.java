@@ -5,7 +5,6 @@ import nintendods.ds_project.model.ClientNode;
 import nintendods.ds_project.model.message.*;
 import nintendods.ds_project.utility.JsonConverter;
 
-import java.io.IOException;
 import java.net.*;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -48,15 +47,14 @@ public class DiscoveryService {
         //Set up the UDPServer
         Thread udpListenerThread = new Thread(() -> {
             try {
-                udpListener(socket);
+                udpListener(socket, this.waitTimeDiscovery);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
         });
 
-
         //Send out the multicast
-        MulticastService ms = new MulticastService(multicastAddress, multicastPort);
+        MulticastSendService ms = new MulticastSendService(multicastAddress, multicastPort);
         long udp_id = System.currentTimeMillis(); // unique messageID
 
         //start listener
@@ -64,7 +62,7 @@ public class DiscoveryService {
 
         //Send out messages
         ms.multicastSend(new MNObject(udp_id, eMessageTypes.MulticastNode, InetAddress.getLocalHost().getHostAddress(), socket.getLocalPort(), node.getName()));
-        ms.multicastSend(new MNObject(udp_id, eMessageTypes.MulticastNode, InetAddress.getLocalHost().getHostAddress(), socket.getLocalPort(), node.getName()));
+        //ms.multicastSend(new MNObject(udp_id, eMessageTypes.MulticastNode, InetAddress.getLocalHost().getHostAddress(), socket.getLocalPort(), node.getName()));
 
         //Wait for UDP packet to be filled in.
         while (udpListenerThread.isAlive()) ;
@@ -106,36 +104,51 @@ public class DiscoveryService {
         }
 
         assert temp != null;
-        if (temp.getAmountOfNodes() > 1) {
+        if (temp.getAmountOfNodes() >= 1) {
             //More than 1 so use neighbour nodes its data to form the prev and next node.
 
             //fetch messages as UNAMNObjects
-            List<UNAMNObject> nodeMessages = Collections.singletonList((UNAMNObject) filteredMessages.stream().filter(m -> m.getMessageType() == eMessageTypes.UnicastNodeToNode).toList());
-            if (nodeMessages.size() <= 1)
+            List<AMessage> filerMessages = filteredMessages.stream().filter(m -> m.getMessageType() == eMessageTypes.UnicastNodeToNode).toList();
+            if (filerMessages.size() < 1)
                 throw new Exception("Not enough nodes have send out their multicast response!");
-
+            List<UNAMNObject> nodeMessages = new ArrayList<>();
+            for(AMessage m : filerMessages)
+                nodeMessages.add((UNAMNObject) m);
             //fetch other data from other nodes.
             if (filteredMessages.stream().filter(m -> m.getMessageType() == eMessageTypes.UnicastNodeToNode).count() > 1) //check if 2 nodes send their info
             {
                 newNode.setPrevNodeId(nodeMessages.stream().filter(m -> m.getPrevNodeId() == -1).toList().getFirst().getNodeHashId());//Get the node with lowest ID and add to prevNodeId
                 newNode.setNextNodeId(nodeMessages.stream().filter(m -> m.getNextNodeId() == -1).toList().getFirst().getNodeHashId());//Get the node with highest ID and add to prevNodeId
                 //Maybe more checks before adding node id's?
+
+                //Make a linking when only 1 node is present
+                if(temp.getAmountOfNodes() == 1){
+                    if(newNode.getPrevNodeId() == -1)
+                    {
+                        newNode.setPrevNodeId(newNode.getNextNodeId());
+                    }
+                    if(newNode.getNextNodeId() == -1)
+                    {
+                        newNode.setNextNodeId(newNode.getPrevNodeId());
+                    }
+                }
             }
-        } else if (temp.getAmountOfNodes() < 1) {
+        } else {
             // no nodes in the network so set prev and next node as its own hash ID.
             newNode.setNextNodeId(newNode.getId());
             newNode.setPrevNodeId(newNode.getId());
         }
+        System.out.println(newNode);
         return newNode;
     }
 
-    private void udpListener(ServerSocket socket) throws Exception {
+    private void udpListener(ServerSocket socket, int timeOutTime) throws Exception {
         UDPServer listener = new UDPServer(InetAddress.getLocalHost(), socket.getLocalPort(), 256);
 
         boolean timeout = false;
 
         long startTimestamp = System.currentTimeMillis();
-        long totalTime = 10000; //10 seconds
+
 
         while (!timeout) {
             try {
@@ -143,8 +156,8 @@ public class DiscoveryService {
             } catch (SocketTimeoutException ignored) {
             }
             //if the messages are received within a specific time (totalTime seconds)
-            if (startTimestamp + totalTime < System.currentTimeMillis()) {
-                System.out.println("Final timeout");
+            if (startTimestamp + timeOutTime < System.currentTimeMillis()) {
+                //System.out.println("Final timeout");
                 timeout = true;
             }
         }

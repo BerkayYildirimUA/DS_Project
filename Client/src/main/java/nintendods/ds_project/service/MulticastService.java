@@ -1,32 +1,110 @@
 package nintendods.ds_project.service;
 
+import nintendods.ds_project.model.ABaseNode;
+import nintendods.ds_project.model.ClientNode;
+import nintendods.ds_project.model.message.MNObject;
+import nintendods.ds_project.model.message.UNAMNObject;
+import nintendods.ds_project.model.message.UNAMObject;
+import nintendods.ds_project.model.message.eMessageTypes;
 import nintendods.ds_project.utility.JsonConverter;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
-import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.MulticastSocket;
 import java.net.UnknownHostException;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
+@Component
 public class MulticastService {
-    private DatagramSocket socket;
-    private InetAddress group;
-    private int port;
-    private byte[] buf;
-    public MulticastService(String multicastAddress, int port ) throws UnknownHostException{
-        this.group = InetAddress.getByName(multicastAddress);
-        this.port = port;
+    private static final String MULTICAST_ADDRESS = "224.0.0.100";
+    private static final int PORT = 12345;
+    private static final int BUFFER_SIZE = 256;
+    private static BlockingQueue<MNObject> multicastQueue;
+    private final JsonConverter jsonConverter = new JsonConverter();
+
+
+    /**
+     * Handler keeps running and listening for multicasts from joining nodes.
+     * @throws RuntimeException
+     */
+    public MulticastService() throws RuntimeException {
+        BlockingQueue<String> packetQueue = new LinkedBlockingQueue<>(20);
+        multicastQueue = new LinkedBlockingQueue<>(20);
+        System.out.println("Setup multicast listener");
+        // Start the receiver thread
+        Thread receiverThread = new Thread(() -> receivePackets(packetQueue));
+        receiverThread.start();
+
+        // Start the processor thread
+        Thread processorThread = new Thread(() -> processPackets(packetQueue));
+        processorThread.start();
     }
 
-    public void multicastSend(Object multicastObject) throws IOException {
-        JsonConverter jsonConverter = new JsonConverter();
-        String jsonText = jsonConverter.toJson(multicastObject);
+    private void receivePackets(BlockingQueue<String> packetQueue) {
+        try (MulticastSocket multicastSocket = new MulticastSocket(PORT)) {
+            InetAddress group = InetAddress.getByName(MULTICAST_ADDRESS);
+            multicastSocket.joinGroup(group);
 
-        socket = new DatagramSocket();
-        buf = jsonText.getBytes();
+            byte[] buffer = new byte[BUFFER_SIZE];
+            DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
 
-        DatagramPacket packet = new DatagramPacket(buf, buf.length, group, port);
-        socket.send(packet);
-        socket.close();
+            while (true) {
+                multicastSocket.receive(packet);
+                System.out.println("Received a multicast");
+                String message = new String(packet.getData(), 0, packet.getLength());
+                System.out.println(message);
+                //Only add if the message is not yet in the queue.
+                // UDP message can be sent more than once.
+                if (packetQueue.stream().noneMatch(c -> (c.equals(message))))
+                    packetQueue.offer(message); // Add packet to the queue
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void processPackets(BlockingQueue<String> packetQueue) {
+
+        while (true) {
+            String packet = null;
+            try {
+                packet = packetQueue.take();
+                System.out.println("Get packet from queue");
+
+                //Check if multicast is from a new node
+                if (packet.contains(eMessageTypes.MulticastNode.name())) {
+                    //cast to it
+                    MNObject mnObject = (MNObject) jsonConverter.toObject(packet, MNObject.class);
+                    try {
+                        multicastQueue.put(mnObject);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    public void sendReply(UNAMNObject reply, ABaseNode toNode) throws IOException {
+        //Setup udp unicast
+        long id = System.currentTimeMillis();
+        reply.setMessageId(id);
+        System.out.println("Send out files from node to node");
+        System.out.println(reply);
+        System.out.println(toNode);
+        UDPClient client = new UDPClient(toNode.getAddress(),toNode.getPort(), 256);
+        client.SendMessage(jsonConverter.toJson(reply));
+        //client.SendMessage(jsonConverter.toJson(reply));
+        System.out.println("Send out 2 packs of UNAMObjects ");
+        client.close();
+    }
+
+    public MNObject getMessage() throws NullPointerException{
+        return multicastQueue.poll();
     }
 }
