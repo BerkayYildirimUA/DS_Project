@@ -55,9 +55,9 @@ public class DsProjectApplication {
                     }
                     System.out.println(node.toString());
                     System.out.println("Successfully reply in " + discoveryRetries + " discoveries.");
-                    nodeState = eNodeState.NodeMulticast;
+                    nodeState = eNodeState.Listening;
                 }
-                case NodeMulticast -> {
+                case Listening -> {
                     //If first bootup, initialize multicastService
                     if (multicastService == null)
                         multicastService = new MulticastService();
@@ -105,7 +105,7 @@ public class DsProjectApplication {
                 }
                 case Transfer -> {
                     //TODO:
-                    nodeState = eNodeState.NodeMulticast;
+                    nodeState = eNodeState.Listening;
                 }
                 case Shutdown -> {
                     //TODO
