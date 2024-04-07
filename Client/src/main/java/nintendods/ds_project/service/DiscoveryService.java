@@ -7,7 +7,6 @@ import nintendods.ds_project.utility.JsonConverter;
 
 import java.net.*;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class DiscoveryService {
@@ -38,7 +37,6 @@ public class DiscoveryService {
         //Setup the socket and get the port
         //Create server socket where we'll listen on when the multicast is sended out.
         try{ this.socket = new ServerSocket(0);
-            System.out.println(socket.getLocalPort());
             this.listener = new UDPServer(InetAddress.getLocalHost(), socket.getLocalPort(), 256);
         }
         catch (Exception ex) {}
@@ -46,12 +44,9 @@ public class DiscoveryService {
         this.multicastAddress = multicastAddress;
         this.multicastPort = multicastPort;
         this.waitTimeDiscovery = waitTime;
-        
     }
 
     public ClientNode discover(ABaseNode node) throws Exception {
-        
-
         //Set up the UDPServer
         Thread udpListenerThread = new Thread(() -> {
             try {
@@ -61,7 +56,7 @@ public class DiscoveryService {
             }
         });
 
-        //Send out the multicast
+        //Create multicast object
         MulticastSendService ms = new MulticastSendService(multicastAddress, multicastPort);
         long udp_id = System.currentTimeMillis(); // unique messageID
 
@@ -79,7 +74,6 @@ public class DiscoveryService {
 
         //Do some processing of the data
 
-        //if no messages received, try a deletion of the node at the NamingServer?
         if (receivedMessages.size() == 0)
             throw new Exception("No messages received within the timeframe");
         
@@ -88,7 +82,7 @@ public class DiscoveryService {
         for (String message : receivedMessages) {
             AMessage m = null;
 
-            //check for type
+            //check for type conversion
             if (message.contains(eMessageTypes.UnicastNamingServerToNode.toString()))
                 m = (UNAMObject) jsonConverter.toObject(message, UNAMObject.class);
             if (message.contains(eMessageTypes.UnicastNodeToNode.toString()))
@@ -96,41 +90,32 @@ public class DiscoveryService {
 
             if (m == null) throw new Exception("no cast found!");
 
-            //Vraag message id op en vergelijk met de opgeslagen messages.
+            //Filter out double messages
             long messageId = m.getMessageId();
             if (filteredMessages.stream().noneMatch(mes -> mes.getMessageId() == messageId)) {
                 filteredMessages.add(m);
             }
         }
 
-        System.out.println("The recieved data: \r\n");
-        filteredMessages.stream().forEach(c -> System.out.println(c.toString()));
-
+        //System.out.println("DiscoveryService - The recieved data: \r\n");
+        //filteredMessages.stream().forEach(c -> System.out.println(c.toString()));
 
         ClientNode newNode = (ClientNode) node; //Casting
+        int prevId = -1;
+        int nextId = -1;
 
         //Check the amount of nodes present in the network
-        UNAMObject temp = null;
-        if (filteredMessages.stream().anyMatch(m -> m.getMessageType() == eMessageTypes.UnicastNamingServerToNode)) {
-            temp = (UNAMObject) filteredMessages.stream().filter(m -> m.getMessageType() == eMessageTypes.UnicastNamingServerToNode).toList().getFirst();
-        }
-
-        assert temp != null;
-        if (temp.getAmountOfNodes() >= 1) {
+        if (((UNAMObject) filteredMessages.stream().filter(m -> m.getMessageType() == eMessageTypes.UnicastNamingServerToNode).toList().getFirst()).getAmountOfNodes() >=1) {
             //More than 1 or 1 so use neighbour nodes its data to form the prev and next node.
 
-            //fetch messages as UNAMNObjects
-            List<AMessage> filerMessages = filteredMessages.stream().filter(m -> m.getMessageType() == eMessageTypes.UnicastNodeToNode).toList();
-            if (filerMessages.isEmpty())
+            //fetch the other messages as UNAMNObjects if possible
+            if (filteredMessages.stream().filter(m -> m.getMessageType() == eMessageTypes.UnicastNodeToNode).toList().size() == 0)
                 throw new Exception("Not enough nodes have send out their multicast response!");
             List<UNAMNObject> nodeMessages = new ArrayList<>();
-            for(AMessage m : filerMessages)
-                nodeMessages.add((UNAMNObject) m);
+            for(AMessage m : filteredMessages.stream().filter(m -> m.getMessageType() == eMessageTypes.UnicastNodeToNode).toList()) nodeMessages.add((UNAMNObject) m);
             //fetch other data from other nodes.
-            if (nodeMessages.size() >= 1) //check if 2 nodes send their info
+            if (nodeMessages.size() >= 1) //check if 2 nodes send their info. Already checked above.
             {
-                int prevId = -1;
-                int nextId = -1;
                 try 
                 {prevId = nodeMessages.stream().filter(m -> m.getNextNodeId() == ((ClientNode) node).getId()).toList().getFirst().getNodeHashId();}
                 catch (Exception ex){}
@@ -140,15 +125,15 @@ public class DiscoveryService {
                 catch (Exception ex){}
                 //if (nextId > newNode.getNextNodeId() && nextId != -1) newNode.setNextNodeId(nextId);//Get the node with highest ID and add to prevNodeId
                 //Maybe more checks before adding node id's?
-                newNode.setNextNodeId(nextId);
-                newNode.setPrevNodeId(prevId);
             }
-        } else {
-            // no nodes in the network so set prev and next node as its own hash ID.
-            newNode.setNextNodeId(newNode.getId());
-            newNode.setPrevNodeId(newNode.getId());
         }
-        System.out.println(newNode);
+
+        //Assign value to node
+        newNode.setNextNodeId(nextId);
+        newNode.setPrevNodeId(prevId);
+
+        System.out.println("\r\nDiscoveryService - New node composed");
+        //System.out.println("\t"+newNode);
         return newNode;
     }
 
@@ -159,14 +144,10 @@ public class DiscoveryService {
         while (!timeout) {
             try {
                 receivedMessages.add(listener.listen(2000));
-                receivedMessages.forEach(System.out::println);
-            } catch (SocketTimeoutException ignored) {
-            }
+                //receivedMessages.forEach(System.out::println);
+            } catch (SocketTimeoutException ignored) {}
             //if the messages are received within a specific time (totalTime seconds)
-            if (startTimestamp + timeOutTime < System.currentTimeMillis()) {
-                //System.out.println("Final timeout");
-                timeout = true;
-            }
+            if (startTimestamp + timeOutTime < System.currentTimeMillis()) timeout = true;
         }
 
         listener.close();

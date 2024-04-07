@@ -32,7 +32,7 @@ public class MulticastService {
     public MulticastService() throws RuntimeException {
         BlockingQueue<String> packetQueue = new LinkedBlockingQueue<>(20);
         multicastQueue = new LinkedBlockingQueue<>(20);
-        System.out.println("Setup multicast listener");
+        System.out.println("MulticastService - Setup multicast listener");
         // Start the receiver thread
         Thread receiverThread = new Thread(() -> receivePackets(packetQueue));
         receiverThread.start();
@@ -40,6 +40,8 @@ public class MulticastService {
         // Start the processor thread
         Thread processorThread = new Thread(() -> processPackets(packetQueue));
         processorThread.start();
+        
+        System.out.println("MulticastService - Started multicast listener");
     }
 
     private void receivePackets(BlockingQueue<String> packetQueue) {
@@ -52,9 +54,9 @@ public class MulticastService {
 
             while (true) {
                 multicastSocket.receive(packet);
-                System.out.println("Received a multicast");
+                System.out.println("MulticastService - Received a multicast");
                 String message = new String(packet.getData(), 0, packet.getLength());
-                System.out.println(message);
+                //System.out.println(message);
                 //Only add if the message is not yet in the queue.
                 // UDP message can be sent more than once.
                 if (packetQueue.stream().noneMatch(c -> (c.equals(message))))
@@ -66,12 +68,11 @@ public class MulticastService {
     }
 
     private void processPackets(BlockingQueue<String> packetQueue) {
-
         while (true) {
             String packet = null;
             try {
                 packet = packetQueue.take();
-                System.out.println("Get packet from queue");
+                System.out.println("MulticastService - Get packet from queue");
 
                 //Check if multicast is from a new node
                 if (packet.contains(eMessageTypes.MulticastNode.name())) {
@@ -93,22 +94,23 @@ public class MulticastService {
         //Setup udp unicast
         long id = System.currentTimeMillis();
         reply.setMessageId(id);
-        System.out.println("Send out files from node to node");
-        System.out.println(reply);
-        System.out.println(toNode);
+        System.out.println("MulticastService - Send out files from node to node");
+        System.out.println("\t"+reply);
+        System.out.println("\t"+toNode);
         UDPClient client = new UDPClient(toNode.getAddress(),toNode.getPort(), 1024);
 
+        // Generate a random delay between 0 and 200 nanoseconds
         try {
-            long randomDelay = (long) (Math.random() * 200); // Generate a random delay between 0 and 200 nanoseconds
+            long randomDelay = (long) (Math.random() * 200); 
             Thread.sleep(0, (int) randomDelay); // Sleep for the random delay
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            System.err.println("Thread sleep interrupted");
+            System.err.println("MulticastService - Thread sleep interrupted");
         }
 
         client.SendMessage(jsonConverter.toJson(reply));
-        //client.SendMessage(jsonConverter.toJson(reply));
-        System.out.println("Send out 1 packs of UNAMObjects on port: " + toNode.getPort());
+        client.SendMessage(jsonConverter.toJson(reply));
+        System.out.println("MulticastService - Send out 1 packs of UNAMObjects on port: " + toNode.getPort());
         client.close();
     }
 

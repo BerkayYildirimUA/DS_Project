@@ -26,7 +26,7 @@ public class UDPServer {
         this.serverSoc.receive(packet);
         var data = packet.getData(); //Blocking method
         String text = new String(data, 0, packet.getLength());
-        System.out.println(text);
+        //System.out.println(text);
         return text;
     }
 

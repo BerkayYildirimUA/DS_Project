@@ -1,8 +1,8 @@
 package nintendods.ds_project.model.message;
 
 /**
- * UNAM or Unicast Node After Multicast is a message object that will be sent to
- * the node that has transmitted a multicast to join the ring topology.
+ * UNAM or Unicast to Node After Multicast is a message object that will be by the Naming Server
+ * to the sender node.
  */
 public class UNAMObject extends AMessage {
     private int amountOfNodes;
@@ -27,6 +27,6 @@ public class UNAMObject extends AMessage {
 
     @Override
     public String toString() {
-        return "UNAMObject: " + "amount of nodes: " + getAmountOfNodes();
+        return "UNAMObject: " + "\r\n\tamount of nodes: " + getAmountOfNodes();
     }
 }

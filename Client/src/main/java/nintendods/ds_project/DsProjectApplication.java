@@ -17,15 +17,12 @@ import java.net.InetAddress;
 public class DsProjectApplication {
 
     private static ClientNode node;
-    private static final JsonConverter jsonConverter = new JsonConverter();
     private static final int DISCOVERY_RETRIES = 6;
 
     public static void main(String[] args) throws IOException {
         //Create Node
         
         node = new ClientNode(InetAddress.getLocalHost(), 21, generateRandomString(20));
-        //node = new ClientNode(InetAddress.getLocalHost(), 21, generateRandomString(20));
-        
         System.out.println("New node with name: " + node.getName()+ " And hash: " + node.getId());
 
         eNodeState nodeState = eNodeState.Discovery;
@@ -35,6 +32,7 @@ public class DsProjectApplication {
         int discoveryRetries = 0;
 
         while(isRunning) {
+            //Finite state machine with eNodeState states
             switch (nodeState) {
                 case Discovery -> {
                     //Set Discovery on
@@ -55,9 +53,7 @@ public class DsProjectApplication {
                         nodeState = eNodeState.Discovery;
                         break;
                     }
-
                     System.out.println(node.toString());
-
                     System.out.println("Successfully reply in " + discoveryRetries + " discoveries.");
                     nodeState = eNodeState.NodeMulticast;
                 }
@@ -70,59 +66,56 @@ public class DsProjectApplication {
                     try{ message = multicastService.getMessage();}
                     catch (NullPointerException ignored) {nodeState = eNodeState.Transfer; break;}
 
-                    if(message == null){
-                        //No message arrived
-                        nodeState = eNodeState.Transfer;
-                        break;
-                    }
-                    else{
+                    if(message != null){
                         //Message arrived
-                        //compose new node
-                        System.out.println("sending port: " + message.getPort());
+                        //compose new node if needed
+                        boolean send = false;
                         ClientNode incommingNode = new ClientNode(message);
-                        System.out.println(incommingNode);
-                        //System.out.println("CurrNode: " + node + "\r\n newNode:" + newNode);
-                        //Check the position of own node and new node
-
+                        //System.out.println(incommingNode);
+                        //Check the position of own node and incomming node
                         if(     (node.getId() < incommingNode.getId() && incommingNode.getId() < node.getNextNodeId()) ||
                                 (node.getNextNodeId() == node.getId() && node.getId() < incommingNode.getId())){
                             //new node is the new next node for current node
                             node.setNextNodeId(incommingNode.getId());
-                            //if(node.getPrevNodeId() == node.getId()) node.setPrevNodeId(incommingNode.getId()); //If 2 nodes are present
-
                             System.out.println("\r\nnode is below the next node\r\n");
+                            send = true;
                         }
 
                         if(     (node.getPrevNodeId() < incommingNode.getId() && incommingNode.getId() < node.getId())||
                                 (node.getPrevNodeId() == node.getId() && node.getId() > incommingNode.getId())){
                             //new node is the new prev node for current node
                             node.setPrevNodeId(incommingNode.getId());
-                            //if(node.getNextNodeId() == node.getId()) node.setNextNodeId(incommingNode.getId()); //If 2 nodes are present
-                            
                             System.out.println("\r\nnode is above the next node \r\n");
+                            send = true;
                         }
-
+                        
+                        //The send boolean is not needed as the uncomming node will check the compatability of the ID's itself. it is just to reduce the network traffic.
+                        if(send){
                         //Compose message and send out
                         UNAMNObject reply = new UNAMNObject( eMessageTypes.UnicastNodeToNode, node.getId(), node.getPrevNodeId(), node.getNextNodeId() );       
                         multicastService.sendReply(reply, incommingNode);
 
-                        System.out.println("The node has been updated!");
+                        System.out.println(" \r\nThe node has been updated!");
                         System.out.println(node + "\r\n");
+                        }
+                        else System.out.println("Node doesn't need to be updated.");
                     }
+                    
                     nodeState = eNodeState.Transfer;
                 }
                 case Transfer -> {
+                    //TODO:
                     nodeState = eNodeState.NodeMulticast;
                 }
                 case Shutdown -> {
-
+                    //TODO
                 }
                 case Error -> {
-                    //Do something
+                    //TODO
                     isRunning = false;
                 }
                 case null, default -> {
-
+                    //Same as error?
                 }
             }
         }

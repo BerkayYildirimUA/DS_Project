@@ -101,20 +101,26 @@ public class MulticastService {
                     amountNodes--;
                 }
 
-                logger.info("Sending unicast to " + node.getName() + " on address: " + node.getAddress().toString() + ", port: " + node.getPort());
-                // Send out the multicast message over UDP with the timestamp as ID.
-                long messageId = System.currentTimeMillis();
-                UNAMObject unicastMessage = new UNAMObject(messageId, eMessageTypes.UnicastNamingServerToNode, amountNodes);
-
-                //Setup the UDP sender and send out.
-                UDPClient client = new UDPClient(node.getAddress(),node.getPort(), 256);
-                client.SendMessage(jsonConverter.toJson(unicastMessage));
-                //client.SendMessage(jsonConverter.toJson(unicastMessage));
-                client.close();
+                sendReply(node, amountNodes);
 
             } catch (InterruptedException | IOException | NameServerFullExeption e) {
                 throw new RuntimeException(e);
             }
         }
+    }
+    private void sendReply(ABaseNode node, int amount) throws IOException {
+        JsonConverter jsonConverter = new JsonConverter();
+        logger.info("Sending unicast to " + node.getName() + " on address: " + node.getAddress().toString() + ", port: " + node.getPort());
+        // Send out the multicast message over UDP with the timestamp as ID.
+        long messageId = System.currentTimeMillis();
+        UNAMObject unicastMessage = new UNAMObject(messageId, eMessageTypes.UnicastNamingServerToNode, amount);
+
+        //Setup the UDP sender and send out.
+        UDPClient client = new UDPClient(node.getAddress(),node.getPort(), 256);
+
+        //Send out 2 times, the receiver must filter out packets with the same ID.
+        client.SendMessage(jsonConverter.toJson(unicastMessage));
+        client.SendMessage(jsonConverter.toJson(unicastMessage));
+        client.close();
     }
 }

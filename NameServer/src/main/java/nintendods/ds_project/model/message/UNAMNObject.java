@@ -1,5 +1,9 @@
 package nintendods.ds_project.model.message;
 
+/**
+ * UNAMN or Unicast to Node After Multicast to Naming server is a message object that will be sent to
+ * the sender node from the node that has transmitted a multicast to join the ring topology.
+ */
 public class UNAMNObject extends AMessage {
     private int nodeHashId;
     private int prevNodeId;
@@ -17,6 +21,13 @@ public class UNAMNObject extends AMessage {
         setPrevNodeId(prevNodeId);
         setNextNodeId(nextNodeId);
     }
+
+    /**
+     * @param type
+     * @param nodeHashId
+     * @param prevNodeId
+     * @param nextNodeId
+     */
     public UNAMNObject(eMessageTypes type, int nodeHashId, int prevNodeId, int nextNodeId) {
         super(0, type);
         setNodeHashId(nodeHashId);
@@ -46,5 +57,10 @@ public class UNAMNObject extends AMessage {
 
     public void setNextNodeId(int nextNodeId) {
         this.nextNodeId = nextNodeId;
+    }
+
+    @Override
+    public String toString() {
+        return "UNAMObject: " + "\r\n\tprevNode: " + getPrevNodeId() + "\r\n\tcurrNode: " + getNodeHashId()+"\r\n\tnextnode: " + getNextNodeId();
     }
 }
