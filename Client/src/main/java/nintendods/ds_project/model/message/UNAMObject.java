@@ -24,4 +24,9 @@ public class UNAMObject extends AMessage {
     public void setAmountOfNodes(int amountOfNodes) {
         this.amountOfNodes = amountOfNodes;
     }
+
+    @Override
+    public String toString() {
+        return "UNAMObject: " + "amount of nodes: " + getAmountOfNodes();
+    }
 }

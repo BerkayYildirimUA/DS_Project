@@ -19,6 +19,8 @@ public class UDPClient {
 
     public void SendMessage(String message) throws IOException {
         DatagramPacket packet = null;
+        buffer = null;
+
         if (message.length() < bufferSize){
             // Send
             buffer = message.getBytes(StandardCharsets.UTF_8);

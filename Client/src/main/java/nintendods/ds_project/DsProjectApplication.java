@@ -9,9 +9,6 @@ import nintendods.ds_project.service.MulticastService;
 import nintendods.ds_project.utility.JsonConverter;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
-
 import java.io.IOException;
 import java.net.InetAddress;
 
@@ -25,7 +22,11 @@ public class DsProjectApplication {
 
     public static void main(String[] args) throws IOException {
         //Create Node
-        node = new ClientNode(InetAddress.getLocalHost(), 21, " Robbe's client");
+        
+        node = new ClientNode(InetAddress.getLocalHost(), 21, generateRandomString(20));
+        //node = new ClientNode(InetAddress.getLocalHost(), 21, generateRandomString(20));
+        
+        System.out.println("New node with name: " + node.getName()+ " And hash: " + node.getId());
 
         eNodeState nodeState = eNodeState.Discovery;
         boolean isRunning = true;
@@ -77,31 +78,36 @@ public class DsProjectApplication {
                     else{
                         //Message arrived
                         //compose new node
-                        ClientNode newNode = new ClientNode(message);
-
-                        System.out.println("CurrNode: " + node + "\r\n newNode:" + newNode);
+                        System.out.println("sending port: " + message.getPort());
+                        ClientNode incommingNode = new ClientNode(message);
+                        System.out.println(incommingNode);
+                        //System.out.println("CurrNode: " + node + "\r\n newNode:" + newNode);
                         //Check the position of own node and new node
 
-                        if(     (node.getId() < newNode.getId() && newNode.getId() < node.getNextNodeId()) ||
-                                (node.getNextNodeId() == node.getId() && node.getId() < newNode.getId())){
+                        if(     (node.getId() < incommingNode.getId() && incommingNode.getId() < node.getNextNodeId()) ||
+                                (node.getNextNodeId() == node.getId() && node.getId() < incommingNode.getId())){
                             //new node is the new next node for current node
-                            node.setNextNodeId(newNode.getId());
-                            if(node.getPrevNodeId() == node.getId()) node.setPrevNodeId(newNode.getId()); //If 2 nodes are present
-                            //Compose message and send out
-                            UNAMNObject reply = new UNAMNObject( eMessageTypes.UnicastNodeToNode, node.getId(), -1, newNode.getId() );
-                            multicastService.sendReply(reply, newNode);
+                            node.setNextNodeId(incommingNode.getId());
+                            //if(node.getPrevNodeId() == node.getId()) node.setPrevNodeId(incommingNode.getId()); //If 2 nodes are present
+
+                            System.out.println("\r\nnode is below the next node\r\n");
                         }
 
-                        if(     (node.getPrevNodeId() < newNode.getId() && newNode.getId() < node.getId())||
-                                (node.getPrevNodeId() == node.getId() && node.getId() > newNode.getId())){
+                        if(     (node.getPrevNodeId() < incommingNode.getId() && incommingNode.getId() < node.getId())||
+                                (node.getPrevNodeId() == node.getId() && node.getId() > incommingNode.getId())){
                             //new node is the new prev node for current node
-                            node.setPrevNodeId(newNode.getId());
-                            if(node.getNextNodeId() == node.getId()) node.setNextNodeId(newNode.getId()); //If 2 nodes are present
-                            //Compose message and send out
-                            UNAMNObject reply = new UNAMNObject( eMessageTypes.UnicastNodeToNode, node.getId(), newNode.getId(), -1 );
-                            multicastService.sendReply(reply, newNode);
+                            node.setPrevNodeId(incommingNode.getId());
+                            //if(node.getNextNodeId() == node.getId()) node.setNextNodeId(incommingNode.getId()); //If 2 nodes are present
+                            
+                            System.out.println("\r\nnode is above the next node \r\n");
                         }
 
+                        //Compose message and send out
+                        UNAMNObject reply = new UNAMNObject( eMessageTypes.UnicastNodeToNode, node.getId(), node.getPrevNodeId(), node.getNextNodeId() );       
+                        multicastService.sendReply(reply, incommingNode);
+
+                        System.out.println("The node has been updated!");
+                        System.out.println(node + "\r\n");
                     }
                     nodeState = eNodeState.Transfer;
                 }
@@ -122,5 +128,15 @@ public class DsProjectApplication {
         }
 
         //SpringApplication.run(DsProjectApplication.class, args);
+    }
+    private static final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+    public static String generateRandomString(int length) {
+        StringBuilder sb = new StringBuilder(length);
+        for (int i = 0; i < length; i++) {
+            int randomIndex = (int) (Math.random() * CHARACTERS.length());
+            sb.append(CHARACTERS.charAt(randomIndex));
+        }
+        return sb.toString();
     }
 }

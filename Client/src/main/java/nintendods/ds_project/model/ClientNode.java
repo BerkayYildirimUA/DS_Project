@@ -26,6 +26,8 @@ public class ClientNode extends ABaseNode{
     }
 
     public void setPrevNodeId(int prevNodeId) {
+        if (prevNodeId == -1)
+            prevNodeId = getId();
         this.prevNodeId = prevNodeId;
     }
 
@@ -34,6 +36,8 @@ public class ClientNode extends ABaseNode{
     }
 
     public void setNextNodeId(int nextNodeId) {
+        if (nextNodeId == -1)
+            nextNodeId = getId();
         this.nextNodeId = nextNodeId;
     }
 

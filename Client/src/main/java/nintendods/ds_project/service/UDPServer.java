@@ -10,7 +10,7 @@ import java.net.SocketException;
 public class UDPServer {
     private DatagramSocket serverSoc = null;
     private byte[] buffer = null;
-    private int bufferSize = 256;
+    private int bufferSize = 1024;
     private final DatagramPacket packet;
 
     public UDPServer(InetAddress address, int port, int buffSize) throws SocketException {
@@ -18,13 +18,16 @@ public class UDPServer {
         this.bufferSize = buffSize;
         this.buffer = new byte[bufferSize];
         this.packet = new DatagramPacket(this.buffer, this.buffer.length);
+        serverSoc.setSoTimeout(500);
+        serverSoc.setReuseAddress(true);
     }
 
     public String listen(int timeout) throws IOException {
-        serverSoc.setSoTimeout(timeout);
         this.serverSoc.receive(packet);
         var data = packet.getData(); //Blocking method
-        return new String(data, 0, packet.getLength());
+        String text = new String(data, 0, packet.getLength());
+        System.out.println(text);
+        return text;
     }
 
     public void close() {

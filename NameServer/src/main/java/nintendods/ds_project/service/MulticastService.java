@@ -85,28 +85,32 @@ public class MulticastService {
                 //Create the node and hash ID (cast to ClientNode to get the ID)
                 ABaseNode node = new ClientNode(receivedObject);
 
+                // Compose response to node based on UNAMObject
+                // amount of nodes present in ring
+                int amountNodes = nodeDB.getSize();
+
                 //Check database if node exist
                 if (!nodeDB.exists(node)) {
                     logger.info("Adding node " + node.getName() + " to DB");
-                    // Compose response to node based on UNAMObject
-                    // amount of nodes present in ring
-                    int amountNodes = nodeDB.getSize();
 
                     //Add to database
                     nodeDB.addNode(node);
-
-                    logger.info("Sending unicast to " + node.getName() + " on address: " + node.getAddress().toString() + ", port: " + node.getPort());
-                    // Send out the multicast message over UDP with the timestamp as ID.
-                    long messageId = System.currentTimeMillis();
-                    UNAMObject unicastMessage = new UNAMObject(messageId, eMessageTypes.UnicastNamingServerToNode, amountNodes);
-
-                    //Setup the UDP sender and send out.
-                    UDPClient client = new UDPClient(node.getAddress(),node.getPort(), 256);
-                    client.SendMessage(jsonConverter.toJson(unicastMessage));
-                    //client.SendMessage(jsonConverter.toJson(unicastMessage));
-                    client.close();
                 }
-                else logger.info("Node " + node.getName() + " already exists in DB");
+                else{
+                    logger.info("Node " + node.getName() + " already exists in DB");
+                    amountNodes--;
+                }
+
+                logger.info("Sending unicast to " + node.getName() + " on address: " + node.getAddress().toString() + ", port: " + node.getPort());
+                // Send out the multicast message over UDP with the timestamp as ID.
+                long messageId = System.currentTimeMillis();
+                UNAMObject unicastMessage = new UNAMObject(messageId, eMessageTypes.UnicastNamingServerToNode, amountNodes);
+
+                //Setup the UDP sender and send out.
+                UDPClient client = new UDPClient(node.getAddress(),node.getPort(), 256);
+                client.SendMessage(jsonConverter.toJson(unicastMessage));
+                //client.SendMessage(jsonConverter.toJson(unicastMessage));
+                client.close();
 
             } catch (InterruptedException | IOException | NameServerFullExeption e) {
                 throw new RuntimeException(e);

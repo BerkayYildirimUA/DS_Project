@@ -47,4 +47,9 @@ public class UNAMNObject extends AMessage {
     public void setNextNodeId(int nextNodeId) {
         this.nextNodeId = nextNodeId;
     }
+
+    @Override
+    public String toString() {
+        return "UNAMObject: " + "prevNode: " + getPrevNodeId() + "\r\ncurrNode: " + getNodeHashId()+"\r\nnextnode: " + getNextNodeId() + "\r\n";
+    }
 }

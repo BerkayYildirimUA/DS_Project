@@ -25,7 +25,6 @@ public class MulticastService {
     private static BlockingQueue<MNObject> multicastQueue;
     private final JsonConverter jsonConverter = new JsonConverter();
 
-
     /**
      * Handler keeps running and listening for multicasts from joining nodes.
      * @throws RuntimeException
@@ -97,10 +96,19 @@ public class MulticastService {
         System.out.println("Send out files from node to node");
         System.out.println(reply);
         System.out.println(toNode);
-        UDPClient client = new UDPClient(toNode.getAddress(),toNode.getPort(), 256);
+        UDPClient client = new UDPClient(toNode.getAddress(),toNode.getPort(), 1024);
+
+        try {
+            long randomDelay = (long) (Math.random() * 200); // Generate a random delay between 0 and 200 nanoseconds
+            Thread.sleep(0, (int) randomDelay); // Sleep for the random delay
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            System.err.println("Thread sleep interrupted");
+        }
+
         client.SendMessage(jsonConverter.toJson(reply));
         //client.SendMessage(jsonConverter.toJson(reply));
-        System.out.println("Send out 2 packs of UNAMObjects ");
+        System.out.println("Send out 1 packs of UNAMObjects on port: " + toNode.getPort());
         client.close();
     }
 
