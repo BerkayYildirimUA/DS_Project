@@ -90,20 +90,19 @@ public class MulticastService {
                 int amountNodes = nodeDB.getSize();
 
                 //Check database if node exist
-                if (!nodeDB.exists(node)) {
-                    logger.info("Adding node " + node.getName() + " to DB");
-
-                    //Add to database
-                    nodeDB.addNode(node);
-                }
-                else{
-                    logger.info("Node " + node.getName() + " already exists in DB");
-                    amountNodes--;
-                }
+//                if (!nodeDB.exists(node)) {
+//                    logger.info("Adding node " + node.getName() + " to DB");
+//
+//                    //Add to database
+//                    nodeDB.addNode(node);
+//                } else {
+//                    logger.info("Node " + node.getName() + " already exists in DB");
+//                    amountNodes--;
+//                }
 
                 sendReply(node, amountNodes);
 
-            } catch (InterruptedException | IOException | NameServerFullExeption e) {
+            } catch (InterruptedException | IOException /*| NameServerFullExeption*/ e) {
                 throw new RuntimeException(e);
             }
         }
