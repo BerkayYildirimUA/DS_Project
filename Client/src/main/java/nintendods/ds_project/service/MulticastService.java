@@ -107,7 +107,8 @@ public class MulticastService {
             Thread.currentThread().interrupt();
             System.err.println("MulticastService - Thread sleep interrupted");
         }
-
+        
+        //Send out 2 times, the receiver must filter out packets with the same ID.
         client.SendMessage(jsonConverter.toJson(reply));
         client.SendMessage(jsonConverter.toJson(reply));
         System.out.println("MulticastService - Send out 1 packs of UNAMObjects on port: " + toNode.getPort());
