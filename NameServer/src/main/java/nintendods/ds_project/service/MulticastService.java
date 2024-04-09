@@ -90,13 +90,12 @@ public class MulticastService {
                 int amountNodes = nodeDB.getSize();
 
                 //Check database if node exist
-                if (!nodeDB.exists(node)) {
+                if (!nodeDB.exists(node.getName())) {
                     logger.info("Adding node " + node.getName() + " to DB");
 
                     //Add to database
-                    nodeDB.addNode(node);
-                }
-                else{
+                    nodeDB.addNode(node.getName(), node.getAddress().toString());
+                } else {
                     logger.info("Node " + node.getName() + " already exists in DB");
                     amountNodes--;
                 }
@@ -105,7 +104,7 @@ public class MulticastService {
 
             } catch (InterruptedException | IOException | NameServerFullExeption e) {
                 throw new RuntimeException(e);
-            }
+            } 
         }
     }
     private void sendReply(ABaseNode node, int amount) throws IOException {

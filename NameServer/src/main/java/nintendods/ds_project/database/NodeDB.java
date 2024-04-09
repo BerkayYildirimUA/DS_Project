@@ -3,12 +3,8 @@ import nintendods.ds_project.Exeptions.NameServerFullExeption;
 import nintendods.ds_project.model.ABaseNode;
 import nintendods.ds_project.utility.NameToHash;
 import org.springframework.stereotype.Repository;
-import org.springframework.stereotype.Service;
 
-import java.net.InetAddress;
 import java.util.*;
-import java.util.stream.Collectors;
-
 
 
 @Repository
@@ -18,8 +14,9 @@ public class NodeDB {
         nodeID_to_nodeIP = new TreeMap<>();
     }
 
-    private final TreeMap<Integer, ABaseNode> nodeID_to_nodeIP;
+    private final TreeMap<Integer, String> nodeID_to_nodeIP;
 
+    /* --------------------------------- ADD --------------------------------- */
     /**
      * <p>Add a server to the list.</p>
      *
@@ -32,13 +29,12 @@ public class NodeDB {
      * @return ID of server
      * @throws NameServerFullExeption
      */
-    public Integer addNode(ABaseNode node) throws NameServerFullExeption {
-        String name = node.getName();
+    public Integer addNode(String name, String ip) throws NameServerFullExeption {
         Integer nodeID = NameToHash.convert(name);
 
         for (int i = 0; i < 32768; ++i) {
             if (!nodeID_to_nodeIP.containsKey(nodeID)) {
-                nodeID_to_nodeIP.put(nodeID, node);
+                nodeID_to_nodeIP.put(nodeID, ip);
                 return nodeID;
             }
 
@@ -51,35 +47,24 @@ public class NodeDB {
         throw new NameServerFullExeption();
     }
 
-    public void deleteNodeByName(String name){
-        nodeID_to_nodeIP.entrySet().removeIf(entry -> entry.getValue().getName().equals(name));
+    /* --------------------------------- DELETE --------------------------------- */
+    public void deleteNode(String name){
+        Integer nodeID = NameToHash.convert(name);
+        nodeID_to_nodeIP.entrySet().removeIf(entry -> entry.getKey().equals(nodeID));
     }
 
-    public void deleteNode(ABaseNode node){
-        nodeID_to_nodeIP.entrySet().removeIf(entry -> entry.getValue().equals(node));
-    }
+    public void deleteNode(int nodeID){ nodeID_to_nodeIP.entrySet().removeIf(entry -> entry.getKey().equals(nodeID)); }
 
-    public boolean exists(ABaseNode node){
-        return nodeID_to_nodeIP.containsKey(NameToHash.convert(node.getName()));
-    }
+    /* --------------------------------- CHECK --------------------------------- */
+    public boolean exists(int nodeID){ return nodeID_to_nodeIP.containsKey(nodeID); }
+    public boolean exists(String name){ return nodeID_to_nodeIP.containsKey(NameToHash.convert(name)); }
 
-    public ABaseNode getNodefromID(Integer nodeID){
-        return nodeID_to_nodeIP.get(nodeID);
-    }
 
-    public InetAddress getClosestNodeIP(String name){
-        return getNodefromID(getClosestNodeID(name)).getAddress();
-    }
-    public int getSize(){
-        return this.nodeID_to_nodeIP.size();
-    }
-
-    public Set<ABaseNode> getNodefromName(String name){
-        return nodeID_to_nodeIP.values().stream().filter(value -> value.getName().equals(name)).collect(Collectors.toSet());
-    }
+    /* --------------------------------- GET --------------------------------- */
+    public int getSize(){ return this.nodeID_to_nodeIP.size(); }
 
     /**
-     * Retrieves the closest IP address of the server with the hash closest to the given file name.
+     * Retrieves the IP address of the server with the hash closest to the given file name.
      * <p> <b>WARNING! Just because you input the exact name of a server doesn't mean you will definitely get its IP back! </b></p>
      *
      * <p>See {@link #addNode(ABaseNode)} to learn on how servers are added and how their hashes are determined,
@@ -87,9 +72,7 @@ public class NodeDB {
      *  @param name file name
      * @return ipp of server for the file
      */
-    public ABaseNode getClosestNode(String name){
-        return getNodefromID(getClosestNodeID(name));
-    }
+    public String getIpFromName(String name){ return nodeID_to_nodeIP.get(getClosestIdFromName(name)); }
 
     /**
      * Retrieves the closest ID address of the server with the hash closest to the given file name.
@@ -100,7 +83,7 @@ public class NodeDB {
      *  @param name file name
      * @return ID of server for the file
      */
-    public int getClosestNodeID(String name){
+    public int getClosestIdFromName(String name){
         Integer tempID = NameToHash.convert(name);
 
         Integer floor = nodeID_to_nodeIP.floorKey(tempID);

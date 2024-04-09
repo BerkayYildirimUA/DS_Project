@@ -10,71 +10,60 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.net.InetAddress;
+import java.util.Map;
+import java.util.TreeMap;
 
 @RestController
 public class NameServerAPI {
     JsonConverter jsonConverter = new JsonConverter("Database.json");
     NodeDB nodeDB = NodeDBService.getNodeDB();
 
-    @GetMapping("/files/{id}")
-    public ResponseEntity<String> getFileById(@PathVariable("id") int id) {
-        ClientNode node = (ClientNode) nodeDB.getNodefromID(id);
-        ResponseObject<ClientNode> response = new ResponseObject<>(node);
-
-        if (node != null)   return ResponseEntity.status(HttpStatus.OK).body(jsonConverter.toJson(response));
-        else                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-    }
-
-    @GetMapping("/files/{file_name}/address")
+    @GetMapping("/files/{file_name}")
     public ResponseEntity<String> getFileAddressByName(@PathVariable("file_name") String name) {
-        InetAddress ip = nodeDB.getClosestNodeIP(name);
+        String ip = nodeDB.getIpFromName(name);
 
-        if (ip != null) return ResponseEntity.status(HttpStatus.OK).body(ip.getHostAddress());
+        if (ip != null) return ResponseEntity.status(HttpStatus.OK).body(ip);
         else            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
     }
 
-    @PostMapping("/files")
+    @PostMapping("/nodes")
     public ResponseEntity<String> postFile(@RequestBody ClientNode newNode) {
-        ResponseObject<ClientNode> response = new ResponseObject<>(newNode);
+        ResponseObject<ClientNode> badResponse = new ResponseObject<>(newNode);
 
         if (newNode == null) {
-            response.setMessage("No item was given in body");
-            return ResponseEntity.status(HttpStatus.NO_CONTENT).body(jsonConverter.toJson(response));
+            badResponse.setMessage("No item was given in body");
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).body(jsonConverter.toJson(badResponse));
         }
 
-        //TODO: check ofdat we mss beter checken op andere velden van existance in de datatbase.
-        // Enkel de id is uniek. De naam kan hetzelfde zijn en de port/ip moeten wij toekenen,
-        // dus erop filteren is nuteloos want als dat niet juist is,
-        // is er gewoon iets mis bij de allocatie en moet dat daar opgelost worden.
-        if (nodeDB.exists(newNode)) {
-            response.setMessage(String.format("Item with id = %d already exists", newNode.getId()));
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(jsonConverter.toJson(response));
+        if (nodeDB.exists(newNode.getName())) {
+            badResponse.setMessage(String.format("Item with id = %d or name "+ newNode.getName() +" already exists", newNode.getId()));
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(jsonConverter.toJson(badResponse));
         }
 
         try {
-            nodeDB.addNode(newNode);
+            nodeDB.addNode(newNode.getName(), newNode.getAddress().getHostAddress());
         }
         catch (NameServerFullExeption ex){
             System.out.println(ex);
-            response.setMessage("The database is full. Max amount of nodes are reached");
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(jsonConverter.toJson(response));
+            badResponse.setMessage("The database is full. Max amount of nodes are reached");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(jsonConverter.toJson(badResponse));
         }
 
-        return ResponseEntity.status(HttpStatus.OK).body(jsonConverter.toJson(response));
+        Map<Integer, String> params = new TreeMap<>();
+        params.put(nodeDB.getClosestIdFromName(newNode.getName()), nodeDB.getIpFromName(newNode.getName()));
+        return ResponseEntity.status(HttpStatus.OK).body(jsonConverter.toJson(params));
     }
 
-    @DeleteMapping("/files/{id}")
+    @DeleteMapping("/nodes/{id}")
     public ResponseEntity<String> deleteFileById(@PathVariable("id") int id) {
-        ClientNode node = (ClientNode) nodeDB.getNodefromID(id);
-        ResponseObject<ClientNode> response = new ResponseObject<>(node);
+        ResponseObject<Integer> response = new ResponseObject<>(id);
 
-        if (node == null) {
-            response.setMessage(String.format("Item with id = %d does not exists", node.getId()));
+        if (nodeDB.exists(id)) {
+            response.setMessage(String.format("Item with id = %d does not exists", id));
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(jsonConverter.toJson(response));
         }
 
-        nodeDB.deleteNode(node);
-        return ResponseEntity.status(HttpStatus.OK).body(jsonConverter.toJson(response));
+        nodeDB.deleteNode(id);
+        return ResponseEntity.status(HttpStatus.OK).body(jsonConverter.toJson(id));
     }
 }
