@@ -65,7 +65,7 @@ public class DiscoveryService {
 
         //Send out messages
         ms.multicastSend(new MNObject(udp_id, eMessageTypes.MulticastNode, InetAddress.getLocalHost().getHostAddress(), this.socket.getLocalPort(), node.getName()));
-        //ms.multicastSend(new MNObject(udp_id, eMessageTypes.MulticastNode, InetAddress.getLocalHost().getHostAddress(), socket.getLocalPort(), node.getName()));
+        ms.multicastSend(new MNObject(udp_id, eMessageTypes.MulticastNode, InetAddress.getLocalHost().getHostAddress(), socket.getLocalPort(), node.getName()));
 
         //Wait for UDP packet to be filled in.
         while (udpListenerThread.isAlive()) ;
@@ -97,9 +97,6 @@ public class DiscoveryService {
             }
         }
 
-        //System.out.println("DiscoveryService - The recieved data: \r\n");
-        //filteredMessages.stream().forEach(c -> System.out.println(c.toString()));
-
         ClientNode newNode = (ClientNode) node; //Casting
         int prevId = -1;
         int nextId = -1;
@@ -119,11 +116,9 @@ public class DiscoveryService {
                 try 
                 {prevId = nodeMessages.stream().filter(m -> m.getNextNodeId() == ((ClientNode) node).getId()).toList().getFirst().getNodeHashId();}
                 catch (Exception ex){}
-                //if (prevId < newNode.getId() && prevId != -1) newNode.setPrevNodeId(prevId);//Get the node with lowest ID and add to prevNodeId
                 try 
                 { nextId = nodeMessages.stream().filter(m -> m.getPrevNodeId() == ((ClientNode) node).getId()).toList().getFirst().getNodeHashId();}
                 catch (Exception ex){}
-                //if (nextId > newNode.getNextNodeId() && nextId != -1) newNode.setNextNodeId(nextId);//Get the node with highest ID and add to prevNodeId
                 //Maybe more checks before adding node id's?
             }
         }

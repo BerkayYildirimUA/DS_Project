@@ -6,7 +6,6 @@ import nintendods.ds_project.model.message.UNAMNObject;
 import nintendods.ds_project.model.message.eMessageTypes;
 import nintendods.ds_project.service.DiscoveryService;
 import nintendods.ds_project.service.MulticastService;
-import nintendods.ds_project.utility.JsonConverter;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import java.io.IOException;
@@ -132,4 +131,5 @@ public class DsProjectApplication {
         }
         return sb.toString();
     }
+    
 }

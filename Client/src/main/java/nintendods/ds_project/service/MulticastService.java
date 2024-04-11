@@ -1,10 +1,8 @@
 package nintendods.ds_project.service;
 
 import nintendods.ds_project.model.ABaseNode;
-import nintendods.ds_project.model.ClientNode;
 import nintendods.ds_project.model.message.MNObject;
 import nintendods.ds_project.model.message.UNAMNObject;
-import nintendods.ds_project.model.message.UNAMObject;
 import nintendods.ds_project.model.message.eMessageTypes;
 import nintendods.ds_project.utility.JsonConverter;
 import org.springframework.stereotype.Component;
@@ -13,7 +11,6 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
-import java.net.UnknownHostException;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
