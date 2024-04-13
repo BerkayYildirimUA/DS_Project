@@ -33,14 +33,14 @@ public class NodeDB {
     public Integer addNode(String name, String ip) throws NameServerFullExeption {
         Integer nodeID = NameToHash.convert(name);
 
-        for (int i = 0; i < 32768; ++i) {
+        for (int i = 0; i < NameToHash.MAX_NODES; ++i) {
             if (!nodeID_to_nodeIP.containsKey(nodeID)) {
                 nodeID_to_nodeIP.put(nodeID, ip);
                 return nodeID;
             }
 
             nodeID++;
-            if (nodeID > 32768){
+            if (nodeID > NameToHash.MAX_NODES){
                 nodeID = 0;
             }
         }
@@ -97,8 +97,8 @@ public class NodeDB {
             floor = nodeID_to_nodeIP.lastKey();
         }
 
-        int distToFloor = (tempID - floor + 32768) % 32768; // Wrap-around distance to floor
-        int distToCeiling = (ceiling - tempID + 32768) % 32768; // Wrap-around distance to ceiling
+        int distToFloor = (tempID - floor + (NameToHash.MAX_NODES + 1)) % (NameToHash.MAX_NODES + 1); // Wrap-around distance to floor
+        int distToCeiling = (ceiling - tempID + (NameToHash.MAX_NODES + 1)) % (NameToHash.MAX_NODES + 1); // Wrap-around distance to ceiling
 
         int closestKey;
         if (distToFloor <= distToCeiling) {
