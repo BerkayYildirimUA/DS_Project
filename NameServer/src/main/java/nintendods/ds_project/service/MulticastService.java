@@ -121,7 +121,7 @@ public class MulticastService {
         UNAMObject unicastMessage = new UNAMObject(messageId, eMessageTypes.UnicastNamingServerToNode, amount);
 
         // Setup the UDP sender and send out.
-        UDPClient client = new UDPClient(node.getAddress(), node.getPort(), 256);
+        UDPClient client = new UDPClient(node.getAddress(), node.getPort(), BUFFER_SIZE);
 
         // Send out 2 times, the receiver must filter out packets with the same ID.
         client.SendMessage(jsonConverter.toJson(unicastMessage));
