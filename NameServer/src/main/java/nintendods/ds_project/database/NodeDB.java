@@ -25,9 +25,10 @@ public class NodeDB {
      *
      * <p>If it can't find an empty spot NameServerFullExeption is thrown.</p>
      *
-     * @param node
+     * @param name the name of the node
+     * @param ip the ip of the node
      * @return ID of server
-     * @throws NameServerFullExeption
+     * @throws NameServerFullExeption if the name server is full
      */
     public Integer addNode(String name, String ip) throws NameServerFullExeption {
         Integer nodeID = NameToHash.convert(name);
@@ -48,16 +49,15 @@ public class NodeDB {
     }
 
     /* --------------------------------- DELETE --------------------------------- */
-    public void deleteNode(String name){
-        Integer nodeID = NameToHash.convert(name);
-        nodeID_to_nodeIP.entrySet().removeIf(entry -> entry.getKey().equals(nodeID));
+    public void deleteNode(String ip){
+        nodeID_to_nodeIP.entrySet().removeIf(entry -> entry.getValue().equals(ip));
     }
 
     public void deleteNode(int nodeID){ nodeID_to_nodeIP.entrySet().removeIf(entry -> entry.getKey().equals(nodeID)); }
 
     /* --------------------------------- CHECK --------------------------------- */
     public boolean exists(int nodeID){ return nodeID_to_nodeIP.containsKey(nodeID); }
-    public boolean exists(String name){ return nodeID_to_nodeIP.containsKey(NameToHash.convert(name)); }
+    public boolean exists(String ip){return nodeID_to_nodeIP.containsValue(ip);}
 
 
     /* --------------------------------- GET --------------------------------- */
@@ -67,7 +67,7 @@ public class NodeDB {
      * Retrieves the IP address of the server with the hash closest to the given file name.
      * <p> <b>WARNING! Just because you input the exact name of a server doesn't mean you will definitely get its IP back! </b></p>
      *
-     * <p>See {@link #addNode(ABaseNode)} to learn on how servers are added and how their hashes are determined,
+     * <p>See {@link #addNode(String, String)} to learn on how servers are added and how their hashes are determined,
      * which causes the warning.</p>
      *  @param name file name
      * @return ipp of server for the file
@@ -78,7 +78,7 @@ public class NodeDB {
      * Retrieves the closest ID address of the server with the hash closest to the given file name.
      * <p> <b>WARNING! Just because you input the exact name of a server doesn't mean you will definitely get its ID back! </b></p>
      *
-     * <p>See {@link #addNode(ABaseNode)} to learn on how servers are added and how their hashes are determined,
+     * <p>See {@link #addNode(String, String)} to learn on how servers are added and how their hashes are determined,
      * which causes the warning.</p>
      *  @param name file name
      * @return ID of server for the file

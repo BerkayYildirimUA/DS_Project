@@ -11,8 +11,7 @@ import java.net.InetAddress;
 import java.util.Random;
 import java.util.TreeMap;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 public class NameServerDatabaseTests {
@@ -118,7 +117,7 @@ public class NameServerDatabaseTests {
     }
 
     @Test(expected = NameServerFullExeption.class)
-    public void getNodeIDTest_SameHash_FullServer() throws Exception {
+    public void addNodeToFullServerTest() throws Exception {
         NodeDB nodeDB = new NodeDB();
         InetAddress address = InetAddress.getByName("10.10.10.10");
 
@@ -150,7 +149,7 @@ public class NameServerDatabaseTests {
         assertEquals(10, nodeDB.getClosestIdFromName(createStringWithKnownHash(12)));
         assertEquals(node1.getAddress().getHostAddress(), nodeDB.getIpFromName(createStringWithKnownHash(12)));
 
-        nodeDB.deleteNode(node1.getName());
+        nodeDB.deleteNode(node1.getAddress().getHostAddress());
 
         assertEquals(15, nodeDB.getClosestIdFromName(createStringWithKnownHash(12)));
         assertEquals(node3.getAddress().getHostAddress(), nodeDB.getIpFromName(createStringWithKnownHash(12)));
@@ -158,15 +157,34 @@ public class NameServerDatabaseTests {
 
 
     @Test
-    public void getNodeIDTest_Exists() throws Exception {
+    public void BasicExistsTest() throws Exception {
         NodeDB nodeDB = new NodeDB();
 
         ClientNode node1 = new ClientNode(InetAddress.getByName("10.10.10.10"), 10, "name1");
 
         nodeDB.addNode(node1.getName(), node1.getAddress().getHostAddress());
 
-        assertTrue(nodeDB.exists(node1.getName()));
+        assertTrue(nodeDB.exists(node1.getAddress().getHostAddress()));
         assertEquals(node1.getAddress().getHostAddress(), nodeDB.getIpFromName(createStringWithKnownHash(12)));
+    }
+
+    @Test
+    public void SameHashExistsTest() throws Exception {
+        NodeDB nodeDB = new NodeDB();
+
+        String nameServer1 = createStringWithKnownHash(10);
+        String nameServer2;
+        do {
+            nameServer2 = createStringWithKnownHash(10);
+        } while (nameServer1.equals(nameServer2)); // this is to make sure they have diffrent names
+
+        ClientNode node1 = new ClientNode(InetAddress.getByName("10.10.10.10"), 10, nameServer1);
+        ClientNode node2 = new ClientNode(InetAddress.getByName("10.10.10.11"), 10, nameServer2);
+
+        nodeDB.addNode(node1.getName(), node1.getAddress().getHostAddress());
+
+        assertFalse(nodeDB.exists(node2.getAddress().getHostAddress()));
+        assertTrue(nodeDB.exists(node1.getAddress().getHostAddress()));
     }
 
 

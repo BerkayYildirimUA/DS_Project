@@ -94,7 +94,7 @@ public class MulticastService {
                 int amountNodes = nodeDB.getSize();
 
                 // Check database if node exist
-                if (!nodeDB.exists(node.getName())) {
+                if (!nodeDB.exists(node.getAddress().getHostAddress())) {
                     logger.info("Adding node " + node.getName() + " to DB");
 
                     // Add to database

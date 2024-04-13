@@ -35,7 +35,7 @@ public class NameServerAPI {
             return ResponseEntity.status(HttpStatus.NO_CONTENT).body(jsonConverter.toJson(badResponse));
         }
 
-        if (nodeDB.exists(newNode.getName())) {
+        if (nodeDB.exists(newNode.getAddress().getHostAddress())) {
             badResponse.setMessage(String.format("Item with id = %d or name "+ newNode.getName() +" already exists", newNode.getId()));
             return ResponseEntity.status(HttpStatus.CONFLICT).body(jsonConverter.toJson(badResponse));
         }
