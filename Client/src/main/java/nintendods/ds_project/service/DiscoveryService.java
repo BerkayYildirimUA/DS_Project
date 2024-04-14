@@ -34,7 +34,7 @@ public class DiscoveryService {
      * @param multicastPort    The port number on which multicast communication will
      *                         occur.
      * @param waitTime         The time duration the discovery service will wait for
-     *                         responses.
+     *                         responses in miliseconds.
      */
     public DiscoveryService(String multicastAddress, int multicastPort, int waitTime) {
         // Setup the socket and get the port
@@ -137,7 +137,6 @@ public class DiscoveryService {
                             .toList().getFirst().getNodeHashId();
                 } catch (Exception ex) {
                 }
-                // Maybe more checks before adding node id's?
             }
         }
 

@@ -7,7 +7,9 @@ public class NameToHash{
      * @param fileName contains the string representation of the filename
      * @return an integer from 0 to 32768
      */
+    final static public int MAX_NODES = 32768;
+
     public static int convert(String fileName){
-        return Interpolate.map(fileName.hashCode(), -2147483647, 2147483647, 0, 32768);
+        return Interpolate.map(fileName.hashCode(), Integer.MIN_VALUE, Integer.MAX_VALUE, 0, MAX_NODES);
     }
 }

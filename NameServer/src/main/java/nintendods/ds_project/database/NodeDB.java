@@ -1,6 +1,5 @@
 package nintendods.ds_project.database;
 import nintendods.ds_project.Exeptions.NameServerFullExeption;
-import nintendods.ds_project.model.ABaseNode;
 import nintendods.ds_project.utility.NameToHash;
 import org.springframework.stereotype.Repository;
 
