@@ -70,24 +70,55 @@ public class DsProjectApplication {
                         //compose new node if needed
                         boolean send = false;
                         ClientNode incommingNode = new ClientNode(message);
+
                         //System.out.println(incommingNode);
                         //Check the position of own node and incomming node
-                        if(     (node.getId() < incommingNode.getId() && incommingNode.getId() < node.getNextNodeId()) ||
-                                (node.getNextNodeId() == node.getId() && node.getId() < incommingNode.getId())){
+                        if((node.getId() < incommingNode.getId() && incommingNode.getId() <= node.getNextNodeId()) || (node.getId() < incommingNode.getId() && node.getNextNodeId() == node.getId())){
                             //new node is the new next node for current node
                             node.setNextNodeId(incommingNode.getId());
+                            //Check if first node of network?
+                            if(node.getId() == node.getPrevNodeId())
+                                node.setPrevNodeId(incommingNode.getId());    
                             System.out.println("\r\nnode is below the next node\r\n");
                             send = true;
                         }
 
-                        if(     (node.getPrevNodeId() < incommingNode.getId() && incommingNode.getId() < node.getId())||
-                                (node.getPrevNodeId() == node.getId() && node.getId() > incommingNode.getId())){
+                        if((node.getId() > incommingNode.getId() && incommingNode.getId() >= node.getPrevNodeId()) || (node.getId() > incommingNode.getId() && node.getPrevNodeId() == node.getId())){
                             //new node is the new prev node for current node
                             node.setPrevNodeId(incommingNode.getId());
+                            //Check if first node of network?
+                            if(node.getId() == node.getNextNodeId())
+                                node.setNextNodeId(incommingNode.getId());  
+
                             System.out.println("\r\nnode is above the next node \r\n");
                             send = true;
                         }
                         
+                        //Closing the ring checks
+                        if(     (node.getPrevNodeId() <= incommingNode.getId() && node.getNextNodeId() <= incommingNode.getId()) || 
+                                (node.getId() < incommingNode.getId() && node.getId() == node.getPrevNodeId())){ //The incomming node is a new end node.
+                            if(!send && node.getPrevNodeId() >= node.getNextNodeId()){
+                                if(node.getId() > node.getNextNodeId())
+                                    node.setNextNodeId(incommingNode.getId());
+                                else
+                                    node.setPrevNodeId(incommingNode.getId());
+                                send = true;
+                                System.out.println("\r\n new end node!\r\n");
+                            }
+                        }
+                        
+                        if (   (node.getPrevNodeId() >= incommingNode.getId() && node.getNextNodeId() >= incommingNode.getId()) ||
+                                    (node.getId() > incommingNode.getId() && node.getId() == node.getNextNodeId())){ //The incomming node is a new start node.
+                            if(!send && node.getPrevNodeId() >= node.getNextNodeId()){
+                                if(node.getId() > node.getNextNodeId())
+                                    node.setNextNodeId(incommingNode.getId());
+                                else
+                                    node.setPrevNodeId(incommingNode.getId());
+                                send = true;
+                                System.out.println("\r\n new start node!\r\n");
+                            }
+                        }
+
                         //The send boolean is not needed as the uncomming node will check the compatability of the ID's itself. it is just to reduce the network traffic.
                         if(send){
                         //Compose message and send out
@@ -108,9 +139,11 @@ public class DsProjectApplication {
                 }
                 case Shutdown -> {
                     //TODO
+                    //Gracefully, update the side nodes on its own and leave the ring topology.
                 }
                 case Error -> {
                     //TODO
+                    //Hard, only transmit to naming server and the naming server needs to deal with it.
                     isRunning = false;
                 }
                 case null, default -> {

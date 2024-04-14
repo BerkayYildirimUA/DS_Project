@@ -76,6 +76,7 @@ On failure of a node, the network must be self healing.
   - Needs to be able to receive a request for the closest ID's of nodes based on the received node id.
     - This means, send out 2 node objects to the requester
 
+
 ### Node
   - needs to have a failback method at every exception to transmit the ID's to the next and previous.
     - The node is suddenly gone so the neighbour nodes must detect these with a ping or alive packet.
