@@ -17,7 +17,7 @@ public class DsProjectApplication {
     private static final int NODE_GLOBAL_PORT = 21;
 
     private static final int DISCOVERY_RETRIES = 6;
-    private static final int DISCOVERY_TIMEOUT = 2000; //In nanoseconds
+    private static final int DISCOVERY_TIMEOUT = 2000; //In microseconds
 
     private static final int LISTENER_BUFFER_SIZE = 20;
 
@@ -69,7 +69,6 @@ public class DsProjectApplication {
                     try {
                         listenerService.listenAndUpdate(node);
                     } catch (Exception e) {
-                        // TODO Auto-generated catch block
                         e.printStackTrace();
                         nodeState = eNodeState.Error;
                     }

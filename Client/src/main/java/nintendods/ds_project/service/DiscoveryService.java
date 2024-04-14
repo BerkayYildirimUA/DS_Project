@@ -137,7 +137,6 @@ public class DiscoveryService {
                             .toList().getFirst().getNodeHashId();
                 } catch (Exception ex) {
                 }
-                // Maybe more checks before adding node id's?
             }
         }
 

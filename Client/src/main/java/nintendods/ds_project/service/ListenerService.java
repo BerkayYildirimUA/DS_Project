@@ -7,11 +7,11 @@ import nintendods.ds_project.model.message.eMessageTypes;
 
 public class ListenerService {
 
-    private static MulticastService multicastService = null;
+    private static MulticastListenService multicastService = null;
 
     public ListenerService(String multicastAddress, int multicastPort, int multicastBufferCapacity) {
         if (multicastService == null)
-            multicastService = new MulticastService(multicastAddress, multicastPort, multicastBufferCapacity);
+            multicastService = new MulticastListenService(multicastAddress, multicastPort, multicastBufferCapacity);
     }
 
     public void listenAndUpdate(ClientNode node) throws Exception {
@@ -54,10 +54,9 @@ public class ListenerService {
                 send = true;
             }
 
-            // Closing the ring checks
-
-            // The incomming node is a new end node.
+            //Is a head or tail node of the ring topology?
             if (!send && node.getPrevNodeId() >= node.getNextNodeId()) {
+                // The incomming node is a new end node.
                 if (node.getPrevNodeId() <= incommingNode.getId()
                         && node.getNextNodeId() <= incommingNode.getId()) {
                     if (node.getId() > node.getNextNodeId())    //If the current node is the original end node
@@ -65,7 +64,7 @@ public class ListenerService {
                     else
                         node.setPrevNodeId(incommingNode.getId());
                     send = true;
-                    System.out.println("\r\n new end node!\r\n");
+                    System.out.println("\r\n new tail node!\r\n");
                 }
 
                 // The incomming node is a new start node.
@@ -76,7 +75,7 @@ public class ListenerService {
                     else
                         node.setPrevNodeId(incommingNode.getId());
                     send = true;
-                    System.out.println("\r\n new start node!\r\n");
+                    System.out.println("\r\n new head node!\r\n");
                 }
             }
 

@@ -15,7 +15,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 @Component
-public class MulticastService {
+public class MulticastListenService {
     private static final int BUFFER_SIZE = 256;
     private static BlockingQueue<MNObject> multicastQueue;
     private final JsonConverter jsonConverter = new JsonConverter();
@@ -27,7 +27,7 @@ public class MulticastService {
      * @param multicastBufferCapacity The maximum messages we can store in the queue
      * @throws RuntimeException
      */
-    public MulticastService(String multicastAddress, int multicastPort, int multicastBufferCapacity) throws RuntimeException {
+    public MulticastListenService(String multicastAddress, int multicastPort, int multicastBufferCapacity) throws RuntimeException {
         BlockingQueue<String> packetQueue = new LinkedBlockingQueue<>(multicastBufferCapacity);
         multicastQueue = new LinkedBlockingQueue<>(multicastBufferCapacity);
         System.out.println("MulticastService - Setup multicast listener");
