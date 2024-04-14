@@ -1,12 +1,8 @@
 package nintendods.ds_project;
 
 import nintendods.ds_project.model.ClientNode;
-import nintendods.ds_project.model.message.MNObject;
-import nintendods.ds_project.model.message.UNAMNObject;
-import nintendods.ds_project.model.message.eMessageTypes;
 import nintendods.ds_project.service.DiscoveryService;
 import nintendods.ds_project.service.ListenerService;
-import nintendods.ds_project.service.MulticastService;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import java.io.IOException;
