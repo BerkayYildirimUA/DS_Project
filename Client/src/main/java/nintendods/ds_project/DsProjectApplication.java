@@ -43,7 +43,7 @@ public class DsProjectApplication {
                         break;
                     }
 
-                    DiscoveryService ds = new DiscoveryService("224.0.0.100", 12345, 10000);
+                    DiscoveryService ds = new DiscoveryService("224.0.0.100", 12345, 2000);
                     discoveryRetries++;
                     try {
                         node = ds.discover(node);
@@ -73,17 +73,17 @@ public class DsProjectApplication {
 
                         //System.out.println(incommingNode);
                         //Check the position of own node and incomming node
-                        if((node.getId() < incommingNode.getId() && incommingNode.getId() <= node.getNextNodeId()) || (node.getId() < incommingNode.getId() && node.getNextNodeId() == node.getId())){
+                        if(node.getId() < incommingNode.getId() && (incommingNode.getId() <= node.getNextNodeId() || node.getNextNodeId() == node.getId())){
                             //new node is the new next node for current node
                             node.setNextNodeId(incommingNode.getId());
                             //Check if first node of network?
                             if(node.getId() == node.getPrevNodeId())
                                 node.setPrevNodeId(incommingNode.getId());    
-                            System.out.println("\r\nnode is below the next node\r\n");
+                            System.out.println("\r\n current node is below the incomming node\r\n");
                             send = true;
                         }
 
-                        if((node.getId() > incommingNode.getId() && incommingNode.getId() >= node.getPrevNodeId()) || (node.getId() > incommingNode.getId() && node.getPrevNodeId() == node.getId())){
+                        if(node.getId() > incommingNode.getId() && (incommingNode.getId() >= node.getPrevNodeId() || node.getPrevNodeId() == node.getId())){
                             //new node is the new prev node for current node
                             node.setPrevNodeId(incommingNode.getId());
                             //Check if first node of network?
