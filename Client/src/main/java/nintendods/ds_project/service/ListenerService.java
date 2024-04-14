@@ -12,7 +12,6 @@ public class ListenerService {
     public ListenerService(String multicastAddress, int multicastPort, int multicastBufferCapacity) {
         if (multicastService == null)
             multicastService = new MulticastService(multicastAddress, multicastPort, multicastBufferCapacity);
-
     }
 
     public void listenAndUpdate(ClientNode node) throws Exception {
