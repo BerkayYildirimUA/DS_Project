@@ -26,12 +26,12 @@ public class ListenerService {
 
         if (message != null) {
             // Message arrived
-            // compose new node if needed
+            // compose incomming node
             boolean send = false;
             ClientNode incommingNode = new ClientNode(message);
 
-            // System.out.println(incommingNode);
-            // Check the position of own node and incomming node
+            // Check the position of own node and incomming node and place it in the ring
+
             if (node.getId() < incommingNode.getId() && (incommingNode.getId() <= node.getNextNodeId()
                     || node.getNextNodeId() == node.getId())) {
                 // new node is the new next node for current node
@@ -56,11 +56,12 @@ public class ListenerService {
             }
 
             // Closing the ring checks
+
             // The incomming node is a new end node.
             if (!send && node.getPrevNodeId() >= node.getNextNodeId()) {
                 if (node.getPrevNodeId() <= incommingNode.getId()
                         && node.getNextNodeId() <= incommingNode.getId()) {
-                    if (node.getId() > node.getNextNodeId())
+                    if (node.getId() > node.getNextNodeId())    //If the current node is the original end node
                         node.setNextNodeId(incommingNode.getId());
                     else
                         node.setPrevNodeId(incommingNode.getId());
@@ -71,7 +72,7 @@ public class ListenerService {
                 // The incomming node is a new start node.
                 if (node.getPrevNodeId() >= incommingNode.getId()
                         && node.getNextNodeId() >= incommingNode.getId()) {
-                    if (node.getId() > node.getNextNodeId())
+                    if (node.getId() > node.getNextNodeId()) //If the current node is the original end node
                         node.setNextNodeId(incommingNode.getId());
                     else
                         node.setPrevNodeId(incommingNode.getId());

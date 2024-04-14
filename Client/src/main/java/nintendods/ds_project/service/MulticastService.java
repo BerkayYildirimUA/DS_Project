@@ -92,9 +92,9 @@ public class MulticastService {
         //Setup udp unicast
         long id = System.currentTimeMillis();
         reply.setMessageId(id);
-        System.out.println("MulticastService - Send out files from node to node");
-        System.out.println("\t"+reply);
-        System.out.println("\t"+toNode);
+        //System.out.println("MulticastService - Send out files from node to node");
+        //System.out.println("\t"+reply);
+        //System.out.println("\t"+toNode);
         UDPClient client = new UDPClient(toNode.getAddress(),toNode.getPort(), 1024);
 
         //Send out 2 times, the receiver must filter out packets with the same ID.
