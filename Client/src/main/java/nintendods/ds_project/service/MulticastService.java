@@ -16,22 +16,23 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 @Component
 public class MulticastService {
-    private static final String MULTICAST_ADDRESS = "224.0.0.100";
-    private static final int PORT = 12345;
     private static final int BUFFER_SIZE = 256;
     private static BlockingQueue<MNObject> multicastQueue;
     private final JsonConverter jsonConverter = new JsonConverter();
 
     /**
-     * Handler keeps running and listening for multicasts from joining nodes.
+     * A multicast service that wil listen to multicast messages and parse these to MNObject. 
+     * @param multicastAddress The address where we listen onto
+     * @param multicastPort The UDP port 
+     * @param multicastBufferCapacity The maximum messages we can store in the queue
      * @throws RuntimeException
      */
-    public MulticastService() throws RuntimeException {
-        BlockingQueue<String> packetQueue = new LinkedBlockingQueue<>(20);
-        multicastQueue = new LinkedBlockingQueue<>(20);
+    public MulticastService(String multicastAddress, int multicastPort, int multicastBufferCapacity) throws RuntimeException {
+        BlockingQueue<String> packetQueue = new LinkedBlockingQueue<>(multicastBufferCapacity);
+        multicastQueue = new LinkedBlockingQueue<>(multicastBufferCapacity);
         System.out.println("MulticastService - Setup multicast listener");
         // Start the receiver thread
-        Thread receiverThread = new Thread(() -> receivePackets(packetQueue));
+        Thread receiverThread = new Thread(() -> receivePackets(packetQueue, multicastAddress, multicastPort));
         receiverThread.start();
 
         // Start the processor thread
@@ -41,9 +42,9 @@ public class MulticastService {
         System.out.println("MulticastService - Started multicast listener");
     }
 
-    private void receivePackets(BlockingQueue<String> packetQueue) {
-        try (MulticastSocket multicastSocket = new MulticastSocket(PORT)) {
-            InetAddress group = InetAddress.getByName(MULTICAST_ADDRESS);
+    private void receivePackets(BlockingQueue<String> packetQueue, String multicastAddress, int multicastPort) {
+        try (MulticastSocket multicastSocket = new MulticastSocket(multicastPort)) {
+            InetAddress group = InetAddress.getByName(multicastAddress);
             multicastSocket.joinGroup(group);
 
             byte[] buffer = new byte[BUFFER_SIZE];
@@ -96,15 +97,6 @@ public class MulticastService {
         System.out.println("\t"+toNode);
         UDPClient client = new UDPClient(toNode.getAddress(),toNode.getPort(), 1024);
 
-        // Generate a random delay between 0 and 200 nanoseconds
-        try {
-            long randomDelay = (long) (Math.random() * 200); 
-            Thread.sleep(0, (int) randomDelay); // Sleep for the random delay
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            System.err.println("MulticastService - Thread sleep interrupted");
-        }
-        
         //Send out 2 times, the receiver must filter out packets with the same ID.
         client.SendMessage(jsonConverter.toJson(reply));
         client.SendMessage(jsonConverter.toJson(reply));
