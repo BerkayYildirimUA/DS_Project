@@ -29,7 +29,7 @@ public class NameServerDatabaseTests {
         nodeDB.addNode(node3.getName(), node3.getAddress().getHostAddress());
 
         assertEquals(10, nodeDB.getClosestIdFromName(createStringWithKnownHash(12)));
-        assertEquals(node1.getAddress().getHostAddress(), nodeDB.getIpFromName(createStringWithKnownHash(12)));
+        assertEquals(node1.getAddress().getHostAddress(), nodeDB.getClosestIpFromName(createStringWithKnownHash(12)));
     }
 
     @Test
@@ -45,7 +45,7 @@ public class NameServerDatabaseTests {
         nodeDB.addNode(node3.getName(), node3.getAddress().getHostAddress());
 
         assertEquals(10, nodeDB.getClosestIdFromName(createStringWithKnownHash(32760)));
-        assertEquals(node1.getAddress().getHostAddress(), nodeDB.getIpFromName(createStringWithKnownHash(32760)));
+        assertEquals(node1.getAddress().getHostAddress(), nodeDB.getClosestIpFromName(createStringWithKnownHash(32760)));
     }
 
     @Test
@@ -61,7 +61,7 @@ public class NameServerDatabaseTests {
         nodeDB.addNode(node3.getName(), node3.getAddress().getHostAddress());
 
         assertEquals(32000, nodeDB.getClosestIdFromName(createStringWithKnownHash(100)));
-        assertEquals(node2.getAddress().getHostAddress(), nodeDB.getIpFromName(createStringWithKnownHash(100)));
+        assertEquals(node2.getAddress().getHostAddress(), nodeDB.getClosestIpFromName(createStringWithKnownHash(100)));
     }
 
     @Test
@@ -77,7 +77,7 @@ public class NameServerDatabaseTests {
         nodeDB.addNode(node3.getName(), node3.getAddress().getHostAddress());
 
         assertEquals(32000, nodeDB.getClosestIdFromName(createStringWithKnownHash(32000)));
-        assertEquals(node2.getAddress().getHostAddress(), nodeDB.getIpFromName(createStringWithKnownHash(32000)));
+        assertEquals(node2.getAddress().getHostAddress(), nodeDB.getClosestIpFromName(createStringWithKnownHash(32000)));
     }
 
     @Test
@@ -93,9 +93,9 @@ public class NameServerDatabaseTests {
         nodeDB.addNode(node3.getName(), node3.getAddress().getHostAddress());
 
         assertEquals(10000, nodeDB.getClosestIdFromName(createStringWithKnownHash(32000)));
-        assertEquals(node1.getAddress().getHostAddress(), nodeDB.getIpFromName(createStringWithKnownHash(32000)));
-        assertEquals(node2.getAddress().getHostAddress(), nodeDB.getIpFromName(createStringWithKnownHash(10001)));
-        assertEquals(node3.getAddress().getHostAddress(), nodeDB.getIpFromName(createStringWithKnownHash(11000)));
+        assertEquals(node1.getAddress().getHostAddress(), nodeDB.getClosestIpFromName(createStringWithKnownHash(32000)));
+        assertEquals(node2.getAddress().getHostAddress(), nodeDB.getClosestIpFromName(createStringWithKnownHash(10001)));
+        assertEquals(node3.getAddress().getHostAddress(), nodeDB.getClosestIpFromName(createStringWithKnownHash(11000)));
     }
 
     @Test
@@ -111,9 +111,9 @@ public class NameServerDatabaseTests {
         nodeDB.addNode(node3.getName(), node3.getAddress().getHostAddress());
 
         assertEquals(nodeDB.getClosestIdFromName(createStringWithKnownHash(32000)), 32768);
-        assertEquals(node1.getAddress().getHostAddress(), nodeDB.getIpFromName(createStringWithKnownHash(32000)));
-        assertEquals(node2.getAddress().getHostAddress(), nodeDB.getIpFromName(createStringWithKnownHash(0)));
-        assertEquals(node3.getAddress().getHostAddress(), nodeDB.getIpFromName(createStringWithKnownHash(1)));
+        assertEquals(node1.getAddress().getHostAddress(), nodeDB.getClosestIpFromName(createStringWithKnownHash(32000)));
+        assertEquals(node2.getAddress().getHostAddress(), nodeDB.getClosestIpFromName(createStringWithKnownHash(0)));
+        assertEquals(node3.getAddress().getHostAddress(), nodeDB.getClosestIpFromName(createStringWithKnownHash(1)));
     }
 
     @Test(expected = NameServerFullExeption.class)
@@ -147,12 +147,12 @@ public class NameServerDatabaseTests {
         nodeDB.addNode(node3.getName(), node3.getAddress().getHostAddress());
 
         assertEquals(10, nodeDB.getClosestIdFromName(createStringWithKnownHash(12)));
-        assertEquals(node1.getAddress().getHostAddress(), nodeDB.getIpFromName(createStringWithKnownHash(12)));
+        assertEquals(node1.getAddress().getHostAddress(), nodeDB.getClosestIpFromName(createStringWithKnownHash(12)));
 
         nodeDB.deleteNode(node1.getAddress().getHostAddress());
 
         assertEquals(15, nodeDB.getClosestIdFromName(createStringWithKnownHash(12)));
-        assertEquals(node3.getAddress().getHostAddress(), nodeDB.getIpFromName(createStringWithKnownHash(12)));
+        assertEquals(node3.getAddress().getHostAddress(), nodeDB.getClosestIpFromName(createStringWithKnownHash(12)));
     }
 
 
@@ -165,7 +165,7 @@ public class NameServerDatabaseTests {
         nodeDB.addNode(node1.getName(), node1.getAddress().getHostAddress());
 
         assertTrue(nodeDB.exists(node1.getAddress().getHostAddress()));
-        assertEquals(node1.getAddress().getHostAddress(), nodeDB.getIpFromName(createStringWithKnownHash(12)));
+        assertEquals(node1.getAddress().getHostAddress(), nodeDB.getClosestIpFromName(createStringWithKnownHash(12)));
     }
 
     @Test
@@ -187,6 +187,44 @@ public class NameServerDatabaseTests {
         assertTrue(nodeDB.exists(node1.getAddress().getHostAddress()));
     }
 
+    @Test
+    public void saveDBTest() throws Exception {
+        NodeDB nodeDB = new NodeDB();
+        Random random = new Random();
+        String name1 = createStringWithKnownHash(random.nextInt(NameToHash.MAX_NODES - 1));
+        String name2 = createStringWithKnownHash(random.nextInt(NameToHash.MAX_NODES - 1));
+        String name3 = createStringWithKnownHash(random.nextInt(NameToHash.MAX_NODES - 1));
+
+        ClientNode node1 = new ClientNode(InetAddress.getByName("10.10.10.10"), 100, name1);
+        ClientNode node2 = new ClientNode(InetAddress.getByName("10.10.10.11"), 100, name2);
+        ClientNode node3 = new ClientNode(InetAddress.getByName("10.10.10.12"), 100, name3);
+
+        nodeDB.addNode(node1.getName(), node1.getAddress().getHostAddress());
+        nodeDB.addNode(node2.getName(), node2.getAddress().getHostAddress());
+        nodeDB.addNode(node3.getName(), node3.getAddress().getHostAddress());
+
+        nodeDB.saveDB();
+
+        NodeDB nodeDB2 = new NodeDB();
+        nodeDB2.loadDB();
+
+        assertEquals(nodeDB2.getClosestIdFromName(name1), node1.getId());
+        assertEquals(nodeDB2.getClosestIdFromName(name2), node2.getId());
+        assertEquals(nodeDB2.getClosestIdFromName(name3), node3.getId());
+
+        assertEquals(nodeDB2.getClosestIpFromName(name1), node1.getAddress().getHostAddress());
+        assertEquals(nodeDB2.getClosestIpFromName(name2), node2.getAddress().getHostAddress());
+        assertEquals(nodeDB2.getClosestIpFromName(name3), node3.getAddress().getHostAddress());
+
+
+    }
+
+    @Test
+    public void debuging() throws Exception {
+        for (int i = 0; i < 100000; ++i){
+            saveDBTest();
+        }
+    }
 
     /**
      * creates random string whos hash after NameToHash.convert is the asked number.
