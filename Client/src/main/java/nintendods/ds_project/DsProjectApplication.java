@@ -96,7 +96,7 @@ public class DsProjectApplication {
             }
         }
 
-        // SpringApplication.run(DsProjectApplication.class, args);
+        //SpringApplication.run(DsProjectApplication.class, args);
     }
 
     private static final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
