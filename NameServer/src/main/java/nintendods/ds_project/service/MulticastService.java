@@ -25,6 +25,7 @@ public class MulticastService {
     private static final String MULTICAST_ADDRESS = "224.0.0.100";
     private static final int PORT = 12345;
     private static final int BUFFER_SIZE = 256;
+    private static final int QUEUE_SIZE  = 20;
 
     /**
      * Handler keeps running and listening for multicasts from joining nodes.
@@ -33,7 +34,7 @@ public class MulticastService {
      */
     public MulticastService() throws RuntimeException {
         logger.info("Starting up MulticastService");
-        BlockingQueue<String> packetQueue = new LinkedBlockingQueue<>(20);
+        BlockingQueue<String> packetQueue = new LinkedBlockingQueue<>(QUEUE_SIZE);
 
         // Start the receiver thread
         Thread receiverThread = new Thread(() -> receivePackets(packetQueue));
