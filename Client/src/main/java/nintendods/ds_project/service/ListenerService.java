@@ -9,25 +9,27 @@ public class ListenerService {
 
     private static MulticastListenService multicastService = null;
 
+    // Constructor that initializes the multicast service if it hasn't been already
     public ListenerService(String multicastAddress, int multicastPort, int multicastBufferCapacity) {
         if (multicastService == null)
             multicastService = new MulticastListenService(multicastAddress, multicastPort, multicastBufferCapacity);
     }
 
+    // Listens for incoming messages and updates node configuration accordingly
     public void listenAndUpdate(ClientNode node) throws Exception {
         // Checks if a multicast has arrived;
         MNObject message = null;
         try {
-            message = multicastService.getMessage();
+            message = multicastService.getMessage(); // Attempt to get a multicast message
         } catch (NullPointerException ignored) {
-            return;
+            return; // TODO: If null, exit the method early
         }
 
         if (message != null) {
             // Message arrived
             // compose incomming node
-            boolean send = false;
-            ClientNode incommingNode = new ClientNode(message);
+            boolean send = false; // Flag to check if we need to send an update
+            ClientNode incommingNode = new ClientNode(message); // Create a node object from the message
 
             // Check the position of own node and incomming node and place it in the ring
 
@@ -79,6 +81,7 @@ public class ListenerService {
                 }
             }
 
+            // If the node's position has changed, send a confirmation message
             if (send) {
                 // Compose message and send out
                 UNAMNObject reply = new UNAMNObject(eMessageTypes.UnicastNodeToNode, node.getId(),

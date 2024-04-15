@@ -15,17 +15,27 @@ import java.util.TreeMap;
 
 @RestController
 public class NameServerAPI {
-    JsonConverter jsonConverter = new JsonConverter("Database.json");
-    NodeDB nodeDB = NodeDBService.getNodeDB();
+    JsonConverter jsonConverter = new JsonConverter("Database.json"); // Utility for converting objects to JSON format
+    NodeDB nodeDB = NodeDBService.getNodeDB(); // Service for database operations
 
+    /**
+     * Retrieves the IP address of a node based on the file name.
+     * @param name The name of the file to look up.
+     * @return A ResponseEntity containing the IP address or a not found status.
+     */
     @GetMapping("/files/{file_name}")
     public ResponseEntity<String> getFileAddressByName(@PathVariable("file_name") String name) {
-        String ip = nodeDB.getIpFromName(name);
+        String ip = nodeDB.getIpFromName(name); // Retrieve IP from database
 
-        if (ip != null) return ResponseEntity.status(HttpStatus.OK).body(ip);
-        else            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        if (ip != null) return ResponseEntity.status(HttpStatus.OK).body(ip); // Return the found IP address
+        else            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null); // Return not found if no IP is associated with the name
     }
 
+    /**
+     * Adds a new node to the database.
+     * @param newNode The new node to add.
+     * @return A ResponseEntity with the operation result.
+     */
     @PostMapping("/nodes")
     public ResponseEntity<String> postFile(@RequestBody ClientNode newNode) {
         ResponseObject<ClientNode> badResponse = new ResponseObject<>(newNode);
@@ -54,6 +64,11 @@ public class NameServerAPI {
         return ResponseEntity.status(HttpStatus.OK).body(jsonConverter.toJson(params));
     }
 
+    /**
+     * Deletes a node by its ID.
+     * @param id The ID of the node to delete.
+     * @return A ResponseEntity with the operation result.
+     */
     @DeleteMapping("/nodes/{id}")
     public ResponseEntity<String> deleteFileById(@PathVariable("id") int id) {
         ResponseObject<Integer> response = new ResponseObject<>(id);

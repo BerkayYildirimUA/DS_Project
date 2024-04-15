@@ -5,7 +5,9 @@ import org.springframework.stereotype.Repository;
 
 import java.util.*;
 
-
+/**
+ * Repository class for storing and managing nodes in the distributed system.
+ */
 @Repository
 public class NodeDB {
 
@@ -13,7 +15,7 @@ public class NodeDB {
         nodeID_to_nodeIP = new TreeMap<>();
     }
 
-    private final TreeMap<Integer, String> nodeID_to_nodeIP;
+    private final TreeMap<Integer, String> nodeID_to_nodeIP; // Maps node IDs to IP addresses
 
     /* --------------------------------- ADD --------------------------------- */
     /**
@@ -48,14 +50,32 @@ public class NodeDB {
     }
 
     /* --------------------------------- DELETE --------------------------------- */
+    /**
+     * Deletes a node from the database by its IP address.
+     * @param ip The IP address of the node to remove.
+     */
     public void deleteNode(String ip){
         nodeID_to_nodeIP.entrySet().removeIf(entry -> entry.getValue().equals(ip));
     }
 
+    /**
+     * Deletes a node from the database by its ID.
+     * @param nodeID The ID of the node to remove.
+     */
     public void deleteNode(int nodeID){ nodeID_to_nodeIP.entrySet().removeIf(entry -> entry.getKey().equals(nodeID)); }
 
     /* --------------------------------- CHECK --------------------------------- */
+    /**
+     * Checks if a node exists by its ID.
+     * @param nodeID The ID to check.
+     * @return true if the node exists, false otherwise.
+     */
     public boolean exists(int nodeID){ return nodeID_to_nodeIP.containsKey(nodeID); }
+    /**
+     * Checks if a node exists by its IP address.
+     * @param ip The IP address to check.
+     * @return true if the node exists, false otherwise.
+     */
     public boolean exists(String ip){return nodeID_to_nodeIP.containsValue(ip);}
 
 
