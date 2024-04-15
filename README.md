@@ -9,7 +9,7 @@ This projects will create a ring topology with clients. A Naming server that wil
   - [x] Save to JSON to a file
 
 - Tom:
-  - [] API
+  - [x] API
 
 - Berkay
   - Name server:
@@ -59,9 +59,11 @@ On failure of a node, the network must be self healing.
   6. [x] Node that casts the multicast, recieves a message from the naming server containing the amount of nodes.
     1. [x] Wait an x amount of time before closing the readPort (and some retries)
     2. [x] Check the amount of available nodes and set the prev and next node accordingly
-## Shutdown
+
+
+## Shutdown (Berkay)
   ### Naming Server
-  - [] needs a method (or API call) that removes the node that shuts itself down.
+  - [] needs a method (or API call) that removes a node that then shuts itself down.
     - This removes the Node ID from the NameServer database
   ### Node
   - [] needs to be able to send out the deletion of its own ID in the Naming Server at shutdown.
@@ -71,9 +73,9 @@ On failure of a node, the network must be self healing.
     - The previous or next node object, can be send through the shutdown state message so the neighbour node doesn't need to recalculate stuff.
 
 
-## Failure
+## Failure (Tom)
 ### Naming Server
-  - Needs to be able to receive a request for the closest ID's of nodes based on the received node id.
+  - [] Needs to be able to receive a request for the closest ID's of nodes based on the received node id.
     - This means, send out 2 node objects to the requester
 
 
