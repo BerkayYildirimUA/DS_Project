@@ -20,10 +20,12 @@ public class FileDB {
     }
 
     /**
-     * Adds or updates a file in the database.
-     * If the file already exists, its node IP will be updated.
-     * @param fileName The name of the file.
-     * @param nodeIP The IP address of the node storing the file.
+     * Adds or updates a file in the database. If the file already exists, its node IP will be updated.
+     * This method throws IllegalArgumentException if the provided fileName or nodeIP is null or empty.
+     *
+     * @param fileName The name of the file. Must be non-null and not empty.
+     * @param nodeIP The IP address of the node storing the file. Must be non-null and not empty.
+     * @throws IllegalArgumentException If fileName or nodeIP is null or empty.
      */
     public void addOrUpdateFile(String fileName, String nodeIP) {
         if (fileName == null || fileName.trim().isEmpty()) {

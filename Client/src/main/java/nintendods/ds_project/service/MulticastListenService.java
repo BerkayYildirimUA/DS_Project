@@ -6,6 +6,7 @@ import nintendods.ds_project.model.message.UNAMNObject;
 import nintendods.ds_project.model.message.eMessageTypes;
 import nintendods.ds_project.utility.JsonConverter;
 import org.springframework.stereotype.Component;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -27,7 +28,7 @@ public class MulticastListenService {
      * @param multicastBufferCapacity The maximum messages we can store in the queue
      * @throws RuntimeException if there is a problem setting up the multicast socket
      */
-    public MulticastListenService(String multicastAddress, int multicastPort, int multicastBufferCapacity) throws RuntimeException {
+    public MulticastListenService(@Value("${multicast.address}") String multicastAddress, @Value("${multicast.port}") int multicastPort, @Value("${multicast.buffer-capacity}") int multicastBufferCapacity) throws RuntimeException {
         BlockingQueue<String> packetQueue = new LinkedBlockingQueue<>(multicastBufferCapacity);
         multicastQueue = new LinkedBlockingQueue<>(multicastBufferCapacity);
         System.out.println("MulticastService - Setup multicast listener");

@@ -1,3 +1,7 @@
+package nintendods.ds_project.service;
+
+import nintendods.ds_project.database.FileDB;
+
 /**
  * Singleton service for accessing the file database.
  */
