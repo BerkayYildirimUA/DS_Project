@@ -13,7 +13,7 @@ public class UNAMObject extends AMessage {
      * @param type The type of unicast message defined in {@link eMessageTypes}
      * @param amountOfNodes The amount of nodes present in the network (exclusive)
      */
-    public UNAMObject(long messageId, eMessageTypes type, int amountOfNodes) {
+    public UNAMObject(long messageId, eMessageTypes type, int amountOfNodes, String address) {
         super(messageId, type);
         setAmountOfNodes(amountOfNodes);
         setNSAddress(address);
