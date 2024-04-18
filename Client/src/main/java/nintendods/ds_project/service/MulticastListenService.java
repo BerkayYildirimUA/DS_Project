@@ -1,5 +1,6 @@
 package nintendods.ds_project.service;
 
+import jakarta.annotation.PostConstruct;
 import nintendods.ds_project.model.ABaseNode;
 import nintendods.ds_project.model.message.MNObject;
 import nintendods.ds_project.model.message.UNAMNObject;
@@ -21,6 +22,10 @@ public class MulticastListenService {
     private static BlockingQueue<MNObject> multicastQueue; // Queue to store processed multicast messages
     private final JsonConverter jsonConverter = new JsonConverter(); // JSON converter for parsing JSON to objects
 
+    String multicastAddress;
+    int multicastPort;
+    int multicastBufferCapacity;
+
     /**
      * A multicast service that wil listen to multicast messages and parse these to MNObject. 
      * @param multicastAddress The address where we listen onto
@@ -28,22 +33,30 @@ public class MulticastListenService {
      * @param multicastBufferCapacity The maximum messages we can store in the queue
      * @throws RuntimeException if there is a problem setting up the multicast socket
      */
-    public MulticastListenService(@Value("${multicast.address}") String multicastAddress, @Value("${multicast.port}") int multicastPort, @Value("${multicast.buffer-capacity}") int multicastBufferCapacity) throws RuntimeException {
-        BlockingQueue<String> packetQueue = new LinkedBlockingQueue<>(multicastBufferCapacity);
-        multicastQueue = new LinkedBlockingQueue<>(multicastBufferCapacity);
-        System.out.println("MulticastService - Setup multicast listener");
+    public MulticastListenService(@Value("${udp.multicast.address}") String multicastAddress,
+                                  @Value("${udp.multicast.port}") int multicastPort,
+                                  @Value("${udp.multicast.buffer-capacity}") int multicastBufferCapacity){
+        this.multicastAddress = multicastAddress;
+        this.multicastPort = multicastPort;
+        this.multicastBufferCapacity = multicastBufferCapacity;
+    }
 
-        // Start the receiver thread
-        // Receiver thread to handle incoming multicast packets
-        Thread receiverThread = new Thread(() -> receivePackets(packetQueue, multicastAddress, multicastPort));
-        receiverThread.start();
+    public void initialize() {
+            BlockingQueue<String> packetQueue = new LinkedBlockingQueue<>(multicastBufferCapacity);
+            multicastQueue = new LinkedBlockingQueue<>(multicastBufferCapacity);
+            System.out.println("MulticastService - Setup multicast listener");
 
-        // Start the processor thread
-        // Processor thread to parse JSON messages into MNObject instances and add them to the queue
-        Thread processorThread = new Thread(() -> processPackets(packetQueue));
-        processorThread.start();
-        
-        System.out.println("MulticastService - Started multicast listener");
+            // Start the receiver thread
+            // Receiver thread to handle incoming multicast packets
+            Thread receiverThread = new Thread(() -> receivePackets(packetQueue, multicastAddress, multicastPort));
+            receiverThread.start();
+
+            // Start the processor thread
+            // Processor thread to parse JSON messages into MNObject instances and add them to the queue
+            Thread processorThread = new Thread(() -> processPackets(packetQueue));
+            processorThread.start();
+
+            System.out.println("MulticastService - Started multicast listener");
     }
 
     /**

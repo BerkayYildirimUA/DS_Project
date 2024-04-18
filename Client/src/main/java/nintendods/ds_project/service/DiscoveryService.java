@@ -4,11 +4,14 @@ import nintendods.ds_project.model.ABaseNode;
 import nintendods.ds_project.model.ClientNode;
 import nintendods.ds_project.model.message.*;
 import nintendods.ds_project.utility.JsonConverter;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Component;
 
 import java.net.*;
 import java.util.ArrayList;
 import java.util.List;
 
+@Component
 public class DiscoveryService {
     private List<String> receivedMessages; // List to hold received messages
     private String multicastAddress = "224.0.0.100"; // Multicast IP address for discovery
