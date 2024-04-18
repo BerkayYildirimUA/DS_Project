@@ -13,11 +13,14 @@ public class UNAMObject extends AMessage {
      * @param messageId The unique message ID
      * @param type The type of unicast message defined in {@link eMessageTypes}
      * @param amountOfNodes The amount of nodes present in the network (exclusive)
+     * @param nsAddress The address of the naming server API
+     * @param nsPort The port of the namingserver API
      */
-    public UNAMObject(long messageId, eMessageTypes type, int amountOfNodes, String address) {
+    public UNAMObject(long messageId, eMessageTypes type, int amountOfNodes, String nsAddress, int nsPort) {
         super(messageId, type);
         setAmountOfNodes(amountOfNodes);
-        setNSAddress(address);
+        setNSAddress(nsAddress);
+        setNSPort(nsPort);
     }
 
     public int getAmountOfNodes() {
