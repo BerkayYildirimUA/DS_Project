@@ -1,11 +1,13 @@
 package nintendods.ds_project.model.message;
 
+
 /**
  * UNAM or Unicast to Node After Multicast is a message object that will be by the Naming Server
  * to the sender node.
  */
 public class UNAMObject extends AMessage {
     private int amountOfNodes;
+    private String namingServerAddress;
 
     /**
      * @param messageId The unique message ID
@@ -23,6 +25,14 @@ public class UNAMObject extends AMessage {
 
     public void setAmountOfNodes(int amountOfNodes) {
         this.amountOfNodes = amountOfNodes;
+    }
+
+    public String getNSAddress() {
+        return namingServerAddress;
+    }
+
+    public void setNSAddress(String nsAddress) {
+        this.namingServerAddress = nsAddress;
     }
 
     @Override
