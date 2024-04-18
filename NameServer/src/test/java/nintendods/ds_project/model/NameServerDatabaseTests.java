@@ -191,9 +191,16 @@ public class NameServerDatabaseTests {
     public void saveDBTest() throws Exception {
         NodeDB nodeDB = new NodeDB();
         Random random = new Random();
-        String name1 = createStringWithKnownHash(random.nextInt(NameToHash.MAX_NODES - 1));
-        String name2 = createStringWithKnownHash(random.nextInt(NameToHash.MAX_NODES - 1));
-        String name3 = createStringWithKnownHash(random.nextInt(NameToHash.MAX_NODES - 1));
+
+        String name1;
+        String name2;
+        String name3;
+
+        do {
+            name1 = createStringWithKnownHash(random.nextInt(NameToHash.MAX_NODES - 1));
+            name2 = createStringWithKnownHash(random.nextInt(NameToHash.MAX_NODES - 1));
+            name3 = createStringWithKnownHash(random.nextInt(NameToHash.MAX_NODES - 1));
+        }while (!name1.equals(name2) && !name1.equals(name3) && !name2.equals(name3));
 
         ClientNode node1 = new ClientNode(InetAddress.getByName("10.10.10.10"), 100, name1);
         ClientNode node2 = new ClientNode(InetAddress.getByName("10.10.10.11"), 100, name2);
@@ -215,16 +222,8 @@ public class NameServerDatabaseTests {
         assertEquals(nodeDB2.getClosestIpFromName(name1), node1.getAddress().getHostAddress());
         assertEquals(nodeDB2.getClosestIpFromName(name2), node2.getAddress().getHostAddress());
         assertEquals(nodeDB2.getClosestIpFromName(name3), node3.getAddress().getHostAddress());
-
-
     }
 
-    @Test
-    public void debuging() throws Exception {
-        for (int i = 0; i < 100000; ++i){
-            saveDBTest();
-        }
-    }
 
     /**
      * creates random string whos hash after NameToHash.convert is the asked number.
