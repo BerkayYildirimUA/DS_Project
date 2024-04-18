@@ -107,11 +107,12 @@ public class DiscoveryService {
         int prevId = -1;
         int nextId = -1;
 
-        // Check the amount of nodes present in the network
-        int numberOfNodes = ((UNAMObject) filteredMessages.stream()
-                .filter(m -> m.getMessageType() == eMessageTypes.UnicastNamingServerToNode).toList().getFirst())
-                .getAmountOfNodes();
-        if (numberOfNodes > 1) {
+        // Accuire the namingserver unicast message
+        UNAMObject namingServerObject = ((UNAMObject) filteredMessages.stream()
+                .filter(m -> m.getMessageType() == eMessageTypes.UnicastNamingServerToNode).toList().getFirst());
+
+        //Check the amount of nodes present in the network
+        if (namingServerObject.getAmountOfNodes() > 1) {
             // More than 1 so use neighbour nodes its data to form the prev and next node.
 
             // fetch the other messages as UNAMNObjects if possible
@@ -138,6 +139,9 @@ public class DiscoveryService {
         // Assign value to node
         newNode.setNextNodeId(nextId);
         newNode.setPrevNodeId(prevId);
+
+        //Finally, add the node to the naming server
+
 
         System.out.println("\r\nDiscoveryService - New node composed");
         // System.out.println("\t"+newNode);

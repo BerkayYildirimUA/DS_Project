@@ -13,6 +13,8 @@ public class DsProjectApplication {
 
     private static ClientNode node;
 
+    private static 
+
     private static final int NODE_NAME_LENGTH = 20;
     private static final int NODE_GLOBAL_PORT = 21;
 
@@ -82,11 +84,24 @@ public class DsProjectApplication {
                 case Shutdown -> {
                     // TODO
                     // Gracefully, update the side nodes on its own and leave the ring topology.
+
+                    /**
+                    * When the node gets in the Shutdown state inside the discovery service, we'll access the 
+                    * NamingServer API to handle everything from here.
+                    * call: {NSAddress}:{NSPort}/nodes/{id}/shutdown
+                    */
                 }
                 case Error -> {
                     // TODO
                     // Hard, only transmit to naming server and the naming server needs to deal with
                     // it.
+
+                    /**
+                    * When the node gets in the Error state, we'll access the 
+                    * NamingServer API to handle everything from here.
+                    * call: {NSAddress}:{NSPort}/nodes/{id}/error
+                    */
+
                     isRunning = false;
                 }
                 case null, default -> {
