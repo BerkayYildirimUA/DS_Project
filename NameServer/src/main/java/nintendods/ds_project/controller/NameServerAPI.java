@@ -1,6 +1,6 @@
 package nintendods.ds_project.controller;
 
-import nintendods.ds_project.Exeptions.NameServerFullExeption;
+import nintendods.ds_project.Exeptions.IDTakenExeption;
 import nintendods.ds_project.model.ClientNode;
 import nintendods.ds_project.model.message.ResponseObject;
 import nintendods.ds_project.database.NodeDB;
@@ -43,7 +43,7 @@ public class NameServerAPI {
         try {
             nodeDB.addNode(newNode.getName(), newNode.getAddress().getHostAddress());
         }
-        catch (NameServerFullExeption ex){
+        catch (IDTakenExeption ex){
             System.out.println(ex);
             badResponse.setMessage("The database is full. Max amount of nodes are reached");
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(jsonConverter.toJson(badResponse));

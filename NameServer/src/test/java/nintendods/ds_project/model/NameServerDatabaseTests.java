@@ -1,6 +1,6 @@
 package nintendods.ds_project.model;
 
-import nintendods.ds_project.Exeptions.NameServerFullExeption;
+import nintendods.ds_project.Exeptions.IDTakenExeption;
 import nintendods.ds_project.database.NodeDB;
 import nintendods.ds_project.utility.NameToHash;
 import org.junit.Test;
@@ -80,58 +80,17 @@ public class NameServerDatabaseTests {
         assertEquals(node2.getAddress().getHostAddress(), nodeDB.getClosestIpFromName(createStringWithKnownHash(32000)));
     }
 
-    @Test
+    @Test(expected = IDTakenExeption.class)
     public void getNodeIDTest_SameHash() throws Exception {
         NodeDB nodeDB = new NodeDB();
 
         ClientNode node1 = new ClientNode(InetAddress.getByName("10.10.10.10"), 100, createStringWithKnownHash(10000));
         ClientNode node2 = new ClientNode(InetAddress.getByName("10.10.10.11"), 100, createStringWithKnownHash(10000));
-        ClientNode node3 = new ClientNode(InetAddress.getByName("10.10.10.12"), 100, createStringWithKnownHash(10000));
 
         nodeDB.addNode(node1.getName(), node1.getAddress().getHostAddress());
         nodeDB.addNode(node2.getName(), node2.getAddress().getHostAddress());
-        nodeDB.addNode(node3.getName(), node3.getAddress().getHostAddress());
 
-        assertEquals(10000, nodeDB.getClosestIdFromName(createStringWithKnownHash(32000)));
-        assertEquals(node1.getAddress().getHostAddress(), nodeDB.getClosestIpFromName(createStringWithKnownHash(32000)));
-        assertEquals(node2.getAddress().getHostAddress(), nodeDB.getClosestIpFromName(createStringWithKnownHash(10001)));
-        assertEquals(node3.getAddress().getHostAddress(), nodeDB.getClosestIpFromName(createStringWithKnownHash(11000)));
-    }
-
-    @Test
-    public void getNodeIDTest_SameHash_IDbackTo0() throws Exception {
-        NodeDB nodeDB = new NodeDB();
-
-        ClientNode node1 = new ClientNode(InetAddress.getByName("10.10.10.10"), 100, createStringWithKnownHash(32768));
-        ClientNode node2 = new ClientNode(InetAddress.getByName("10.10.10.11"), 100, createStringWithKnownHash(32768));
-        ClientNode node3 = new ClientNode(InetAddress.getByName("10.10.10.12"), 100, createStringWithKnownHash(32768));
-
-        nodeDB.addNode(node1.getName(), node1.getAddress().getHostAddress());
-        nodeDB.addNode(node2.getName(), node2.getAddress().getHostAddress());
-        nodeDB.addNode(node3.getName(), node3.getAddress().getHostAddress());
-
-        assertEquals(nodeDB.getClosestIdFromName(createStringWithKnownHash(32000)), 32768);
-        assertEquals(node1.getAddress().getHostAddress(), nodeDB.getClosestIpFromName(createStringWithKnownHash(32000)));
-        assertEquals(node2.getAddress().getHostAddress(), nodeDB.getClosestIpFromName(createStringWithKnownHash(0)));
-        assertEquals(node3.getAddress().getHostAddress(), nodeDB.getClosestIpFromName(createStringWithKnownHash(1)));
-    }
-
-    @Test(expected = NameServerFullExeption.class)
-    public void addNodeToFullServerTest() throws Exception {
-        NodeDB nodeDB = new NodeDB();
-        InetAddress address = InetAddress.getByName("10.10.10.10");
-
-        // had to fill in the map directly because any other means would be really, really slow
-        Field mapField = NodeDB.class.getDeclaredField("nodeID_to_nodeIP");
-        mapField.setAccessible(true);
-        TreeMap<Integer, String> nodeID_to_nodeIP = (TreeMap<Integer, String>) mapField.get(nodeDB);
-        for (int i = 0; i <= 32768; i++) {
-            nodeID_to_nodeIP.put(i, address.getHostAddress());
-        }
-        mapField.setAccessible(false);
-
-        ClientNode node = new ClientNode(address, 100, "ERROR");
-        nodeDB.addNode(node.getName(), node.getAddress().getHostAddress());
+       fail();
     }
 
     @Test
@@ -200,7 +159,7 @@ public class NameServerDatabaseTests {
             name1 = createStringWithKnownHash(random.nextInt(NameToHash.MAX_NODES - 1));
             name2 = createStringWithKnownHash(random.nextInt(NameToHash.MAX_NODES - 1));
             name3 = createStringWithKnownHash(random.nextInt(NameToHash.MAX_NODES - 1));
-        }while (!name1.equals(name2) && !name1.equals(name3) && !name2.equals(name3));
+        }while (name1.equals(name2) || name1.equals(name3) || name2.equals(name3));
 
         ClientNode node1 = new ClientNode(InetAddress.getByName("10.10.10.10"), 100, name1);
         ClientNode node2 = new ClientNode(InetAddress.getByName("10.10.10.11"), 100, name2);
