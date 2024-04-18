@@ -20,7 +20,7 @@ public class NameServerAPI {
 
     @GetMapping("/files/{file_name}")
     public ResponseEntity<String> getFileAddressByName(@PathVariable("file_name") String name) {
-        String ip = nodeDB.getIpFromName(name);
+        String ip = nodeDB.getClosestIpFromName(name);
 
         if (ip != null) return ResponseEntity.status(HttpStatus.OK).body(ip);
         else            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
@@ -50,7 +50,7 @@ public class NameServerAPI {
         }
 
         Map<Integer, String> params = new TreeMap<>();
-        params.put(nodeDB.getClosestIdFromName(newNode.getName()), nodeDB.getIpFromName(newNode.getName()));
+        params.put(nodeDB.getClosestIdFromName(newNode.getName()), nodeDB.getClosestIpFromName(newNode.getName()));
         return ResponseEntity.status(HttpStatus.OK).body(jsonConverter.toJson(params));
     }
 
