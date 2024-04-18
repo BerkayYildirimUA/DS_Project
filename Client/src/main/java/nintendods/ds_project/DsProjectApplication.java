@@ -1,8 +1,12 @@
 package nintendods.ds_project;
 
 import nintendods.ds_project.model.ClientNode;
+import nintendods.ds_project.model.message.UNAMObject;
 import nintendods.ds_project.service.DiscoveryService;
 import nintendods.ds_project.service.ListenerService;
+import nintendods.ds_project.service.NSAPIService;
+import nintendods.ds_project.utility.JsonConverter;
+
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import java.io.IOException;
@@ -13,7 +17,7 @@ public class DsProjectApplication {
 
     private static ClientNode node;
 
-    private static 
+    private static NSAPIService nsapiService;
 
     private static final int NODE_NAME_LENGTH = 20;
     private static final int NODE_GLOBAL_PORT = 21;
@@ -35,6 +39,7 @@ public class DsProjectApplication {
         eNodeState nodeState = eNodeState.Discovery;
         boolean isRunning = true;
         ListenerService listenerService = null;
+        JsonConverter jsonConverter = new JsonConverter();
 
         int discoveryRetries = 0;
 
@@ -60,6 +65,17 @@ public class DsProjectApplication {
                         nodeState = eNodeState.Discovery;
                         break;
                     }
+                    
+                    //Discovery has succeeded so continue
+                    //get NSObject from discovery service
+                    UNAMObject nsObject = ds.getNSObject();
+
+                    //Define the api object
+                    nsapiService = new NSAPIService(nsObject.getNSAddress(), nsObject.getNSPort());
+
+                    //Add node to Naming Server
+                    nsapiService.executePost("/nodes", jsonConverter.toJson(nsObject));
+
                     System.out.println(node.toString());
                     System.out.println("Successfully reply in " + discoveryRetries + " discoveries.");
                     nodeState = eNodeState.Listening;

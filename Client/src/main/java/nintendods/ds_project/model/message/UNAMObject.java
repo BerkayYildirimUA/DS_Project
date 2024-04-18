@@ -6,6 +6,7 @@ package nintendods.ds_project.model.message;
  */
 public class UNAMObject extends AMessage {
     private int amountOfNodes;
+    private int namingServerPort;
     private String namingServerAddress;
 
     /**
@@ -33,6 +34,14 @@ public class UNAMObject extends AMessage {
 
     public void setNSAddress(String nsAddress) {
         this.namingServerAddress = nsAddress;
+    }
+
+    public int getNSPort() {
+        return namingServerPort;
+    }
+
+    public void setNSPort(int nsPort) {
+        this.namingServerPort = nsPort;
     }
 
     @Override

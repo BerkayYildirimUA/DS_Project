@@ -16,6 +16,7 @@ public class DiscoveryService {
     private int waitTimeDiscovery = 20000;
     private UDPServer listener;
     private ServerSocket socket;
+    private UNAMObject nsObject;
 
     /**
      * Create a Discovery service object.
@@ -108,11 +109,11 @@ public class DiscoveryService {
         int nextId = -1;
 
         // Accuire the namingserver unicast message
-        UNAMObject namingServerObject = ((UNAMObject) filteredMessages.stream()
+        nsObject = ((UNAMObject) filteredMessages.stream()
                 .filter(m -> m.getMessageType() == eMessageTypes.UnicastNamingServerToNode).toList().getFirst());
 
         //Check the amount of nodes present in the network
-        if (namingServerObject.getAmountOfNodes() > 1) {
+        if (nsObject.getAmountOfNodes() > 1) {
             // More than 1 so use neighbour nodes its data to form the prev and next node.
 
             // fetch the other messages as UNAMNObjects if possible
@@ -163,5 +164,9 @@ public class DiscoveryService {
         }
 
         listener.close();
+    }
+
+    public UNAMObject getNSObject(){
+        return nsObject;
     }
 }
