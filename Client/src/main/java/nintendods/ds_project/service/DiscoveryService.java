@@ -42,8 +42,7 @@ public class DiscoveryService {
         try {
             this.socket = new ServerSocket(0);
             this.listener = new UDPServer(InetAddress.getLocalHost(), socket.getLocalPort(), 256);
-        } catch (Exception ex) {
-        }
+        } catch (Exception ex) { }
         this.receivedMessages = new ArrayList<>();
         this.multicastAddress = multicastAddress;
         this.multicastPort = multicastPort;
@@ -74,8 +73,7 @@ public class DiscoveryService {
                 socket.getLocalPort(), node.getName()));
 
         // Wait for UDP packet to be filled in.
-        while (udpListenerThread.isAlive())
-            ;
+        while (udpListenerThread.isAlive());
 
         JsonConverter jsonConverter = new JsonConverter();
 
@@ -117,26 +115,23 @@ public class DiscoveryService {
             // More than 1 so use neighbour nodes its data to form the prev and next node.
 
             // fetch the other messages as UNAMNObjects if possible
-            if (filteredMessages.stream().filter(m -> m.getMessageType() == eMessageTypes.UnicastNodeToNode).toList()
-                    .size() == 0)
+            if (filteredMessages.stream().filter(m -> m.getMessageType() == eMessageTypes.UnicastNodeToNode).toList().isEmpty())
                 throw new Exception("Not enough nodes have send out their multicast response!");
             List<UNAMNObject> nodeMessages = new ArrayList<>();
             for (AMessage m : filteredMessages.stream()
                     .filter(m -> m.getMessageType() == eMessageTypes.UnicastNodeToNode).toList())
                 nodeMessages.add((UNAMNObject) m);
             // fetch other data from other nodes.
-            if (nodeMessages.size() > 0) // check if 2 nodes send their info. Already checked above.
-            {
+            if (!nodeMessages.isEmpty()) { // check if 2 nodes send their info. Already checked above.
                 try {
                     prevId = nodeMessages.stream().filter(m -> m.getNextNodeId() == ((ClientNode) node).getId())
                             .toList().getFirst().getNodeHashId();
-                } catch (Exception ex) {
-                }
+                } catch (Exception ex) { }
+
                 try {
                     nextId = nodeMessages.stream().filter(m -> m.getPrevNodeId() == ((ClientNode) node).getId())
                             .toList().getFirst().getNodeHashId();
-                } catch (Exception ex) {
-                }
+                } catch (Exception ex) { }
             }
         }
 
@@ -157,8 +152,7 @@ public class DiscoveryService {
             try {
                 receivedMessages.add(listener.listen(2000));
                 // receivedMessages.forEach(System.out::println);
-            } catch (SocketTimeoutException ignored) {
-            }
+            } catch (SocketTimeoutException ignored) { }
             // if the messages are received within a specific time (totalTime seconds)
             if (startTimestamp + timeOutTime < System.currentTimeMillis())
                 timeout = true;
