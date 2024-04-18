@@ -1,10 +1,14 @@
 package nintendods.ds_project;
 
 import nintendods.ds_project.model.ClientNode;
+import nintendods.ds_project.model.message.UNAMObject;
 import nintendods.ds_project.service.DiscoveryService;
 import nintendods.ds_project.service.ListenerService;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
+import nintendods.ds_project.service.NSAPIService;
+import nintendods.ds_project.utility.JsonConverter;
+
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import java.io.IOException;
@@ -32,11 +36,17 @@ public class DsProjectApplication {
     private static final int MULTICAST_PORT = 12345; // Port for multicast communication
     private static boolean isRunning = true;
 
+    private static NSAPIService nsapiService;
+
+    private static final int NODE_NAME_LENGTH = 20;
+    private static final int NODE_GLOBAL_PORT = 21;
     public static void main(String[] args) throws UnknownHostException {
         ApplicationContext context = SpringApplication.run(DsProjectApplication.class, args);
         runNodeLifecycle(context);
     }
 
+    private static final int DISCOVERY_RETRIES = 6;
+    private static final int DISCOVERY_TIMEOUT = 8000; //In microseconds
     private static final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"; // Characters used in the random string generation
 
     /**
@@ -65,9 +75,11 @@ public class DsProjectApplication {
         node = new ClientNode(InetAddress.getLocalHost(), NODE_GLOBAL_PORT, generateRandomString(NODE_NAME_LENGTH));
         System.out.println("New node with name: " + node.getName() + " And hash: " + node.getId());
 
-        nodeState = eNodeState.Discovery; // Initial state of the node
-        boolean isRunning = true; // Controls the main loop
-        ListenerService listenerService = null; // Service for handling incoming messages
+        nodeState = eNodeState.Discovery;
+        boolean isRunning = true;
+        ListenerService listenerService = null;
+        JsonConverter jsonConverter = new JsonConverter();
+        UNAMObject nsObject;
 
         int discoveryRetries = 0; // Counter for discovery attempts
 
@@ -91,8 +103,22 @@ public class DsProjectApplication {
                     } catch (Exception e) {
                         System.out.println("Retried discovery for the" + discoveryRetries + "(th) time");
                         nodeState = eNodeState.Discovery;
+                        //Create new node
+                        node = new ClientNode(InetAddress.getLocalHost(), NODE_GLOBAL_PORT, generateRandomString(NODE_NAME_LENGTH));
+                        System.out.println(node);
                         break;
                     }
+
+                    // //Discovery has succeeded so continue
+                    // //get NSObject from discovery service
+                    nsObject = ds.getNSObject();
+
+                    // //Define the api object
+                    // nsapiService = new NSAPIService(nsObject.getNSAddress(), nsObject.getNSPort());
+
+                    // //Add node to Naming Server
+                    // nsapiService.executePost("/nodes", jsonConverter.toJson(nsObject));
+
                     System.out.println(node.toString());
                     System.out.println("Successfully reply in " + discoveryRetries + " discoveries.");
                     nodeState = eNodeState.Listening; // Move to Listening state after successful discovery
@@ -119,12 +145,25 @@ public class DsProjectApplication {
                 case Shutdown -> {
                     // TODO: Handle shutdown process, ensuring all connections are closed properly
                     // Gracefully, update the side nodes on its own and leave the ring topology.
+
+                    /**
+                    * When the node gets in the Shutdown state inside the discovery service, we'll access the
+                    * NamingServer API to handle everything from here.
+                    * call: {NSAddress}:{NSPort}/nodes/{id}/shutdown
+                    */
                 }
                 case Error -> {
                     // TODO: Handle error state, possibly attempt to recover or shutdown gracefully
                     // Hard, only transmit to naming server and the naming server needs to deal with
                     // it.
-                    isRunning = false; // Stop the main loop
+
+                    /**
+                    * When the node gets in the Error state, we'll access the
+                    * NamingServer API to handle everything from here.
+                    * call: {NSAddress}:{NSPort}/nodes/{id}/error
+                    */
+
+                    isRunning = false;
                 }
                 case null, default -> {
                     // Same as error?
@@ -135,20 +174,15 @@ public class DsProjectApplication {
 
     }
 
-    /*@Bean
-    public DiscoveryService discoveryService() {
-        return new DiscoveryService("224.0.0.100", 12345, 2000);
-    }*/
+    private static final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
-    /*@Bean
-    public ListenerService listenerService() {
-        return new ListenerService("224.0.0.100", 12345, 1024);
-    }*/
-
-    /*
-    @Bean
-    public TransferService transferService() {
-        return new TransferService(); // Assuming this class exists
+    public static String generateRandomString(int length) {
+        StringBuilder sb = new StringBuilder(length);
+        for (int i = 0; i < length; i++) {
+            int randomIndex = (int) (Math.random() * CHARACTERS.length());
+            sb.append(CHARACTERS.charAt(randomIndex));
+        }
+        return sb.toString();
     }
-     */
+
 }

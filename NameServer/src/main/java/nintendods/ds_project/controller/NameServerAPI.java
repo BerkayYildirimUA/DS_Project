@@ -1,6 +1,6 @@
 package nintendods.ds_project.controller;
 
-import nintendods.ds_project.Exeptions.NameServerFullExeption;
+import nintendods.ds_project.Exeptions.IDTakenExeption;
 import nintendods.ds_project.model.ClientNode;
 import nintendods.ds_project.model.message.ResponseObject;
 import nintendods.ds_project.database.NodeDB;
@@ -25,7 +25,7 @@ public class NameServerAPI {
      */
     @GetMapping("/files/{file_name}")
     public ResponseEntity<String> getFileAddressByName(@PathVariable("file_name") String name) {
-        String ip = nodeDB.getIpFromName(name); // Retrieve IP from database
+        String ip = nodeDB.getClosestIpFromName(name);
 
         if (ip != null) return ResponseEntity.status(HttpStatus.OK).body(ip); // Return the found IP address
         else            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null); // Return not found if no IP is associated with the name
@@ -53,14 +53,14 @@ public class NameServerAPI {
         try {
             nodeDB.addNode(newNode.getName(), newNode.getAddress().getHostAddress());
         }
-        catch (NameServerFullExeption ex){
+        catch (IDTakenExeption ex){
             System.out.println(ex);
             badResponse.setMessage("The database is full. Max amount of nodes are reached");
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(jsonConverter.toJson(badResponse));
         }
 
         Map<Integer, String> params = new TreeMap<>();
-        params.put(nodeDB.getClosestIdFromName(newNode.getName()), nodeDB.getIpFromName(newNode.getName()));
+        params.put(nodeDB.getClosestIdFromName(newNode.getName()), nodeDB.getClosestIpFromName(newNode.getName()));
         return ResponseEntity.status(HttpStatus.OK).body(jsonConverter.toJson(params));
     }
 

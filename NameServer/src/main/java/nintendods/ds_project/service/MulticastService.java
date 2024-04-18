@@ -7,11 +7,11 @@ import nintendods.ds_project.model.message.MNObject;
 import nintendods.ds_project.model.message.UNAMObject;
 import nintendods.ds_project.model.message.eMessageTypes;
 import nintendods.ds_project.utility.JsonConverter;
+import nintendods.ds_project.utility.NameToHash;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-
 import java.io.IOException;
 import java.net.*;
 import java.util.concurrent.BlockingQueue;
@@ -24,7 +24,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 public class MulticastService {
 
     final Logger logger = LoggerFactory.getLogger(MulticastService.class);
-
     private static final String MULTICAST_ADDRESS = "224.0.0.100";
     private static final int PORT = 12345;
     private static final int BUFFER_SIZE = 256;
@@ -97,17 +96,17 @@ public class MulticastService {
                 // amount of nodes present in ring
                 int amountNodes = nodeDB.getSize();
 
-                // Check database if node exist
-                if (!nodeDB.exists(node.getAddress().getHostAddress())) {
+                // Check database if node exist based on IP (so it is already added)
+                if (!nodeDB.exists(NameToHash.convert(node.getName()))) {
                     logger.info("Adding node " + node.getName() + " to DB");
 
-                    // Add to database
+                    //Add to database
                     nodeDB.addNode(node.getName(), node.getAddress().toString());
                 } else {
                     logger.info("Node " + node.getName() + " already exists in DB");
                     amountNodes--;
                 }
-
+                
                 sendReply(node, amountNodes);
 
             } catch (Exception e) {
@@ -122,7 +121,8 @@ public class MulticastService {
                 + node.getPort());
         // Send out the multicast message over UDP with the timestamp as ID.
         long messageId = System.currentTimeMillis();
-        UNAMObject unicastMessage = new UNAMObject(messageId, eMessageTypes.UnicastNamingServerToNode, amount);
+        //TODO: add correct port from Naming Server
+        UNAMObject unicastMessage = new UNAMObject(messageId, eMessageTypes.UnicastNamingServerToNode, amount, InetAddress.getLocalHost().getHostAddress(), 8089);
 
         // Setup the UDP sender and send out.
         UDPClient client = new UDPClient(node.getAddress(), node.getPort(), BUFFER_SIZE);

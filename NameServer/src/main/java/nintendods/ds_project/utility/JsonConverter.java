@@ -83,7 +83,7 @@ public class JsonConverter {
 
     /***
      * Extracts an object from a file that's being assigned at the constructor.
-     * @param ob the object skeleton as Object.class
+     * @param ob the object skeleton as TypeToken or Object.Class
      * @return the Object or else null if the json conversion failed
      */
     public Object fromFile(Type ob){
