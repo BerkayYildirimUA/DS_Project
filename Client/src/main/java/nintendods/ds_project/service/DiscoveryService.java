@@ -141,9 +141,6 @@ public class DiscoveryService {
         newNode.setNextNodeId(nextId);
         newNode.setPrevNodeId(prevId);
 
-        //Finally, add the node to the naming server
-
-
         System.out.println("\r\nDiscoveryService - New node composed");
         // System.out.println("\t"+newNode);
         return newNode;

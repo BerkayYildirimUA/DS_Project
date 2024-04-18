@@ -40,6 +40,7 @@ public class DsProjectApplication {
         boolean isRunning = true;
         ListenerService listenerService = null;
         JsonConverter jsonConverter = new JsonConverter();
+        UNAMObject nsObject;
 
         int discoveryRetries = 0;
 
@@ -66,15 +67,15 @@ public class DsProjectApplication {
                         break;
                     }
                     
-                    //Discovery has succeeded so continue
-                    //get NSObject from discovery service
-                    UNAMObject nsObject = ds.getNSObject();
+                    // //Discovery has succeeded so continue
+                    // //get NSObject from discovery service
+                    nsObject = ds.getNSObject();
 
-                    //Define the api object
-                    nsapiService = new NSAPIService(nsObject.getNSAddress(), nsObject.getNSPort());
+                    // //Define the api object
+                    // nsapiService = new NSAPIService(nsObject.getNSAddress(), nsObject.getNSPort());
 
-                    //Add node to Naming Server
-                    nsapiService.executePost("/nodes", jsonConverter.toJson(nsObject));
+                    // //Add node to Naming Server
+                    // nsapiService.executePost("/nodes", jsonConverter.toJson(nsObject));
 
                     System.out.println(node.toString());
                     System.out.println("Successfully reply in " + discoveryRetries + " discoveries.");
