@@ -1,8 +1,12 @@
 package nintendods.ds_project;
 
 import nintendods.ds_project.model.ClientNode;
+import nintendods.ds_project.model.message.UNAMObject;
 import nintendods.ds_project.service.DiscoveryService;
 import nintendods.ds_project.service.ListenerService;
+import nintendods.ds_project.service.NSAPIService;
+import nintendods.ds_project.utility.JsonConverter;
+
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import java.io.IOException;
@@ -13,11 +17,13 @@ public class DsProjectApplication {
 
     private static ClientNode node;
 
+    private static NSAPIService nsapiService;
+
     private static final int NODE_NAME_LENGTH = 20;
     private static final int NODE_GLOBAL_PORT = 21;
 
     private static final int DISCOVERY_RETRIES = 6;
-    private static final int DISCOVERY_TIMEOUT = 2000; //In microseconds
+    private static final int DISCOVERY_TIMEOUT = 8000; //In microseconds
 
     private static final int LISTENER_BUFFER_SIZE = 20;
 
@@ -27,12 +33,14 @@ public class DsProjectApplication {
     public static void main(String[] args) throws IOException {
         // Create Node
 
-        node = new ClientNode(InetAddress.getLocalHost(), NODE_GLOBAL_PORT, generateRandomString(NODE_NAME_LENGTH));
-        System.out.println("New node with name: " + node.getName() + " And hash: " + node.getId());
+        node = new ClientNode(InetAddress.getLocalHost(), NODE_GLOBAL_PORT, "Robbe");
+        System.out.println(node);
 
         eNodeState nodeState = eNodeState.Discovery;
         boolean isRunning = true;
         ListenerService listenerService = null;
+        JsonConverter jsonConverter = new JsonConverter();
+        UNAMObject nsObject;
 
         int discoveryRetries = 0;
 
@@ -56,16 +64,29 @@ public class DsProjectApplication {
                     } catch (Exception e) {
                         System.out.println("Retried discovery for the" + discoveryRetries + "(th) time");
                         nodeState = eNodeState.Discovery;
+                        //Create new node
+                        node = new ClientNode(InetAddress.getLocalHost(), NODE_GLOBAL_PORT, generateRandomString(NODE_NAME_LENGTH));
+                        System.out.println(node);
                         break;
                     }
+                    
+                    // //Discovery has succeeded so continue
+                    // //get NSObject from discovery service
+                    nsObject = ds.getNSObject();
+
+                    // //Define the api object
+                    // nsapiService = new NSAPIService(nsObject.getNSAddress(), nsObject.getNSPort());
+
+                    // //Add node to Naming Server
+                    // nsapiService.executePost("/nodes", jsonConverter.toJson(nsObject));
+
                     System.out.println(node.toString());
                     System.out.println("Successfully reply in " + discoveryRetries + " discoveries.");
                     nodeState = eNodeState.Listening;
                 }
                 case Listening -> {
-                    if(listenerService == null)
+                    if (listenerService == null)
                         listenerService = new ListenerService(MULTICAST_ADDRESS, MULTICAST_PORT, LISTENER_BUFFER_SIZE);
-
                     try {
                         listenerService.listenAndUpdate(node);
                     } catch (Exception e) {
@@ -82,11 +103,24 @@ public class DsProjectApplication {
                 case Shutdown -> {
                     // TODO
                     // Gracefully, update the side nodes on its own and leave the ring topology.
+
+                    /**
+                    * When the node gets in the Shutdown state inside the discovery service, we'll access the 
+                    * NamingServer API to handle everything from here.
+                    * call: {NSAddress}:{NSPort}/nodes/{id}/shutdown
+                    */
                 }
                 case Error -> {
                     // TODO
                     // Hard, only transmit to naming server and the naming server needs to deal with
                     // it.
+
+                    /**
+                    * When the node gets in the Error state, we'll access the 
+                    * NamingServer API to handle everything from here.
+                    * call: {NSAddress}:{NSPort}/nodes/{id}/error
+                    */
+
                     isRunning = false;
                 }
                 case null, default -> {
