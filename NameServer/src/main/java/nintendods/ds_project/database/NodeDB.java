@@ -1,6 +1,6 @@
 package nintendods.ds_project.database;
 
-import nintendods.ds_project.Exeptions.NameServerFullExeption;
+import nintendods.ds_project.Exeptions.IDTakenExeption;
 import nintendods.ds_project.utility.NameToHash;
 import org.springframework.stereotype.Repository;
 import nintendods.ds_project.utility.JsonConverter;
@@ -18,6 +18,10 @@ public class NodeDB {
         nodeID_to_nodeIP = new TreeMap<>();
     }
 
+    private void put(Integer nodeID, String ip){
+        nodeID_to_nodeIP.put(nodeID, ip);
+        this.saveDB();
+    }
     /* --------------------------------- ADD --------------------------------- */
 
     /**
@@ -26,38 +30,33 @@ public class NodeDB {
      * <p>Since the ID is based on name, it's possible that 2 different names have the same Hash.
      * To not override a name that has come before we will move the new ID by 1 until it finds an empty spot.</p>
      *
-     * <p>If it can't find an empty spot NameServerFullExeption is thrown.</p>
+     * <p>If it can't find an empty spot IDTakenExeption is thrown.</p>
      *
      * @param name the name of the node
      * @param ip   the ip of the node
      * @return ID of server
-     * @throws NameServerFullExeption if the name server is full
+     * @throws IDTakenExeption if the name server is full
      */
-    public Integer addNode(String name, String ip) throws NameServerFullExeption {
+    public Integer addNode(String name, String ip) throws IDTakenExeption {
         Integer nodeID = NameToHash.convert(name);
 
-        for (int i = 0; i < NameToHash.MAX_NODES; ++i) {
-            if (!nodeID_to_nodeIP.containsKey(nodeID)) {
-                nodeID_to_nodeIP.put(nodeID, ip);
+        if (!nodeID_to_nodeIP.containsKey(nodeID)) {
+                this.put(nodeID, ip);
                 return nodeID;
-            }
-
-            nodeID++;
-            if (nodeID > NameToHash.MAX_NODES) {
-                nodeID = 0;
-            }
         }
 
-        throw new NameServerFullExeption();
+        throw new IDTakenExeption();
     }
 
     /* --------------------------------- DELETE --------------------------------- */
     public void deleteNode(String ip) {
         nodeID_to_nodeIP.entrySet().removeIf(entry -> entry.getValue().equals(ip));
+        this.saveDB();
     }
 
     public void deleteNode(int nodeID) {
         nodeID_to_nodeIP.entrySet().removeIf(entry -> entry.getKey().equals(nodeID));
+        this.saveDB();
     }
 
     /* --------------------------------- CHECK --------------------------------- */
@@ -69,6 +68,8 @@ public class NodeDB {
         return nodeID_to_nodeIP.containsValue(ip);
     }
 
+    public boolean exists(int nodeID, String ip) { return nodeID_to_nodeIP.get(nodeID).equals(ip);}
+
 
     /* --------------------------------- GET --------------------------------- */
     public int getSize() {
@@ -77,10 +78,6 @@ public class NodeDB {
 
     /**
      * Retrieves the IP address of the server with the hash closest to the given file name.
-     * <p> <b>WARNING! Just because you input the exact name of a server doesn't mean you will definitely get its IP back! </b></p>
-     *
-     * <p>See {@link #addNode(String, String)} to learn on how servers are added and how their hashes are determined,
-     * which causes the warning.</p>
      *
      * @param name file name
      * @return ipp of server for the file
@@ -91,10 +88,6 @@ public class NodeDB {
 
     /**
      * Retrieves the closest ID address of the server with the hash closest to the given file name.
-     * <p> <b>WARNING! Just because you input the exact name of a server doesn't mean you will definitely get its ID back! </b></p>
-     *
-     * <p>See {@link #addNode(String, String)} to learn on how servers are added and how their hashes are determined,
-     * which causes the warning.</p>
      *
      * @param name file name
      * @return ID of server for the file
