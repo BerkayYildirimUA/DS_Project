@@ -21,7 +21,7 @@ public class UDPClient {
         DatagramPacket packet = null;
         buffer = null;
 
-        if (message.length() < bufferSize){
+        if (message.length() < bufferSize) {
             // Send
             buffer = message.getBytes(StandardCharsets.UTF_8);
 
@@ -31,7 +31,7 @@ public class UDPClient {
     }
 
     public void close(){
-        if (!this.clientSoc.isClosed()){
+        if (!this.clientSoc.isClosed()) {
             this.clientSoc.close();
         }
     }

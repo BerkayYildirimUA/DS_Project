@@ -63,7 +63,7 @@ public class DsProjectApplication {
                     nodeState = eNodeState.Listening;
                 }
                 case Listening -> {
-                    if(listenerService == null)
+                    if (listenerService == null)
                         listenerService = new ListenerService(MULTICAST_ADDRESS, MULTICAST_PORT, LISTENER_BUFFER_SIZE);
 
                     try {

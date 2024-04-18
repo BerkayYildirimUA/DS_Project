@@ -31,8 +31,8 @@ public class ListenerService {
 
             // Check the position of own node and incomming node and place it in the ring
 
-            if (node.getId() < incommingNode.getId() && (incommingNode.getId() <= node.getNextNodeId()
-                    || node.getNextNodeId() == node.getId())) {
+            if (    node.getId() < incommingNode.getId() && (incommingNode.getId() <= node.getNextNodeId() ||
+                    node.getNextNodeId() == node.getId())) {
                 // new node is the new next node for current node
                 node.setNextNodeId(incommingNode.getId());
                 // Check if first node of network?
@@ -42,8 +42,8 @@ public class ListenerService {
                 send = true;
             }
 
-            if (node.getId() > incommingNode.getId() && (incommingNode.getId() >= node.getPrevNodeId()
-                    || node.getPrevNodeId() == node.getId())) {
+            if (    node.getId() > incommingNode.getId() && (incommingNode.getId() >= node.getPrevNodeId() ||
+                    node.getPrevNodeId() == node.getId())) {
                 // new node is the new prev node for current node
                 node.setPrevNodeId(incommingNode.getId());
                 // Check if first node of network?
@@ -59,6 +59,7 @@ public class ListenerService {
                 // The incomming node is a new end node.
                 if (node.getPrevNodeId() <= incommingNode.getId()
                         && node.getNextNodeId() <= incommingNode.getId()) {
+
                     if (node.getId() > node.getNextNodeId())    //If the current node is the original end node
                         node.setNextNodeId(incommingNode.getId());
                     else
@@ -68,8 +69,9 @@ public class ListenerService {
                 }
 
                 // The incomming node is a new start node.
-                if (node.getPrevNodeId() >= incommingNode.getId()
-                        && node.getNextNodeId() >= incommingNode.getId()) {
+                if (    node.getPrevNodeId() >= incommingNode.getId() &&
+                        node.getNextNodeId() >= incommingNode.getId()) {
+
                     if (node.getId() > node.getNextNodeId()) //If the current node is the original end node
                         node.setNextNodeId(incommingNode.getId());
                     else
