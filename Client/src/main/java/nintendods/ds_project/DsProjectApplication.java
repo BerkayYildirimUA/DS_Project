@@ -23,7 +23,7 @@ public class DsProjectApplication {
     private static final int NODE_GLOBAL_PORT = 21;
 
     private static final int DISCOVERY_RETRIES = 6;
-    private static final int DISCOVERY_TIMEOUT = 2000; //In microseconds
+    private static final int DISCOVERY_TIMEOUT = 8000; //In microseconds
 
     private static final int LISTENER_BUFFER_SIZE = 20;
 
@@ -33,9 +33,8 @@ public class DsProjectApplication {
     public static void main(String[] args) throws IOException {
         // Create Node
 
-        node = new ClientNode(InetAddress.getLocalHost(), NODE_GLOBAL_PORT, generateRandomString(NODE_NAME_LENGTH));
-        System.out.println("New node with name: " + node.getName() + " And hash: " + node.getId());
-
+        node = new ClientNode(InetAddress.getLocalHost(), NODE_GLOBAL_PORT, "Robbe");
+        
         eNodeState nodeState = eNodeState.Discovery;
         boolean isRunning = true;
         ListenerService listenerService = null;
@@ -64,6 +63,8 @@ public class DsProjectApplication {
                     } catch (Exception e) {
                         System.out.println("Retried discovery for the" + discoveryRetries + "(th) time");
                         nodeState = eNodeState.Discovery;
+                        //Create new node
+                        node = new ClientNode(InetAddress.getLocalHost(), NODE_GLOBAL_PORT, generateRandomString(NODE_NAME_LENGTH));
                         break;
                     }
                     
@@ -84,7 +85,6 @@ public class DsProjectApplication {
                 case Listening -> {
                     if (listenerService == null)
                         listenerService = new ListenerService(MULTICAST_ADDRESS, MULTICAST_PORT, LISTENER_BUFFER_SIZE);
-
                     try {
                         listenerService.listenAndUpdate(node);
                     } catch (Exception e) {

@@ -29,8 +29,14 @@ public class ListenerService {
             boolean send = false;
             ClientNode incommingNode = new ClientNode(message);
 
-            // Check the position of own node and incomming node and place it in the ring
+            //A diplicate candidate!
+            if ( node.getId() == incommingNode.getId()){
+                send = true;
 
+                System.out.println("\r\n Duplicate node!\r\n");
+            }
+
+            // Check the position of own node and incomming node and place it in the ring
             if (    node.getId() < incommingNode.getId() && (incommingNode.getId() <= node.getNextNodeId() ||
                     node.getNextNodeId() == node.getId())) {
                 // new node is the new next node for current node

@@ -113,7 +113,7 @@ public class DiscoveryService {
                 .filter(m -> m.getMessageType() == eMessageTypes.UnicastNamingServerToNode).toList().getFirst());
 
         //Check the amount of nodes present in the network
-        if (nsObject.getAmountOfNodes() > 1) {
+        if (nsObject.getAmountOfNodes() >= 1) {
             // More than 1 so use neighbour nodes its data to form the prev and next node.
 
             // fetch the other messages as UNAMNObjects if possible
@@ -125,6 +125,16 @@ public class DiscoveryService {
                 nodeMessages.add((UNAMNObject) m);
             // fetch other data from other nodes.
             if (!nodeMessages.isEmpty()) { // check if 2 nodes send their info. Already checked above.
+                
+                //Check if a received message has the same id as the node itself
+                // All the nodes will send back and if a node has the same ID as the received ID, it will send also a message back. 
+                // Now the discovery node can check if his ID is a duplicate in the network.
+                if(nodeMessages.stream().anyMatch(m -> m.getNodeHashId() == ((ClientNode) node).getId()))
+                {
+                    System.out.println("Node is already in network!");
+                    throw new Exception("Node is already in network!");
+                }
+
                 try {
                     prevId = nodeMessages.stream().filter(m -> m.getNextNodeId() == ((ClientNode) node).getId())
                             .toList().getFirst().getNodeHashId();
@@ -134,6 +144,21 @@ public class DiscoveryService {
                     nextId = nodeMessages.stream().filter(m -> m.getPrevNodeId() == ((ClientNode) node).getId())
                             .toList().getFirst().getNodeHashId();
                 } catch (Exception ex) { }
+            }
+        }
+        else if (!filteredMessages.stream().filter(m -> m.getMessageType() == eMessageTypes.UnicastNodeToNode).toList().isEmpty()){
+
+            List<UNAMNObject> nodeMessages = new ArrayList<>();
+            for (AMessage m : filteredMessages.stream()
+                    .filter(m -> m.getMessageType() == eMessageTypes.UnicastNodeToNode).toList())
+                nodeMessages.add((UNAMNObject) m);
+            //Check if a received message has the same id as the node itself
+            // All the nodes will send back and if a node has the same ID as the received ID, it will send also a message back. 
+            // Now the discovery node can check if his ID is a duplicate in the network.
+            if(nodeMessages.stream().anyMatch(m -> m.getNodeHashId() == ((ClientNode) node).getId()))
+            {
+                System.out.println("Node is already in network!");
+                throw new Exception("Node is already in network!");
             }
         }
 

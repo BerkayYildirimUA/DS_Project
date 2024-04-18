@@ -7,6 +7,7 @@ import nintendods.ds_project.model.message.MNObject;
 import nintendods.ds_project.model.message.UNAMObject;
 import nintendods.ds_project.model.message.eMessageTypes;
 import nintendods.ds_project.utility.JsonConverter;
+import nintendods.ds_project.utility.NameToHash;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -93,7 +94,7 @@ public class MulticastService {
                 int amountNodes = nodeDB.getSize();
 
                 // Check database if node exist based on IP (so it is already added)
-                if (!nodeDB.exists(node.getAddress().getHostAddress())) {
+                if (!nodeDB.exists(NameToHash.convert(node.getName()))) {
                     logger.info("Adding node " + node.getName() + " to DB");
 
                     //Add to database
