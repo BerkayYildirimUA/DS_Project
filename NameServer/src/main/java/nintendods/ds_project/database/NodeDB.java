@@ -28,8 +28,6 @@ public class NodeDB {
     /**
      * <p>Add a server to the list.</p>
      *
-     * <p>Since the ID is based on name, it's possible that 2 different names have the same Hash.
-     * To not override a name that has come before we will move the new ID by 1 until it finds an empty spot.</p>
      *
      * <p>If it can't find an empty spot IDTakenExeption is thrown.</p>
      *
