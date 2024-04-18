@@ -1,49 +1,55 @@
 package nintendods.ds_project;
 
 import nintendods.ds_project.model.ClientNode;
-import nintendods.ds_project.model.message.MNObject;
-import nintendods.ds_project.model.message.UNAMNObject;
-import nintendods.ds_project.model.message.eMessageTypes;
 import nintendods.ds_project.service.DiscoveryService;
-import nintendods.ds_project.service.MulticastService;
+import nintendods.ds_project.service.ListenerService;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import java.io.IOException;
 import java.net.InetAddress;
 
-
-@SpringBootApplication(exclude = {DataSourceAutoConfiguration.class })
+@SpringBootApplication(exclude = { DataSourceAutoConfiguration.class })
 public class DsProjectApplication {
 
     private static ClientNode node;
+
+    private static final int NODE_NAME_LENGTH = 20;
+    private static final int NODE_GLOBAL_PORT = 21;
+
     private static final int DISCOVERY_RETRIES = 6;
+    private static final int DISCOVERY_TIMEOUT = 2000; //In microseconds
+
+    private static final int LISTENER_BUFFER_SIZE = 20;
+
+    private static final String MULTICAST_ADDRESS = "224.0.0.100";
+    private static final int MULTICAST_PORT = 12345;
 
     public static void main(String[] args) throws IOException {
-        //Create Node
-        
-        node = new ClientNode(InetAddress.getLocalHost(), 21, generateRandomString(20));
-        System.out.println("New node with name: " + node.getName()+ " And hash: " + node.getId());
+        // Create Node
+
+        node = new ClientNode(InetAddress.getLocalHost(), NODE_GLOBAL_PORT, generateRandomString(NODE_NAME_LENGTH));
+        System.out.println("New node with name: " + node.getName() + " And hash: " + node.getId());
 
         eNodeState nodeState = eNodeState.Discovery;
         boolean isRunning = true;
-        MulticastService multicastService = null;
+        ListenerService listenerService = null;
 
         int discoveryRetries = 0;
 
-        while(isRunning) {
-            //Finite state machine with eNodeState states
+        while (isRunning) {
+            // Finite state machine with eNodeState states
             switch (nodeState) {
                 case Discovery -> {
-                    //Set Discovery on
+                    // Set Discovery on
 
-                    if(discoveryRetries == DISCOVERY_RETRIES){
-                        //Max retries reached
+                    if (discoveryRetries == DISCOVERY_RETRIES) {
+                        // Max retries reached
                         System.out.println("Max discovery retries reached");
                         nodeState = eNodeState.Error;
                         break;
                     }
 
-                    DiscoveryService ds = new DiscoveryService("224.0.0.100", 12345, 10000);
+                    DiscoveryService ds = new DiscoveryService(MULTICAST_ADDRESS, MULTICAST_PORT, DISCOVERY_TIMEOUT);
                     discoveryRetries++;
                     try {
                         node = ds.discover(node);
@@ -57,70 +63,41 @@ public class DsProjectApplication {
                     nodeState = eNodeState.Listening;
                 }
                 case Listening -> {
-                    //If first bootup, initialize multicastService
-                    if (multicastService == null)
-                        multicastService = new MulticastService();
-                    //Checks if a multicast has arrived;
-                    MNObject message = null;
-                    try{ message = multicastService.getMessage();}
-                    catch (NullPointerException ignored) {nodeState = eNodeState.Transfer; break;}
+                    if(listenerService == null)
+                        listenerService = new ListenerService(MULTICAST_ADDRESS, MULTICAST_PORT, LISTENER_BUFFER_SIZE);
 
-                    if(message != null){
-                        //Message arrived
-                        //compose new node if needed
-                        boolean send = false;
-                        ClientNode incommingNode = new ClientNode(message);
-                        //System.out.println(incommingNode);
-                        //Check the position of own node and incomming node
-                        if(     (node.getId() < incommingNode.getId() && incommingNode.getId() < node.getNextNodeId()) ||
-                                (node.getNextNodeId() == node.getId() && node.getId() < incommingNode.getId())){
-                            //new node is the new next node for current node
-                            node.setNextNodeId(incommingNode.getId());
-                            System.out.println("\r\nnode is below the next node\r\n");
-                            send = true;
-                        }
-
-                        if(     (node.getPrevNodeId() < incommingNode.getId() && incommingNode.getId() < node.getId())||
-                                (node.getPrevNodeId() == node.getId() && node.getId() > incommingNode.getId())){
-                            //new node is the new prev node for current node
-                            node.setPrevNodeId(incommingNode.getId());
-                            System.out.println("\r\nnode is above the next node \r\n");
-                            send = true;
-                        }
-                        
-                        //The send boolean is not needed as the uncomming node will check the compatability of the ID's itself. it is just to reduce the network traffic.
-                        if(send){
-                        //Compose message and send out
-                        UNAMNObject reply = new UNAMNObject( eMessageTypes.UnicastNodeToNode, node.getId(), node.getPrevNodeId(), node.getNextNodeId() );       
-                        multicastService.sendReply(reply, incommingNode);
-
-                        System.out.println(" \r\nThe node has been updated!");
-                        System.out.println(node + "\r\n");
-                        }
-                        else System.out.println("Node doesn't need to be updated.");
+                    try {
+                        listenerService.listenAndUpdate(node);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        nodeState = eNodeState.Error;
                     }
-                    
+
                     nodeState = eNodeState.Transfer;
                 }
                 case Transfer -> {
-                    //TODO:
+                    // TODO:
                     nodeState = eNodeState.Listening;
                 }
                 case Shutdown -> {
-                    //TODO
+                    // TODO
+                    // Gracefully, update the side nodes on its own and leave the ring topology.
                 }
                 case Error -> {
-                    //TODO
+                    // TODO
+                    // Hard, only transmit to naming server and the naming server needs to deal with
+                    // it.
                     isRunning = false;
                 }
                 case null, default -> {
-                    //Same as error?
+                    // Same as error?
                 }
             }
         }
 
         //SpringApplication.run(DsProjectApplication.class, args);
     }
+
     private static final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
     public static String generateRandomString(int length) {
@@ -131,5 +108,5 @@ public class DsProjectApplication {
         }
         return sb.toString();
     }
-    
+
 }
