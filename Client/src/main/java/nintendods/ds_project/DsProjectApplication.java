@@ -34,7 +34,8 @@ public class DsProjectApplication {
         // Create Node
 
         node = new ClientNode(InetAddress.getLocalHost(), NODE_GLOBAL_PORT, "Robbe");
-        
+        System.out.println(node);
+
         eNodeState nodeState = eNodeState.Discovery;
         boolean isRunning = true;
         ListenerService listenerService = null;
@@ -65,6 +66,7 @@ public class DsProjectApplication {
                         nodeState = eNodeState.Discovery;
                         //Create new node
                         node = new ClientNode(InetAddress.getLocalHost(), NODE_GLOBAL_PORT, generateRandomString(NODE_NAME_LENGTH));
+                        System.out.println(node);
                         break;
                     }
                     
