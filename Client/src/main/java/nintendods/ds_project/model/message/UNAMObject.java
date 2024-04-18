@@ -16,6 +16,7 @@ public class UNAMObject extends AMessage {
     public UNAMObject(long messageId, eMessageTypes type, int amountOfNodes) {
         super(messageId, type);
         setAmountOfNodes(amountOfNodes);
+        setNSAddress(address);
     }
 
     public int getAmountOfNodes() {

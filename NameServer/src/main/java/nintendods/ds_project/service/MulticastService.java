@@ -99,7 +99,7 @@ public class MulticastService {
                     logger.info("Adding node " + node.getName() + " to DB");
 
                     // Add to database
-                    nodeDB.addNode(node.getName(), node.getAddress().toString());
+                    // nodeDB.addNode(node.getName(), node.getAddress().toString());
                 } else {
                     logger.info("Node " + node.getName() + " already exists in DB");
                     amountNodes--;
@@ -119,7 +119,7 @@ public class MulticastService {
                 + node.getPort());
         // Send out the multicast message over UDP with the timestamp as ID.
         long messageId = System.currentTimeMillis();
-        UNAMObject unicastMessage = new UNAMObject(messageId, eMessageTypes.UnicastNamingServerToNode, amount);
+        UNAMObject unicastMessage = new UNAMObject(messageId, eMessageTypes.UnicastNamingServerToNode, amount, InetAddress.getLocalHost().getHostAddress());
 
         // Setup the UDP sender and send out.
         UDPClient client = new UDPClient(node.getAddress(), node.getPort(), BUFFER_SIZE);
