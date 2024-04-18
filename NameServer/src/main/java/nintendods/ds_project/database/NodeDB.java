@@ -1,13 +1,14 @@
 package nintendods.ds_project.database;
 
+import com.google.gson.reflect.TypeToken;
+import nintendods.ds_project.Exeptions.EntryNotInDBExeption;
 import nintendods.ds_project.Exeptions.IDTakenExeption;
+import nintendods.ds_project.utility.JsonConverter;
 import nintendods.ds_project.utility.NameToHash;
 import org.springframework.stereotype.Repository;
-import nintendods.ds_project.utility.JsonConverter;
 
 import java.lang.reflect.Type;
-import java.util.*;
-import com.google.gson.reflect.TypeToken;
+import java.util.TreeMap;
 
 @Repository
 public class NodeDB {
@@ -18,7 +19,7 @@ public class NodeDB {
         nodeID_to_nodeIP = new TreeMap<>();
     }
 
-    private void put(Integer nodeID, String ip){
+    private void put(Integer nodeID, String ip) {
         nodeID_to_nodeIP.put(nodeID, ip);
         this.saveDB();
     }
@@ -41,8 +42,8 @@ public class NodeDB {
         Integer nodeID = NameToHash.convert(name);
 
         if (!nodeID_to_nodeIP.containsKey(nodeID)) {
-                this.put(nodeID, ip);
-                return nodeID;
+            this.put(nodeID, ip);
+            return nodeID;
         }
 
         throw new IDTakenExeption();
@@ -59,6 +60,15 @@ public class NodeDB {
         this.saveDB();
     }
 
+    public void deleteNode(int nodeID, String ip) throws EntryNotInDBExeption {
+        if (this.exists(nodeID, ip)) {
+            nodeID_to_nodeIP.remove(nodeID);
+        } else {
+            throw new EntryNotInDBExeption();
+        }
+        this.saveDB();
+    }
+
     /* --------------------------------- CHECK --------------------------------- */
     public boolean exists(int nodeID) {
         return nodeID_to_nodeIP.containsKey(nodeID);
@@ -68,7 +78,14 @@ public class NodeDB {
         return nodeID_to_nodeIP.containsValue(ip);
     }
 
-    public boolean exists(int nodeID, String ip) { return nodeID_to_nodeIP.get(nodeID).equals(ip);}
+    public boolean exists(int nodeID, String ip) {
+
+        if (nodeID_to_nodeIP.containsKey(nodeID)) {
+            return nodeID_to_nodeIP.get(nodeID).equals(ip);
+        } else {
+            return false;
+        }
+    }
 
 
     /* --------------------------------- GET --------------------------------- */
@@ -99,10 +116,14 @@ public class NodeDB {
         Integer ceiling = nodeID_to_nodeIP.ceilingKey(tempID);
 
         // if no upper key, then we loop back to beginning
-        if (ceiling == null) {ceiling = nodeID_to_nodeIP.firstKey();}
+        if (ceiling == null) {
+            ceiling = nodeID_to_nodeIP.firstKey();
+        }
 
         // if no lower key, then we loop to end
-        if (floor == null) {floor = nodeID_to_nodeIP.lastKey();}
+        if (floor == null) {
+            floor = nodeID_to_nodeIP.lastKey();
+        }
 
         int distToFloor = (tempID - floor + (NameToHash.MAX_NODES + 1)) % (NameToHash.MAX_NODES + 1); // Wrap-around distance to floor
         int distToCeiling = (ceiling - tempID + (NameToHash.MAX_NODES + 1)) % (NameToHash.MAX_NODES + 1); // Wrap-around distance to ceiling
@@ -117,23 +138,24 @@ public class NodeDB {
         return closestKey;
     }
 
-    public void saveDB(){
+    public void saveDB() {
         saveDB("NodeDB.json");
     }
 
-    public void loadDB(){
+    public void loadDB() {
         loadDB("NodeDB.json");
     }
 
     public void loadDB(String fileName) {
         JsonConverter jsonConverter = new JsonConverter(fileName);
 
-        Type type = new TypeToken<TreeMap<Integer, String>>(){}.getType();
+        Type type = new TypeToken<TreeMap<Integer, String>>() {
+        }.getType();
 
         nodeID_to_nodeIP = (TreeMap<Integer, String>) jsonConverter.fromFile(type);
     }
 
-    public void saveDB(String fileName){
+    public void saveDB(String fileName) {
         JsonConverter jsonConverter = new JsonConverter(fileName);
 
         jsonConverter.toFile(nodeID_to_nodeIP);
