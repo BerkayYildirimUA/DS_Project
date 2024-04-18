@@ -4,21 +4,25 @@ import nintendods.ds_project.model.ABaseNode;
 import nintendods.ds_project.model.ClientNode;
 import nintendods.ds_project.model.message.*;
 import nintendods.ds_project.utility.JsonConverter;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Component;
 
 import java.net.*;
 import java.util.ArrayList;
 import java.util.List;
 
+@Component
 public class DiscoveryService {
-    private List<String> receivedMessages;
-    private String multicastAddress = "224.0.0.100";
-    private int multicastPort = 12345;
-    private int waitTimeDiscovery = 20000;
-    private UDPServer listener;
-    private ServerSocket socket;
+    private List<String> receivedMessages; // List to hold received messages
+    private String multicastAddress = "224.0.0.100"; // Multicast IP address for discovery
+    private int multicastPort = 12345; // Port number for multicast communication
+    private int waitTimeDiscovery = 20000; // Time to wait for discovery responses in milliseconds
+    private UDPServer listener; // UDP server for listening to responses
+    private ServerSocket socket; // Server socket for communication
     private UNAMObject nsObject;
 
     /**
+     * Default constructor setting up basic properties
      * Create a Discovery service object.
      * Will send out a discovery message with format {@link MNObject} and waits for
      * a response of the Naming server of type {@link UNAMObject}.
@@ -41,9 +45,10 @@ public class DiscoveryService {
         // Setup the socket and get the port
         // Create server socket where we'll listen on when the multicast is sended out.
         try {
-            this.socket = new ServerSocket(0);
-            this.listener = new UDPServer(InetAddress.getLocalHost(), socket.getLocalPort(), 256);
-        } catch (Exception ex) { }
+            this.socket = new ServerSocket(0); // Initialize the server socket on any available port
+            this.listener = new UDPServer(InetAddress.getLocalHost(), socket.getLocalPort(), 256); // Setup UDP server
+        } catch (Exception ex) { // TODO: Handle exceptions such as socket errors, this should go to error state.
+        }
         this.receivedMessages = new ArrayList<>();
         this.multicastAddress = multicastAddress;
         this.multicastPort = multicastPort;
@@ -51,7 +56,7 @@ public class DiscoveryService {
     }
 
     public ClientNode discover(ABaseNode node) throws Exception {
-        // Set up the UDPServer
+        // Set up the UDPServer for listening to UDP responses
         Thread udpListenerThread = new Thread(() -> {
             try {
                 udpListener(this.waitTimeDiscovery, this.listener);
@@ -62,12 +67,14 @@ public class DiscoveryService {
 
         // Create multicast object
         MulticastSendService ms = new MulticastSendService(multicastAddress, multicastPort);
-        long udp_id = System.currentTimeMillis(); // unique messageID
+        long udp_id = System.currentTimeMillis(); // unique messageID based on timestamp
 
-        // start listener
+        // start listener thread
         udpListenerThread.start();
 
-        // Send out messages
+        // Send out multicast discovery messages
+        // Those messages are sent out 2 times because of UDP (multicast message).
+        // If there is no answer, the service will go in timeout for 2 seconds and then repeat the process.
         ms.multicastSend(new MNObject(udp_id, eMessageTypes.MulticastNode, InetAddress.getLocalHost().getHostAddress(),
                 this.socket.getLocalPort(), node.getName()));
         ms.multicastSend(new MNObject(udp_id, eMessageTypes.MulticastNode, InetAddress.getLocalHost().getHostAddress(),
@@ -83,7 +90,7 @@ public class DiscoveryService {
         if (receivedMessages.size() == 0)
             throw new Exception("No messages received within the timeframe");
 
-        // reformat the list to unique messages
+        // reformat the list to unique messages to avoid duplicates
         List<AMessage> filteredMessages = new ArrayList<>();
         for (String message : receivedMessages) {
             AMessage m = null;
@@ -125,9 +132,9 @@ public class DiscoveryService {
                 nodeMessages.add((UNAMNObject) m);
             // fetch other data from other nodes.
             if (!nodeMessages.isEmpty()) { // check if 2 nodes send their info. Already checked above.
-                
+
                 //Check if a received message has the same id as the node itself
-                // All the nodes will send back and if a node has the same ID as the received ID, it will send also a message back. 
+                // All the nodes will send back and if a node has the same ID as the received ID, it will send also a message back.
                 // Now the discovery node can check if his ID is a duplicate in the network.
                 if(nodeMessages.stream().anyMatch(m -> m.getNodeHashId() == ((ClientNode) node).getId()))
                 {
@@ -153,7 +160,7 @@ public class DiscoveryService {
                     .filter(m -> m.getMessageType() == eMessageTypes.UnicastNodeToNode).toList())
                 nodeMessages.add((UNAMNObject) m);
             //Check if a received message has the same id as the node itself
-            // All the nodes will send back and if a node has the same ID as the received ID, it will send also a message back. 
+            // All the nodes will send back and if a node has the same ID as the received ID, it will send also a message back.
             // Now the discovery node can check if his ID is a duplicate in the network.
             if(nodeMessages.stream().anyMatch(m -> m.getNodeHashId() == ((ClientNode) node).getId()))
             {
@@ -177,15 +184,16 @@ public class DiscoveryService {
 
         while (!timeout) {
             try {
-                receivedMessages.add(listener.listen(2000));
+                receivedMessages.add(listener.listen(2000)); // Listen for messages, timeout every 2000 milliseconds
                 // receivedMessages.forEach(System.out::println);
-            } catch (SocketTimeoutException ignored) { }
+            } catch (SocketTimeoutException ignored) { // TODO: Timeout is normal and ignored here
+            }
             // if the messages are received within a specific time (totalTime seconds)
             if (startTimestamp + timeOutTime < System.currentTimeMillis())
                 timeout = true;
         }
 
-        listener.close();
+        listener.close(); // Close listener after the wait time has expired
     }
 
     public UNAMObject getNSObject(){

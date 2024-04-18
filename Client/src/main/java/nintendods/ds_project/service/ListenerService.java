@@ -4,30 +4,42 @@ import nintendods.ds_project.model.ClientNode;
 import nintendods.ds_project.model.message.MNObject;
 import nintendods.ds_project.model.message.UNAMNObject;
 import nintendods.ds_project.model.message.eMessageTypes;
-
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+@Component
 public class ListenerService {
 
     private static MulticastListenService multicastService = null;
 
-    public ListenerService(String multicastAddress, int multicastPort, int multicastBufferCapacity) {
-        if (multicastService == null)
+    // Constructor that initializes the multicast service if it hasn't been already
+    public ListenerService(@Value("${udp.multicast.address}") String multicastAddress,
+                           @Value("${udp.multicast.port}") int multicastPort,
+                           @Value("${udp.multicast.buffer-capacity}") int multicastBufferCapacity) {
+        if (multicastService == null) {
             multicastService = new MulticastListenService(multicastAddress, multicastPort, multicastBufferCapacity);
+            //multicastService.initialize();
+        }
     }
 
+    public void initialize_multicast() {
+        multicastService.initialize();
+    }
+
+    // Listens for incoming messages and updates node configuration accordingly
     public void listenAndUpdate(ClientNode node) throws Exception {
         // Checks if a multicast has arrived;
         MNObject message = null;
         try {
-            message = multicastService.getMessage();
+            message = multicastService.getMessage(); // Attempt to get a multicast message
         } catch (NullPointerException ignored) {
-            return;
+            return; // TODO: If null, exit the method early
         }
 
         if (message != null) {
             // Message arrived
             // compose incomming node
-            boolean send = false;
-            ClientNode incommingNode = new ClientNode(message);
+            boolean send = false; // Flag to check if we need to send an update
+            ClientNode incommingNode = new ClientNode(message); // Create a node object from the message
 
             //A diplicate candidate!
             if ( node.getId() == incommingNode.getId()){
@@ -87,6 +99,7 @@ public class ListenerService {
                 }
             }
 
+            // If the node's position has changed, send a confirmation message
             if (send) {
                 // Compose message and send out
                 UNAMNObject reply = new UNAMNObject(eMessageTypes.UnicastNodeToNode, node.getId(),

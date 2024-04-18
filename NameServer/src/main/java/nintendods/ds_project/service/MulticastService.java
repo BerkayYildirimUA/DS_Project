@@ -17,6 +17,9 @@ import java.net.*;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+/**
+ * Handles multicast communication for discovering nodes and interacting with them.
+ */
 @Component
 public class MulticastService {
 
