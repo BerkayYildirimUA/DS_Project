@@ -3,25 +3,21 @@ package nintendods.ds_project;
 import nintendods.ds_project.exeption.DuplicateNodeException;
 import nintendods.ds_project.exeption.NotEnoughMessageException;
 import nintendods.ds_project.model.ClientNode;
-import nintendods.ds_project.model.message.UNAMObject;
 import nintendods.ds_project.service.DiscoveryService;
 import nintendods.ds_project.service.ListenerService;
-import nintendods.ds_project.service.NSAPIService;
 import nintendods.ds_project.utility.Generator;
-import nintendods.ds_project.utility.JsonConverter;
 
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import java.io.IOException;
 import java.net.InetAddress;
-import java.util.Random;
 
 @SpringBootApplication(exclude = { DataSourceAutoConfiguration.class })
 public class DsProjectApplication {
 
     private static ClientNode node;
 
-    private static NSAPIService nsapiService;
+    //private static NSAPIService nsapiService;
 
     private static final int NODE_NAME_LENGTH = 20;
     private static final int NODE_GLOBAL_PORT = 21;
@@ -43,8 +39,8 @@ public class DsProjectApplication {
         eNodeState nodeState = eNodeState.Discovery;
         boolean isRunning = true;
         ListenerService listenerService = null;
-        JsonConverter jsonConverter = new JsonConverter();
-        UNAMObject nsObject;
+        //JsonConverter jsonConverter = new JsonConverter();
+        //UNAMObject nsObject;
 
         int discoveryRetries = 0;
 
@@ -71,7 +67,7 @@ public class DsProjectApplication {
                     } 
                     catch (Exception e) {
                         discoveryRetries++;
-                        if (discoveryRetries != DISCOVERY_RETRIES +1) System.out.println("Retry discovery for the" + discoveryRetries + "(th) time");
+                        if (discoveryRetries != DISCOVERY_RETRIES +1) { System.out.println("Retry discovery for the" + discoveryRetries + "(th) time"); }
                         nodeState = eNodeState.Discovery;
 
                         if(e instanceof DuplicateNodeException){
@@ -91,18 +87,16 @@ public class DsProjectApplication {
                     
                     // //Discovery has succeeded so continue
                     // //get NSObject from discovery service
-                    nsObject = ds.getNSObject(); //For later use
+                    // nsObject = ds.getNSObject(); //For later use
 
                     System.out.println(node.toString());
                     System.out.println("Successfully reply in " + discoveryRetries + " discoveries.");
                     nodeState = eNodeState.Listening;
                 }
                 case Listening -> {
-                    if (listenerService == null)
-                        listenerService = new ListenerService(MULTICAST_ADDRESS, MULTICAST_PORT, LISTENER_BUFFER_SIZE);
-                    try {
-                        listenerService.listenAndUpdate(node);
-                    } catch (Exception e) {
+                    if (listenerService == null) { listenerService = new ListenerService(MULTICAST_ADDRESS, MULTICAST_PORT, LISTENER_BUFFER_SIZE); }
+                    try { listenerService.listenAndUpdate(node); } 
+                    catch (Exception e) {
                         e.printStackTrace();
                         nodeState = eNodeState.Error;
                     }
