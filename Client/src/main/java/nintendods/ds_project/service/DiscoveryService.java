@@ -176,7 +176,7 @@ public class DiscoveryService {
         long startTimestamp = System.currentTimeMillis();
 
         while (!timeout) {
-            try { receivedMessages.add(listener.listen(2000)); } 
+            try { receivedMessages.add(listener.listen()); } 
             catch (SocketTimeoutException ignored) { }
             if (startTimestamp + timeOutTime < System.currentTimeMillis()) { timeout = true; }
         }
