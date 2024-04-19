@@ -1,11 +1,11 @@
 package nintendods.ds_project;
 
+import nintendods.ds_project.exeption.DuplicateNodeException;
+import nintendods.ds_project.exeption.NotEnoughMessageException;
 import nintendods.ds_project.model.ClientNode;
-import nintendods.ds_project.model.message.UNAMObject;
 import nintendods.ds_project.service.DiscoveryService;
 import nintendods.ds_project.service.ListenerService;
-import nintendods.ds_project.service.NSAPIService;
-import nintendods.ds_project.utility.JsonConverter;
+import nintendods.ds_project.utility.Generator;
 
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
@@ -17,13 +17,14 @@ public class DsProjectApplication {
 
     private static ClientNode node;
 
-    private static NSAPIService nsapiService;
+    //private static NSAPIService nsapiService;
 
     private static final int NODE_NAME_LENGTH = 20;
     private static final int NODE_GLOBAL_PORT = 21;
 
-    private static final int DISCOVERY_RETRIES = 6;
-    private static final int DISCOVERY_TIMEOUT = 8000; //In microseconds
+    private static final int DISCOVERY_RETRIES = 10;
+    private static int discoveryTimeout = 500; //In microseconds
+    private static final int DISCOVERY_ADDITION_TIMEOUT = 1000; //In microseconds
 
     private static final int LISTENER_BUFFER_SIZE = 20;
 
@@ -33,14 +34,13 @@ public class DsProjectApplication {
     public static void main(String[] args) throws IOException {
         // Create Node
 
-        node = new ClientNode(InetAddress.getLocalHost(), NODE_GLOBAL_PORT, "Robbe");
-        System.out.println(node);
-
+        node = new ClientNode(InetAddress.getLocalHost(), NODE_GLOBAL_PORT, Generator.randomString(NODE_NAME_LENGTH));
+        
         eNodeState nodeState = eNodeState.Discovery;
         boolean isRunning = true;
         ListenerService listenerService = null;
-        JsonConverter jsonConverter = new JsonConverter();
-        UNAMObject nsObject;
+        //JsonConverter jsonConverter = new JsonConverter();
+        //UNAMObject nsObject;
 
         int discoveryRetries = 0;
 
@@ -50,46 +50,53 @@ public class DsProjectApplication {
                 case Discovery -> {
                     // Set Discovery on
 
-                    if (discoveryRetries == DISCOVERY_RETRIES) {
+                    if (discoveryRetries == DISCOVERY_RETRIES +1) {
                         // Max retries reached
                         System.out.println("Max discovery retries reached");
                         nodeState = eNodeState.Error;
                         break;
                     }
 
-                    DiscoveryService ds = new DiscoveryService(MULTICAST_ADDRESS, MULTICAST_PORT, DISCOVERY_TIMEOUT);
-                    discoveryRetries++;
+                    DiscoveryService ds = new DiscoveryService(MULTICAST_ADDRESS, MULTICAST_PORT, discoveryTimeout);
                     try {
-                        node = ds.discover(node);
-                    } catch (Exception e) {
-                        System.out.println("Retried discovery for the" + discoveryRetries + "(th) time");
-                        nodeState = eNodeState.Discovery;
-                        //Create new node
-                        node = new ClientNode(InetAddress.getLocalHost(), NODE_GLOBAL_PORT, generateRandomString(NODE_NAME_LENGTH));
+                        System.out.println("do discovery with node");
                         System.out.println(node);
+
+                        node = ds.discover(node);
+                        System.out.println("Discovery done");
+                    } 
+                    catch (Exception e) {
+                        discoveryRetries++;
+                        if (discoveryRetries != DISCOVERY_RETRIES +1) { System.out.println("Retry discovery for the" + discoveryRetries + "(th) time"); }
+                        nodeState = eNodeState.Discovery;
+
+                        if(e instanceof DuplicateNodeException){
+                            //Create new node
+                            node = new ClientNode(InetAddress.getLocalHost(), NODE_GLOBAL_PORT, Generator.randomString(NODE_NAME_LENGTH));
+                            System.out.println(node);
+                            System.out.println("nodeName updated " + node.getName());
+                        }
+                        if(e instanceof NotEnoughMessageException){
+                            //Create other timeout
+                            discoveryTimeout +=  DISCOVERY_ADDITION_TIMEOUT;
+                            System.out.println("discoveryTimeout updated " + discoveryTimeout);
+                        }
+
                         break;
                     }
                     
                     // //Discovery has succeeded so continue
                     // //get NSObject from discovery service
-                    nsObject = ds.getNSObject();
-
-                    // //Define the api object
-                    // nsapiService = new NSAPIService(nsObject.getNSAddress(), nsObject.getNSPort());
-
-                    // //Add node to Naming Server
-                    // nsapiService.executePost("/nodes", jsonConverter.toJson(nsObject));
+                    // nsObject = ds.getNSObject(); //For later use
 
                     System.out.println(node.toString());
                     System.out.println("Successfully reply in " + discoveryRetries + " discoveries.");
                     nodeState = eNodeState.Listening;
                 }
                 case Listening -> {
-                    if (listenerService == null)
-                        listenerService = new ListenerService(MULTICAST_ADDRESS, MULTICAST_PORT, LISTENER_BUFFER_SIZE);
-                    try {
-                        listenerService.listenAndUpdate(node);
-                    } catch (Exception e) {
+                    if (listenerService == null) { listenerService = new ListenerService(MULTICAST_ADDRESS, MULTICAST_PORT, LISTENER_BUFFER_SIZE); }
+                    try { listenerService.listenAndUpdate(node); } 
+                    catch (Exception e) {
                         e.printStackTrace();
                         nodeState = eNodeState.Error;
                     }
@@ -131,16 +138,4 @@ public class DsProjectApplication {
 
         //SpringApplication.run(DsProjectApplication.class, args);
     }
-
-    private static final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-
-    public static String generateRandomString(int length) {
-        StringBuilder sb = new StringBuilder(length);
-        for (int i = 0; i < length; i++) {
-            int randomIndex = (int) (Math.random() * CHARACTERS.length());
-            sb.append(CHARACTERS.charAt(randomIndex));
-        }
-        return sb.toString();
-    }
-
 }

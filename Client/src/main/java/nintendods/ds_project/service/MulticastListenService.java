@@ -16,7 +16,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 @Component
 public class MulticastListenService {
-    private static final int BUFFER_SIZE = 256;
+    private static final int BUFFER_SIZE = 1024;
     private static BlockingQueue<MNObject> multicastQueue;
     private final JsonConverter jsonConverter = new JsonConverter();
 
@@ -57,8 +57,7 @@ public class MulticastListenService {
                 //System.out.println(message);
                 //Only add if the message is not yet in the queue.
                 // UDP message can be sent more than once.
-                if (packetQueue.stream().noneMatch(c -> (c.equals(message))))
-                    packetQueue.offer(message); // Add packet to the queue
+                if (packetQueue.stream().noneMatch(c -> (c.equals(message)))) packetQueue.offer(message); // Add packet to the queue
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -76,26 +75,19 @@ public class MulticastListenService {
                 if (packet.contains(eMessageTypes.MulticastNode.name())) {
                     //cast to it
                     MNObject mnObject = (MNObject) jsonConverter.toObject(packet, MNObject.class);
-                    try {
-                        multicastQueue.put(mnObject);
-                    } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
+                    try { multicastQueue.put(mnObject); } 
+                    catch (InterruptedException e) { throw new RuntimeException(e);
                     }
                 }
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
+            } catch (InterruptedException e) { throw new RuntimeException(e); }
         }
     }
 
     public void sendReply(UNAMNObject reply, ABaseNode toNode) throws IOException {
-        //Setup udp unicast
         long id = System.currentTimeMillis();
         reply.setMessageId(id);
-        //System.out.println("MulticastService - Send out files from node to node");
-        //System.out.println("\t"+reply);
-        //System.out.println("\t"+toNode);
-        UDPClient client = new UDPClient(toNode.getAddress(),toNode.getPort(), 1024);
+
+        UDPClient client = new UDPClient(toNode.getAddress(),toNode.getPort(), BUFFER_SIZE);
 
         //Send out 2 times, the receiver must filter out packets with the same ID.
         client.SendMessage(jsonConverter.toJson(reply));
