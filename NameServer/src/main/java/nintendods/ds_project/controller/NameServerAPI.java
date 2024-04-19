@@ -15,7 +15,7 @@ import java.util.TreeMap;
 
 @RestController
 public class NameServerAPI {
-    JsonConverter jsonConverter = new JsonConverter("Database.json");
+    JsonConverter jsonConverter = new JsonConverter();
     NodeDB nodeDB = NodeDBService.getNodeDB();
 
     @GetMapping("/files/{file_name}")
