@@ -1,5 +1,7 @@
 package nintendods.ds_project.service;
 
+import nintendods.ds_project.exeption.DuplicateNodeException;
+import nintendods.ds_project.exeption.NotEnoughMessageException;
 import nintendods.ds_project.model.ABaseNode;
 import nintendods.ds_project.model.ClientNode;
 import nintendods.ds_project.model.message.*;
@@ -118,11 +120,16 @@ public class DiscoveryService {
 
             // fetch the other messages as UNAMNObjects if possible
             if (filteredMessages.stream().filter(m -> m.getMessageType() == eMessageTypes.UnicastNodeToNode).toList().isEmpty())
-                throw new Exception("Not enough nodes have send out their multicast response!");
+                throw new NotEnoughMessageException();
             List<UNAMNObject> nodeMessages = new ArrayList<>();
             for (AMessage m : filteredMessages.stream()
                     .filter(m -> m.getMessageType() == eMessageTypes.UnicastNodeToNode).toList())
                 nodeMessages.add((UNAMNObject) m);
+
+            //Check if enough messages has arrived at the node
+            if(nsObject.getAmountOfNodes() == 1 && nodeMessages.size() < 1){throw new NotEnoughMessageException();}
+            else if(nsObject.getAmountOfNodes() > 1 && nodeMessages.size() < 2){throw new NotEnoughMessageException();}
+
             // fetch other data from other nodes.
             if (!nodeMessages.isEmpty()) { // check if 2 nodes send their info. Already checked above.
                 
@@ -132,9 +139,10 @@ public class DiscoveryService {
                 if(nodeMessages.stream().anyMatch(m -> m.getNodeHashId() == ((ClientNode) node).getId()))
                 {
                     System.out.println("Node is already in network!");
-                    throw new Exception("Node is already in network!");
+                    throw new DuplicateNodeException();
                 }
 
+                //Check the incomming messages from the nodes that have been changed
                 try {
                     prevId = nodeMessages.stream().filter(m -> m.getNextNodeId() == ((ClientNode) node).getId())
                             .toList().getFirst().getNodeHashId();
@@ -147,7 +155,7 @@ public class DiscoveryService {
             }
         }
         else if (!filteredMessages.stream().filter(m -> m.getMessageType() == eMessageTypes.UnicastNodeToNode).toList().isEmpty()){
-
+            //Special case when only 1 node is present. If the same ID, it will be amountOfNodes = 0;
             List<UNAMNObject> nodeMessages = new ArrayList<>();
             for (AMessage m : filteredMessages.stream()
                     .filter(m -> m.getMessageType() == eMessageTypes.UnicastNodeToNode).toList())
@@ -158,7 +166,7 @@ public class DiscoveryService {
             if(nodeMessages.stream().anyMatch(m -> m.getNodeHashId() == ((ClientNode) node).getId()))
             {
                 System.out.println("Node is already in network!");
-                throw new Exception("Node is already in network!");
+                throw new DuplicateNodeException();
             }
         }
 

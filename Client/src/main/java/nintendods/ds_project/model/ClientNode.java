@@ -66,6 +66,6 @@ public class ClientNode extends ABaseNode {
 
     @Override
     public String toString() {
-        return "\r\nname: " + getName() + "\r\nprevious node:\t" + getPrevNodeId() + "\r\nid:\t\t" + getId() + "\r\nnextNode:\t" + getNextNodeId() + "\r\n";
+        return "name: " + getName() + ", previous node id:\t" + getPrevNodeId() + ", node id:\t" + getId() + ", next node id:\t" + getNextNodeId() + "\r\n";
     }
 }
