@@ -143,25 +143,4 @@ public class DsProjectApplication {
 
         //SpringApplication.run(DsProjectApplication.class, args);
     }
-
-    private static final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-
-    public static String generateRandomString(int length) {
-        StringBuilder sb = new StringBuilder(length);
-        for (int i = 0; i < length; i++) {
-            int randomIndex = (int) (Math.random() * CHARACTERS.length());
-            sb.append(CHARACTERS.charAt(randomIndex));
-        }
-        return sb.toString();
-    }
-
-    public static int generateRandomNumber(int min, int max) {
-        if (min >= max) {
-            throw new IllegalArgumentException("Max must be greater than min");
-        }
-        
-        Random rand = new Random();
-        return rand.nextInt((max - min) + 1) + min;
-    }
-
 }
