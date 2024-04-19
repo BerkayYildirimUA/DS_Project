@@ -7,6 +7,7 @@ import nintendods.ds_project.model.message.UNAMObject;
 import nintendods.ds_project.service.DiscoveryService;
 import nintendods.ds_project.service.ListenerService;
 import nintendods.ds_project.service.NSAPIService;
+import nintendods.ds_project.utility.Generator;
 import nintendods.ds_project.utility.JsonConverter;
 
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -37,7 +38,7 @@ public class DsProjectApplication {
     public static void main(String[] args) throws IOException {
         // Create Node
 
-        node = new ClientNode(InetAddress.getLocalHost(), NODE_GLOBAL_PORT, generateRandomString(NODE_NAME_LENGTH));
+        node = new ClientNode(InetAddress.getLocalHost(), NODE_GLOBAL_PORT, Generator.randomString(NODE_NAME_LENGTH));
         
         eNodeState nodeState = eNodeState.Discovery;
         boolean isRunning = true;
@@ -75,7 +76,7 @@ public class DsProjectApplication {
 
                         if(e instanceof DuplicateNodeException){
                             //Create new node
-                            node = new ClientNode(InetAddress.getLocalHost(), NODE_GLOBAL_PORT, generateRandomString(NODE_NAME_LENGTH));
+                            node = new ClientNode(InetAddress.getLocalHost(), NODE_GLOBAL_PORT, Generator.randomString(NODE_NAME_LENGTH));
                             System.out.println(node);
                             System.out.println("nodeName updated " + node.getName());
                         }

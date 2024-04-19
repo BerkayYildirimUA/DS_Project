@@ -11,7 +11,7 @@ public class Generator {
      * @param length The length of the string.
      * @return
      */
-    public static String generateRandomString(int length) {
+    public static String randomString(int length) {
         StringBuilder sb = new StringBuilder(length);
         for (int i = 0; i < length; i++) {
             int randomIndex = (int) (Math.random() * CHARACTERS.length());
@@ -26,7 +26,7 @@ public class Generator {
      * @param max Is Inclusive
      * @return the random value between min and max
      */
-    public static int generateRandomNumber(int min, int max) {
+    public static int randomNumber(int min, int max) {
         if (min >= max) {
             throw new IllegalArgumentException("Max must be greater than min");
         }
