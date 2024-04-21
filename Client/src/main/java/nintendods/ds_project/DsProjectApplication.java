@@ -62,7 +62,7 @@ public class DsProjectApplication {
                     try {
                         node = ds.discover(node);
                     } catch (Exception e) {
-                        System.out.println("Retried discovery for the" + discoveryRetries + "(th) time");
+                        System.out.println("Retried discovery for the " + discoveryRetries + "(th) time");
                         nodeState = eNodeState.Discovery;
                         //Create new node
                         node = new ClientNode(InetAddress.getLocalHost(), NODE_GLOBAL_PORT, generateRandomString(NODE_NAME_LENGTH));

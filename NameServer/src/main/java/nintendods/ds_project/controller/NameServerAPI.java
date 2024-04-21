@@ -66,4 +66,34 @@ public class NameServerAPI {
         nodeDB.deleteNode(id);
         return ResponseEntity.status(HttpStatus.OK).body(jsonConverter.toJson(id));
     }
+
+    @DeleteMapping("/nodes/{id}/error")
+    public ResponseEntity<String> deleteDueToError(@PathVariable("id") int id) {
+        ResponseObject<Integer> response = new ResponseObject<>(id);
+
+        /* Code for error */
+
+        if (nodeDB.exists(id)) {
+            response.setMessage(String.format("Item with id = %d does not exists", id));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(jsonConverter.toJson(response));
+        }
+
+        nodeDB.deleteNode(id);
+        return ResponseEntity.status(HttpStatus.OK).body(jsonConverter.toJson(id));
+    }
+
+    @DeleteMapping("/nodes/{id}/shutdown")
+    public ResponseEntity<String> deleteDueToShutdown(@PathVariable("id") int id) {
+        ResponseObject<Integer> response = new ResponseObject<>(id);
+
+        /* Code for shutdown */
+
+        if (nodeDB.exists(id)) {
+            response.setMessage(String.format("Item with id = %d does not exists", id));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(jsonConverter.toJson(response));
+        }
+
+        nodeDB.deleteNode(id);
+        return ResponseEntity.status(HttpStatus.OK).body(jsonConverter.toJson(id));
+    }
 }
