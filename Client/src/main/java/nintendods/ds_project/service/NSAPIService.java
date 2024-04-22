@@ -27,29 +27,28 @@ public class NSAPIService {
         return ip + ":" + port;
     }
 
-    public String executePost(String path, String json) {
+    public String executeErrorDelete(String path) {
         HttpURLConnection connection = null;
 
         try {
-            //Create connection
+            // Create connection
             URL url = new URL(getBaseUrl() + path);
             connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestMethod("POST");
-            connection.setRequestProperty("Content-Type","application/x-www-form-urlencoded");
-            // MediaType.APPLICATION_JSON
+            connection.setRequestMethod("DELETE");
+            connection.setRequestProperty("Content-Type", "application/json");
 
-            connection.setRequestProperty("Content-Length", Integer.toString(json.getBytes().length));
-            connection.setRequestProperty("Content-Language", "en-US");
+            //  connection.setRequestProperty("Content-Length", Integer.toString(json.getBytes().length));
+            //  connection.setRequestProperty("Content-Language", "en-US");
 
             connection.setUseCaches(false);
             connection.setDoOutput(true);
 
-            //Send request
+            // Send request
             DataOutputStream wr = new DataOutputStream (connection.getOutputStream());
-            wr.writeBytes(json);
+            // wr.writeBytes(json);
             wr.close();
 
-            //Get Response
+            // Get Response
             InputStream is = connection.getInputStream();
             BufferedReader rd = new BufferedReader(new InputStreamReader(is));
             StringBuilder response = new StringBuilder(); // or StringBuffer if Java version 5+
