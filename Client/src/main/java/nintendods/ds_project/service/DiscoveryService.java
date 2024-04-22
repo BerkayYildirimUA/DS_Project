@@ -6,11 +6,13 @@ import nintendods.ds_project.model.ABaseNode;
 import nintendods.ds_project.model.ClientNode;
 import nintendods.ds_project.model.message.*;
 import nintendods.ds_project.utility.JsonConverter;
+import org.springframework.stereotype.Component;
 
 import java.net.*;
 import java.util.ArrayList;
 import java.util.List;
 
+@Component("Dis1")
 public class DiscoveryService {
     private List<String> receivedMessages;
     private String multicastAddress = "224.0.0.100";
@@ -50,7 +52,6 @@ public class DiscoveryService {
         this.multicastPort = multicastPort;
         this.waitTimeDiscovery = waitTime;
     }
-
     public ClientNode discover(ABaseNode node) throws Exception {
         // Set up the UDPServer
         Thread udpListenerThread = new Thread(() -> {
