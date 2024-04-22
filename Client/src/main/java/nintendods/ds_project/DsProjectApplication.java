@@ -112,8 +112,7 @@ public class DsProjectApplication {
                 }
                 case Error -> {
                     // TODO
-                    // Hard, only transmit to naming server and the naming server needs to deal with
-                    // it.
+                    // Hard, only transmit to naming server and the naming server needs to deal with it.
 
                     /**
                     * When the node gets in the Error state, we'll access the 
@@ -129,7 +128,7 @@ public class DsProjectApplication {
             }
         }
 
-        //SpringApplication.run(DsProjectApplication.class, args);
+        // SpringApplication.run(DsProjectApplication.class, args);
     }
 
     private static final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
