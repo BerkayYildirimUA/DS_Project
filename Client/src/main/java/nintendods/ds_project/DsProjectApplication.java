@@ -37,30 +37,9 @@ public class DsProjectApplication {
     private static boolean isRunning = true;
 
     private static NSAPIService nsapiService;
-
-    private static final int NODE_NAME_LENGTH = 20;
-    private static final int NODE_GLOBAL_PORT = 21;
     public static void main(String[] args) throws UnknownHostException {
         ApplicationContext context = SpringApplication.run(DsProjectApplication.class, args);
         runNodeLifecycle(context);
-    }
-
-    private static final int DISCOVERY_RETRIES = 6;
-    private static final int DISCOVERY_TIMEOUT = 8000; //In microseconds
-    private static final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"; // Characters used in the random string generation
-
-    /**
-     * Generates a random alphanumeric string of specified length.
-     * @param length The length of the string to generate.
-     * @return A random alphanumeric string.
-     */
-    public static String generateRandomString(int length) {
-        StringBuilder sb = new StringBuilder(length);
-        for (int i = 0; i < length; i++) {
-            int randomIndex = (int) (Math.random() * CHARACTERS.length());
-            sb.append(CHARACTERS.charAt(randomIndex));
-        }
-        return sb.toString();
     }
 
     private static void runNodeLifecycle(ApplicationContext context) throws UnknownHostException {
