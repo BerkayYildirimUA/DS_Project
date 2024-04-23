@@ -1,24 +1,17 @@
 package nintendods.ds_project;
 
+import nintendods.ds_project.exeption.DuplicateNodeException;
+import nintendods.ds_project.exeption.NotEnoughMessageException;
 import nintendods.ds_project.model.ClientNode;
-import nintendods.ds_project.service.*;
 import nintendods.ds_project.utility.Generator;
-import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
-import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-
-import nintendods.ds_project.model.ClientNode;
 import nintendods.ds_project.service.DiscoveryService;
 import nintendods.ds_project.service.ListenerService;
-//import nintendods.ds_project.service.TransferService; // Assuming you have a service to handle data transfers
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.Bean;
 
 /**
  * Spring Boot application for managing a distributed system node's lifecycle excluding database auto-configuration.
@@ -31,7 +24,9 @@ public class DsProjectApplication {
     private static final int NODE_NAME_LENGTH = 20; // Length of the random node name
     private static final int NODE_GLOBAL_PORT = 21; // Fixed port for node operations
     private static final int DISCOVERY_RETRIES = 6; // Maximum number of retries for discovery
-    private static final int DISCOVERY_TIMEOUT = 2000; //In microseconds: Timeout for discovery
+    private static int discoveryTimeout = 500; //In microseconds: Timeout for discovery
+
+    private static final int DISCOVERY_ADDITION_TIMEOUT = 1000; //In microseconds
     private static final int LISTENER_BUFFER_SIZE = 20; // Buffer size for the listener service
     private static final String MULTICAST_ADDRESS = "224.0.0.100"; // Multicast address for network communication
     private static final int MULTICAST_PORT = 12345; // Port for multicast communication
@@ -64,15 +59,37 @@ public class DsProjectApplication {
                         nodeState = eNodeState.Error;
                         break;
                     }
-                    DiscoveryService ds = new DiscoveryService(MULTICAST_ADDRESS, MULTICAST_PORT, DISCOVERY_TIMEOUT);
-                    discoveryRetries++;
+                    DiscoveryService ds = new DiscoveryService(MULTICAST_ADDRESS, MULTICAST_PORT, discoveryTimeout);
                     try {
-                        node = ds.discover(node); // Attempt to discover other nodes and establish itself in the network
-                    } catch (Exception e) {
-                        System.out.println("Retried discovery for the" + discoveryRetries + "(th) time");
+                        System.out.println("do discovery with node");
+                        System.out.println(node);
+
+                        node = ds.discover(node);
+                        System.out.println("Discovery done");
+                    }
+                    catch (Exception e) {
+                        discoveryRetries++;
+                        if (discoveryRetries != DISCOVERY_RETRIES +1) { System.out.println("Retry discovery for the" + discoveryRetries + "(th) time"); }
                         nodeState = eNodeState.Discovery;
+
+                        if(e instanceof DuplicateNodeException){
+                            //Create new node
+                            node = new ClientNode(InetAddress.getLocalHost(), NODE_GLOBAL_PORT, Generator.randomString(NODE_NAME_LENGTH));
+                            System.out.println(node);
+                            System.out.println("nodeName updated " + node.getName());
+                        }
+                        if(e instanceof NotEnoughMessageException){
+                            //Create other timeout
+                            discoveryTimeout +=  DISCOVERY_ADDITION_TIMEOUT;
+                            System.out.println("discoveryTimeout updated " + discoveryTimeout);
+                        }
+
                         break;
                     }
+
+                    // //Discovery has succeeded so continue
+                    // //get NSObject from discovery service
+                    // nsObject = ds.getNSObject(); //For later use
                     System.out.println(node.toString());
                     System.out.println("Successfully reply in " + discoveryRetries + " discoveries.");
                     nodeState = eNodeState.Listening; // Move to Listening state after successful discovery
