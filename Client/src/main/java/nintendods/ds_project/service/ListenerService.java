@@ -4,14 +4,30 @@ import nintendods.ds_project.model.ClientNode;
 import nintendods.ds_project.model.message.MNObject;
 import nintendods.ds_project.model.message.UNAMNObject;
 import nintendods.ds_project.model.message.eMessageTypes;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
+@Component("Lis1")
 public class ListenerService {
 
     private static MulticastListenService multicastService = null;
 
-    public ListenerService(String multicastAddress, int multicastPort, int multicastBufferCapacity) {
+    String multicastAddress;
+    int multicastPort;
+    int multicastBufferCapacity;
+
+    public ListenerService(@Value("${udp.multicast.address}") String multicastAddress,
+                           @Value("${udp.multicast.port}") int multicastPort,
+                           @Value("${udp.multicast.buffer-capacity}") int multicastBufferCapacity) {
+        this.multicastAddress = multicastAddress;
+        this.multicastPort = multicastPort;
+        this.multicastBufferCapacity = multicastBufferCapacity;
+    }
+
+    public void initialize_multicast() {
         if (multicastService == null)
             multicastService = new MulticastListenService(multicastAddress, multicastPort, multicastBufferCapacity);
+        multicastService.initialize();
     }
 
     public void listenAndUpdate(ClientNode node) throws Exception {

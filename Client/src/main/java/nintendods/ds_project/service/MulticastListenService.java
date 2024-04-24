@@ -5,7 +5,10 @@ import nintendods.ds_project.model.message.MNObject;
 import nintendods.ds_project.model.message.UNAMNObject;
 import nintendods.ds_project.model.message.eMessageTypes;
 import nintendods.ds_project.utility.JsonConverter;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -20,6 +23,10 @@ public class MulticastListenService {
     private static BlockingQueue<MNObject> multicastQueue;
     private final JsonConverter jsonConverter = new JsonConverter();
 
+    String multicastAddress;
+    int multicastPort;
+    int multicastBufferCapacity;
+
     /**
      * A multicast service that wil listen to multicast messages and parse these to MNObject. 
      * @param multicastAddress The address where we listen onto
@@ -27,7 +34,23 @@ public class MulticastListenService {
      * @param multicastBufferCapacity The maximum messages we can store in the queue
      * @throws RuntimeException
      */
-    public MulticastListenService(String multicastAddress, int multicastPort, int multicastBufferCapacity) throws RuntimeException {
+    public MulticastListenService(@Value("${udp.multicast.address}") String multicastAddress,
+                                  @Value("${udp.multicast.port}") int multicastPort,
+                                  @Value("${udp.multicast.buffer-capacity}") int multicastBufferCapacity) throws RuntimeException {
+        this.multicastAddress = multicastAddress;
+        this.multicastPort = multicastPort;
+        this.multicastBufferCapacity = multicastBufferCapacity;
+    }
+
+//    public MulticastListenService(String multicastAddress,
+//                                  int multicastPort,
+//                                  int multicastBufferCapacity) throws RuntimeException {
+//        this.multicastAddress = multicastAddress;
+//        this.multicastPort = multicastPort;
+//        this.multicastBufferCapacity = multicastBufferCapacity;
+//    }
+
+    public void initialize() {
         BlockingQueue<String> packetQueue = new LinkedBlockingQueue<>(multicastBufferCapacity);
         multicastQueue = new LinkedBlockingQueue<>(multicastBufferCapacity);
         System.out.println("MulticastService - Setup multicast listener");
@@ -38,7 +61,7 @@ public class MulticastListenService {
         // Start the processor thread
         Thread processorThread = new Thread(() -> processPackets(packetQueue));
         processorThread.start();
-        
+
         System.out.println("MulticastService - Started multicast listener");
     }
 
