@@ -52,7 +52,7 @@ public class DiscoveryService {
         this.multicastPort = multicastPort;
         this.waitTimeDiscovery = waitTime;
     }
-    public ClientNode discover(ABaseNode node) throws Exception {
+    public void discover(ClientNode node) throws Exception {
         // Set up the UDPServer
         Thread udpListenerThread = new Thread(() -> {
             try { udpListener(this.waitTimeDiscovery, this.listener); } 
@@ -101,7 +101,6 @@ public class DiscoveryService {
             }
         }
 
-        ClientNode newNode = (ClientNode) node; // Casting
         int prevId = -1;
         int nextId = -1;
 
@@ -133,16 +132,16 @@ public class DiscoveryService {
                 //Check if a received message has the same id as the node itself
                 // All the nodes will send back and if a node has the same ID as the received ID, it will send also a message back. 
                 // Now the discovery node can check if his ID is a duplicate in the network.
-                if(nodeMessages.stream().anyMatch(m -> m.getNodeHashId() == ((ClientNode) node).getId())) {
+                if(nodeMessages.stream().anyMatch(m -> m.getNodeHashId() == node.getId())) {
                     System.out.println("Node is already in network!");
                     throw new DuplicateNodeException();
                 }
 
                 //Check the incomming messages from the nodes that have been changed
-                try { prevId = nodeMessages.stream().filter(m -> m.getNextNodeId() == ((ClientNode) node).getId()).toList().getFirst().getNodeHashId(); } 
+                try { prevId = nodeMessages.stream().filter(m -> m.getNextNodeId() == ( node).getId()).toList().getFirst().getNodeHashId(); }
                 catch (Exception ex) { }
 
-                try { nextId = nodeMessages.stream().filter(m -> m.getPrevNodeId() == ((ClientNode) node).getId()).toList().getFirst().getNodeHashId(); } 
+                try { nextId = nodeMessages.stream().filter(m -> m.getPrevNodeId() == ( node).getId()).toList().getFirst().getNodeHashId(); }
                 catch (Exception ex) { }
             }
         }
@@ -157,7 +156,7 @@ public class DiscoveryService {
             //Check if a received message has the same id as the node itself
             // All the nodes will send back and if a node has the same ID as the received ID, it will send also a message back. 
             // Now the discovery node can check if his ID is a duplicate in the network.
-            if (nodeMessages.stream().anyMatch(m -> m.getNodeHashId() == ((ClientNode) node).getId()))
+            if (nodeMessages.stream().anyMatch(m -> m.getNodeHashId() == node.getId()))
             {
                 System.out.println("Node is already in network!");
                 throw new DuplicateNodeException();
@@ -165,11 +164,10 @@ public class DiscoveryService {
         }
 
         // Assign value to node
-        newNode.setNextNodeId(nextId);
-        newNode.setPrevNodeId(prevId);
+        node.setNextNodeId(nextId);
+        node.setPrevNodeId(prevId);
 
         System.out.println("\r\nDiscoveryService - New node composed");
-        return newNode;
     }
 
     private void udpListener(int timeOutTime, UDPServer listener) throws Exception {

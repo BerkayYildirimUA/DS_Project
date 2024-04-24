@@ -28,6 +28,12 @@ public class ClientNode extends ABaseNode{
         return prevNodeId;
     }
 
+    @Override
+    public void setName(String name) {
+        super.setName(name);
+        setId(NameToHash.convert(name));
+    }
+
     /**
      * Set the previous node ID. If prevNodeId == -1, it gets set to id;
      * @param prevNodeId
