@@ -122,24 +122,10 @@ public class DsProjectApplication {
                     // it.
                     isRunning = false; // Stop the main loop
                 }
-                case null, default -> {
+                default -> {
                     // Same as error?
                 }
             }
         }
     }
-    /*@Bean
-    public DiscoveryService discoveryService() {
-        return new DiscoveryService("224.0.0.100", 12345, 2000);
-    }*/
-    /*@Bean
-    public ListenerService listenerService() {
-        return new ListenerService("224.0.0.100", 12345, 1024);
-    }*/
-    /*
-    @Bean
-    public TransferService transferService() {
-        return new TransferService(); // Assuming this class exists
-    }
-     */
 }
