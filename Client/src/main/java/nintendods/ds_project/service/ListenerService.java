@@ -8,10 +8,13 @@ import nintendods.ds_project.model.message.eMessageTypes;
 public class ListenerService {
 
     private static MulticastListenService multicastService = null;
+    private static UnicastListenService unicastService = null;
 
     public ListenerService(String multicastAddress, int multicastPort, int multicastBufferCapacity) {
         if (multicastService == null)
             multicastService = new MulticastListenService(multicastAddress, multicastPort, multicastBufferCapacity);
+
+        unicastService = new UnicastListenService();
     }
 
     public void listenAndUpdate(ClientNode node) throws Exception {
@@ -99,5 +102,9 @@ public class ListenerService {
             } else
                 System.out.println("Node doesn't need to be updated.");
         }
+    }
+
+    public void stopTCP() {
+        unicastService.stop();
     }
 }
