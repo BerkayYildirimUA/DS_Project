@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 public class ListenerService {
 
     private static MulticastListenService multicastService = null;
+    private static UnicastListenService unicastService = null;
 
     String multicastAddress;
     int multicastPort;
@@ -27,7 +28,12 @@ public class ListenerService {
     public void initialize_multicast() {
         if (multicastService == null)
             multicastService = new MulticastListenService(multicastAddress, multicastPort, multicastBufferCapacity);
+<<<<<<< HEAD
         multicastService.initialize();
+=======
+
+        unicastService = new UnicastListenService();
+>>>>>>> 0a42f2d (TCPClient)
     }
 
     public void listenAndUpdate(ClientNode node) throws Exception {
@@ -102,5 +108,9 @@ public class ListenerService {
                 System.out.println(node);
             } else { System.out.println("Node doesn't need to be updated."); }
         }
+    }
+
+    public void stopTCP() {
+        unicastService.stop();
     }
 }
