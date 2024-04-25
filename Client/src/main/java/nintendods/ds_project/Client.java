@@ -11,6 +11,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.util.concurrent.TimeUnit;
 
 @SpringBootApplication(exclude = { DataSourceAutoConfiguration.class })
 public class Client {
@@ -98,7 +99,12 @@ public class Client {
                 }
                 case Transfer -> {
                     // TODO:
-                    nodeState = eNodeState.Error;
+                    // nodeState = eNodeState.Listening;
+                    try {
+                        TimeUnit.SECONDS.sleep(10);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
                 }
                 case Shutdown -> {
                     // TODO
