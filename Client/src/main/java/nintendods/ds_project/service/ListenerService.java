@@ -5,6 +5,9 @@ import nintendods.ds_project.model.message.MNObject;
 import nintendods.ds_project.model.message.UNAMNObject;
 import nintendods.ds_project.model.message.eMessageTypes;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+
 public class ListenerService {
 
     private static MulticastListenService multicastService = null;
@@ -13,6 +16,12 @@ public class ListenerService {
     public ListenerService(String multicastAddress, int multicastPort, int multicastBufferCapacity) {
         if (multicastService == null)
             multicastService = new MulticastListenService(multicastAddress, multicastPort, multicastBufferCapacity);
+
+        try {
+            System.out.println(InetAddress.getLocalHost().getHostAddress());
+        } catch (UnknownHostException e) {
+            throw new RuntimeException(e);
+        }
 
         unicastService = new UnicastListenService();
     }
