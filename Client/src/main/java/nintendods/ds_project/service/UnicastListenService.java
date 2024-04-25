@@ -9,6 +9,7 @@ public class UnicastListenService {
         try {
             client = new TCPClient();
         } catch (IOException e) {
+            System.out.println("Error:\tconstructor\n" + e.toString() + "\n");
             throw new RuntimeException(e);
         }
     }
@@ -17,6 +18,7 @@ public class UnicastListenService {
         try {
             client.stop();
         } catch (IOException e) {
+            System.out.println("Error:\tstop\n" + e.toString() + "\n");
             throw new RuntimeException(e);
         }
     }
