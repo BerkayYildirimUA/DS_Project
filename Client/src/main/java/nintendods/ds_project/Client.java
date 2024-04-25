@@ -102,6 +102,7 @@ public class Client {
                     // nodeState = eNodeState.Listening;
                     try {
                         TimeUnit.SECONDS.sleep(10);
+                        nodeState = eNodeState.Error;
                     } catch (InterruptedException e) {
                         throw new RuntimeException(e);
                     }
