@@ -1,10 +1,12 @@
 package nintendods.ds_project;
 
 import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 import nintendods.ds_project.config.ClientNodeConfig;
 import nintendods.ds_project.exeption.DuplicateNodeException;
 import nintendods.ds_project.exeption.NotEnoughMessageException;
 import nintendods.ds_project.model.ClientNode;
+import nintendods.ds_project.model.message.UNAMObject;
 import nintendods.ds_project.utility.Generator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,9 +15,15 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.concurrent.CountDownLatch;
+
 import nintendods.ds_project.service.DiscoveryService;
 import nintendods.ds_project.service.ListenerService;
 import org.springframework.context.ApplicationContext;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.RestTemplate;
 
 /**
  * Spring Boot application for managing a distributed system node's lifecycle excluding database auto-configuration.
@@ -53,6 +61,9 @@ public class DsProjectApplication {
         MULTICAST_PORT = ClientNodeConfig.MULTICAST_PORT;
     }
 
+    private static UNAMObject nsObject;
+    private static final CountDownLatch latch = new CountDownLatch(1);
+
 
 
     private static boolean isRunning = true;
@@ -60,6 +71,14 @@ public class DsProjectApplication {
         ApplicationContext context = SpringApplication.run(DsProjectApplication.class, args);
         runNodeLifecycle(context);
     }
+
+    @PreDestroy
+    public void prepareForShutdown() throws InterruptedException {
+        System.out.println("Preparing for shutdown...");
+        nodeState = eNodeState.Shutdown;
+        latch.await();
+    }
+
     private static void runNodeLifecycle(ApplicationContext context) throws UnknownHostException {
         DiscoveryService discoveryService = context.getBean(DiscoveryService.class);
         //MulticastSendService multicastSendService = context.getBean(MulticastSendService.class);
@@ -72,9 +91,17 @@ public class DsProjectApplication {
         boolean isRunning = true; // Controls the main loop
         ListenerService listenerService = null; // Service for handling incoming messages
         int discoveryRetries = 0; // Counter for discovery attempts
+
+        int skip = 10000;
+        Boolean isDebug = Boolean.TRUE;
         while (isRunning) {
 
-            System.out.println(node.getNextNodeId());
+            if (skip <= 0){
+                System.out.println("WE ARE TRYING TO STOP NOW");
+                nodeState = eNodeState.Shutdown;
+            } else if (isDebug) {
+                skip -= 1;
+            }
 
             // Finite state machine with eNodeState states
             switch (nodeState) {
@@ -116,7 +143,7 @@ public class DsProjectApplication {
 
                     // //Discovery has succeeded so continue
                     // //get NSObject from discovery service
-                    // nsObject = ds.getNSObject(); //For later use
+                    nsObject = ds.getNSObject(); //For later use
                     System.out.println(node.toString());
                     System.out.println("Successfully reply in " + discoveryRetries + " discoveries.");
                     nodeState = eNodeState.Listening; // Move to Listening state after successful discovery
@@ -140,6 +167,9 @@ public class DsProjectApplication {
                     nodeState = eNodeState.Listening; // Loop back to Listening for simplicity
                 }
                 case Shutdown -> {
+                    shutdown();
+                    latch.countDown();
+                    isRunning = false;
                     // TODO: Handle shutdown process, ensuring all connections are closed properly
                     // Gracefully, update the side nodes on its own and leave the ring topology.
                 }
@@ -155,4 +185,29 @@ public class DsProjectApplication {
             }
         }
     }
+
+
+    private static void shutdown(){
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        HttpEntity<String> request = new HttpEntity<>(headers);
+
+        ResponseEntity<String> getNextNodeIDResponse = restTemplate.getForEntity("http://" + nsObject.getNSAddress() + ":8089/node/" + node.getNextNodeId(), String.class);
+        String nextNodeIP = getNextNodeIDResponse.getBody();
+
+        ResponseEntity<String> getPrevNodeIDResponse = restTemplate.getForEntity("http://" + nsObject.getNSAddress() + ":8089/node/" + node.getPrevNodeId(), String.class);
+        String prevNodeIP = getPrevNodeIDResponse.getBody();
+
+        // in PREV node I need to change their NEXT node to my NEXT node
+        // http heeft 1 '/' in de plaats van 2 want the IP's strings starten met '/' en ik will dit niet uit filtreren.
+        restTemplate.put("http:/" + prevNodeIP + ":8080/api/Management/nextNodeID/?ID=" + node.getNextNodeId(), String.class);
+
+        // in NEXT node I need to change their PREV node to my PREV node
+        restTemplate.put("http:/" + nextNodeIP + ":8080/api/Management/prevNodeID/?ID=" + node.getPrevNodeId(), String.class);
+
+        restTemplate.delete("http://" + nsObject.getNSAddress() + ":8089/nodes/" + node.getId());
+    }
+
+
+
 }

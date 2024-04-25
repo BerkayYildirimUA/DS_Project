@@ -184,7 +184,7 @@ public class DiscoveryService {
     }
 
     //later use
-    // public UNAMObject getNSObject(){
-    //     return nsObject;
-    // }
+    public UNAMObject getNSObject(){
+         return nsObject;
+    }
 }

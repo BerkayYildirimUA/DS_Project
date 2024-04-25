@@ -26,6 +26,14 @@ public class NameServerAPI {
         else            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
     }
 
+    @GetMapping("/node/{id}")
+    public ResponseEntity<String> getNodeIPfromID(@PathVariable("id") int id) {
+        String ip = nodeDB.getIPfromID(id);
+
+        if (ip != null && !ip.isEmpty()) return ResponseEntity.status(HttpStatus.OK).body(ip);
+        else            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+    }
+
     @PostMapping("/nodes")
     public ResponseEntity<String> postFile(@RequestBody ClientNode newNode) {
         ResponseObject<ClientNode> badResponse = new ResponseObject<>(newNode);
