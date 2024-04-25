@@ -1,5 +1,7 @@
 package nintendods.ds_project;
 
+import jakarta.annotation.PostConstruct;
+import nintendods.ds_project.config.ClientNodeConfig;
 import nintendods.ds_project.exeption.DuplicateNodeException;
 import nintendods.ds_project.exeption.NotEnoughMessageException;
 import nintendods.ds_project.model.ClientNode;
@@ -21,28 +23,37 @@ import org.springframework.context.ApplicationContext;
 @SpringBootApplication(exclude = { DataSourceAutoConfiguration.class })
 public class DsProjectApplication {
 
-    @Autowired
     private static ClientNode node;
+
+    @Autowired
+    public void setNode(ClientNode node) {
+        DsProjectApplication.node = node;
+    }
 
     private static eNodeState nodeState;
 
-    @Value("${NODE_NAME_LENGTH}")
-    private static int NODE_NAME_LENGTH; // Length of the random node name
-    @Value("${NODE_GLOBAL_PORT}")
-    private static int NODE_GLOBAL_PORT; //Fixed port for node operations
-    @Value("${DISCOVERY_RETRIES}")
-    private static int DISCOVERY_RETRIES; // Maximum number of retries for discovery
-
     private static int discoveryTimeout = 500; //In microseconds: Timeout for discovery
 
-    @Value("${DISCOVERY_ADDITION_TIMEOUT}")
-    private static final int DISCOVERY_ADDITION_TIMEOUT = 1000; //In microseconds
-    @Value("${LISTENER_BUFFER_SIZE}")
-    private static final int LISTENER_BUFFER_SIZE = 20; // Buffer size for the listener service
-    @Value("${MULTICAST_ADDRESS}")
-    private static final String MULTICAST_ADDRESS = "224.0.0.100"; // Multicast address for network communication
-    @Value("${MULTICAST_PORT}")
-    private static final int MULTICAST_PORT = 12345; // Port for multicast communication
+    private static int NODE_NAME_LENGTH; // Length of the random node name
+    private static int NODE_GLOBAL_PORT; //Fixed port for node operations
+    private static int DISCOVERY_RETRIES; // Maximum number of retries for discovery
+    private static int DISCOVERY_ADDITION_TIMEOUT; //In microseconds
+    private static int LISTENER_BUFFER_SIZE; // Buffer size for the listener service
+    private static String MULTICAST_ADDRESS; // Multicast address for network communication
+    private static int MULTICAST_PORT; // Port for multicast communication
+
+    @PostConstruct
+    private void init() {
+        NODE_NAME_LENGTH = ClientNodeConfig.NODE_NAME_LENGTH;
+        NODE_GLOBAL_PORT = ClientNodeConfig.NODE_GLOBAL_PORT;
+        DISCOVERY_RETRIES = ClientNodeConfig.DISCOVERY_RETRIES;
+        DISCOVERY_ADDITION_TIMEOUT = ClientNodeConfig.DISCOVERY_ADDITION_TIMEOUT;
+        LISTENER_BUFFER_SIZE = ClientNodeConfig.LISTENER_BUFFER_SIZE;
+        MULTICAST_ADDRESS = ClientNodeConfig.MULTICAST_ADDRESS;
+        MULTICAST_PORT = ClientNodeConfig.MULTICAST_PORT;
+    }
+
+
 
     private static boolean isRunning = true;
     public static void main(String[] args) throws UnknownHostException {
@@ -62,6 +73,9 @@ public class DsProjectApplication {
         ListenerService listenerService = null; // Service for handling incoming messages
         int discoveryRetries = 0; // Counter for discovery attempts
         while (isRunning) {
+
+            System.out.println(node.getNextNodeId());
+
             // Finite state machine with eNodeState states
             switch (nodeState) {
                 case Discovery -> {
