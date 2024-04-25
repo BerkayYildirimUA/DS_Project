@@ -1,10 +1,12 @@
 package nintendods.ds_project.model.file;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 import nintendods.ds_project.model.ABaseNode;
 import nintendods.ds_project.model.file.log.ALog;
+import nintendods.ds_project.model.file.log.eLog;
 import nintendods.ds_project.utility.NameToHash;
 
 public class AFile
@@ -17,27 +19,19 @@ public class AFile
     ABaseNode replicatedOwner;  //The replicated Owner where the file is located
 
     /**
-     * Create a new file object that creates an empty log.
-     * @param path the absolute path of the given file
-     * @param name the name of the file 
-     */
-    public AFile(String path, String name){
-        setName(name);
-        setPath(path);
-        logs = new ArrayList<>();
-    }
-
-    /**
-     * Create a new file object that creates a log with the provided ABaseNode.
-     * @param path the absolute path of the given file
+     * Create a new file object that creates a log with the provided ABaseNode. It finds the file based on the absolute path.
+     * @param path the absolute path of the given file with the file name included
      * @param name the name of the file 
      * @param owner the ABaseNode object that we want to set as the owner of the file
      */
-    public AFile(String path, String name, ABaseNode owner){
+    public AFile(String path, String name, ABaseNode creator){
         setName(name);
         setPath(path);
         logs = new ArrayList<>();
-        this.owner = owner;
+        this.owner = creator;
+
+        //Set a new log of initial creation with the owner of the file
+        logs.add(new ALog(owner, eLog.fileCreation, "initial creation of the file"));
     }
 
     /**
@@ -49,12 +43,7 @@ public class AFile
      * @param prevList
      * @param replicatedOwner
      */
-    public AFile(String path, String name, ABaseNode prevOwner, List<ALog> prevList, ABaseNode replicatedOwner){
-        setName(name);
-        setPath(path);
-        this.logs = prevList;
-        this.owner = prevOwner;
-        this.replicatedOwner = replicatedOwner;
+    public AFile(String path, String name, ABaseNode creator, List<ALog> prevList){
     }
 
     /**
@@ -71,7 +60,7 @@ public class AFile
     }
 
     /**
-     * Set the path of the file with no trailing / so /user/jhon/dir and not /user/jhon/dir/
+     * Set the path of the file with the file included
      * @param path
      */
     public void setPath(String path){
@@ -82,18 +71,14 @@ public class AFile
     }
 
     /**
-     * Returns the full path with the path + name and it adds a / between path and name.
-     * @return
-     */
-    public String getFullPathName(){
-        return this.path + "/" +this.name;
-    }
-
-    /**
      * Returns the id of the file based on the name of the file.
      * @return
      */
     public int getId(){
         return this.id;
+    }
+
+    public File getFile(){
+        return new File(this.path);
     }
 }
