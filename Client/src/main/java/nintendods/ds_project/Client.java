@@ -34,7 +34,7 @@ public class Client {
     public static void main(String[] args) throws IOException {
         // Create Node
 
-        node = new ClientNode(InetAddress.getLocalHost(), NODE_GLOBAL_PORT, "Robbe");
+        node = new ClientNode(InetAddress.getLocalHost(), NODE_GLOBAL_PORT, generateRandomString(NODE_NAME_LENGTH));
         System.out.println(node);
 
         eNodeState nodeState = eNodeState.Discovery;
@@ -96,6 +96,7 @@ public class Client {
                     }
 
                     try {
+                        System.out.println("Client: Start sleep");
                         TimeUnit.SECONDS.sleep(10);
                         nodeState = eNodeState.Error;
                     } catch (InterruptedException e) {
@@ -121,6 +122,7 @@ public class Client {
                     // TODO
                     // Hard, only transmit to naming server and the naming server needs to deal with it.
 
+                    System.out.println("Client: Send error");
                     nsapiService.executeErrorDelete("/nodes/" + node.getId() + "error");
                     /**
                     * When the node gets in the Error state, we'll access the 
