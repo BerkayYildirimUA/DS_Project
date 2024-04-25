@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 
 @SpringBootApplication(exclude = { DataSourceAutoConfiguration.class })
-public class DsProjectApplication {
+public class Client {
 
     private static ClientNode node;
 
@@ -75,7 +75,7 @@ public class DsProjectApplication {
                     nsObject = ds.getNSObject();
 
                     // //Define the api object
-                    // nsapiService = new NSAPIService(nsObject.getNSAddress(), nsObject.getNSPort());
+                    nsapiService = new NSAPIService(nsObject.getNSAddress(), nsObject.getNSPort());
 
                     // //Add node to Naming Server
                     // nsapiService.executePost("/nodes", jsonConverter.toJson(nsObject));
@@ -98,7 +98,14 @@ public class DsProjectApplication {
                 }
                 case Transfer -> {
                     // TODO:
-                    nodeState = eNodeState.Listening;
+
+                    // nodeState = eNodeState.Listening;
+                    try {
+                        TimeUnit.SECONDS.sleep(10);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                    nodeState = eNodeState.Error;
                 }
                 case Shutdown -> {
                     // TODO
@@ -114,6 +121,7 @@ public class DsProjectApplication {
                     // TODO
                     // Hard, only transmit to naming server and the naming server needs to deal with it.
 
+                    nsapiService.executeErrorDelete("/nodes/" + node.getId() + "error");
                     /**
                     * When the node gets in the Error state, we'll access the 
                     * NamingServer API to handle everything from here.
@@ -127,7 +135,6 @@ public class DsProjectApplication {
                 }
             }
         }
-
         // SpringApplication.run(DsProjectApplication.class, args);
     }
 
