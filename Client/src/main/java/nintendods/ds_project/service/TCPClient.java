@@ -13,7 +13,7 @@ public class TCPClient {
     private final DataOutputStream dataOut;
 
     public TCPClient() throws IOException {
-        serverSocket = new ServerSocket(378);
+        serverSocket = new ServerSocket(3780);
         System.out.println("Listening for clients...");
 
         clientSocket = serverSocket.accept();
