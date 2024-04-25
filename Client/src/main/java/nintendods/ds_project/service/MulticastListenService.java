@@ -75,7 +75,7 @@ public class MulticastListenService {
 
             while (true) {
                 multicastSocket.receive(packet);
-                System.out.println("MulticastService - Received a multicast");
+                System.out.println("MulticastService - Received a multicast: " + packet.getAddress().getHostAddress());
                 String message = new String(packet.getData(), 0, packet.getLength());
                 //System.out.println(message);
                 //Only add if the message is not yet in the queue.
