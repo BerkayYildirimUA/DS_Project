@@ -1,5 +1,7 @@
 package nintendods.ds_project.service;
 
+import org.springframework.beans.factory.annotation.Value;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -12,8 +14,11 @@ public class TCPClient {
     private final DataInputStream dataIn;
     private final DataOutputStream dataOut;
 
+    @Value("${tcp.unicast.port}")
+    private int PORT;
+
     public TCPClient() throws IOException {
-        serverSocket = new ServerSocket(3780);
+        serverSocket = new ServerSocket(PORT);
         System.out.println("Listening for clients...");
 
         clientSocket = serverSocket.accept();

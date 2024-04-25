@@ -95,17 +95,17 @@ public class Client {
                         nodeState = eNodeState.Error;
                     }
 
-                    nodeState = eNodeState.Transfer;
-                }
-                case Transfer -> {
-                    // TODO:
-                    // nodeState = eNodeState.Listening;
                     try {
                         TimeUnit.SECONDS.sleep(10);
                         nodeState = eNodeState.Error;
                     } catch (InterruptedException e) {
                         throw new RuntimeException(e);
                     }
+                    // nodeState = eNodeState.Transfer;
+                }
+                case Transfer -> {
+                    // TODO:
+                    nodeState = eNodeState.Listening;
                 }
                 case Shutdown -> {
                     // TODO
