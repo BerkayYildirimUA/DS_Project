@@ -7,6 +7,7 @@ import java.net.Socket;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import nintendods.ds_project.model.ANode;
 import nintendods.ds_project.model.file.AFile;
 import nintendods.ds_project.model.message.FileMessage;
 
@@ -16,14 +17,21 @@ import nintendods.ds_project.model.message.FileMessage;
 public class FileTranseiverService {
 
     @Value("${tcp.file.receive.port}")
-    private int port = 12346; // this final, do not change.
+    private int port = 12346; // this is final, do not change.
 
     private static BlockingQueue<FileMessage> receiveQueue;
 
     public FileTranseiverService() {
         Thread receiverThread = new Thread(() -> receiveFile());
-        receiveQueue  = new LinkedBlockingQueue<>(10);
+        receiveQueue = new LinkedBlockingQueue<>(10);
         receiverThread.start();
+
+        try {
+            Thread.sleep(200); // Sleep for 500 milliseconds
+        } catch (InterruptedException e) {
+            // Handle interruption if needed
+            e.printStackTrace();
+        }
     }
 
     public boolean sendFile(AFile fileObject, String receiverAddress) {
@@ -50,8 +58,8 @@ public class FileTranseiverService {
             objectOutputStream.writeObject(message);
 
             // Close all
-            //objectOutputStream.close();
-            //outputStream.close();
+            // objectOutputStream.close();
+            // outputStream.close();
             socket.close();
 
         } catch (Exception ex) {
@@ -98,12 +106,60 @@ public class FileTranseiverService {
         }
     }
 
-    public boolean available() {
+    public AFile saveIncommingFile(ANode node) {
+        return saveIncommingFile(node, "");
+    }
+
+    /**
+     * Save a file that is present in the incoming buffer. If a file is present, we
+     * save it in the given directory
+     * 
+     * @param newPath
+     * @return
+     */
+    public AFile saveIncommingFile(ANode node, String directoryPath) {
+        if (available() && node != null) {
+            FileMessage m = getFileMessage();
+            String newPath = "";
+
+            if (m != null) {
+                AFile fileObject = m.getFileObject();
+
+                // Set the new owner of the file
+                fileObject.setOwner(node);
+
+                try {
+                    if (directoryPath.equals("")) {
+                        newPath = m.getFileObject().getName();
+                    } else {
+                        newPath = directoryPath + "/" + m.getFileObject().getName();
+                    }
+
+                    FileOutputStream fos;
+                    fos = new FileOutputStream(newPath);
+                    fos.write(m.getFileInByte());
+                    fos.close();
+
+                    //set file path
+                    fileObject.setPath(new File(newPath).getAbsolutePath());
+
+                    return fileObject;
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+            }
+
+            return null;
+        }
+        return null;
+    }
+
+    private boolean available() {
         return !receiveQueue.isEmpty();
     }
 
-    public FileMessage getFileMessage()
-    {
+    private FileMessage getFileMessage() {
         return receiveQueue.poll();
     }
 }

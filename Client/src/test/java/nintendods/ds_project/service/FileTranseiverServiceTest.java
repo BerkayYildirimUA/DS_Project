@@ -9,64 +9,78 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.nio.file.Files;
 
 import org.junit.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import nintendods.ds_project.model.ANetworkNode;
-import nintendods.ds_project.model.ANode;
 import nintendods.ds_project.model.file.AFile;
 import nintendods.ds_project.model.message.FileMessage;
-import nintendods.ds_project.utility.Interpolate;
 
 @SpringBootTest
 public class FileTranseiverServiceTest {
-        @Test
-    public void checkMappingUpperLimit(){
+    @Test
+    public void testFileTransfer() {
         try {
             File testFile = new File("TestFile.txt");
-            if(testFile.createNewFile()){
+            if (testFile.createNewFile()) {
                 FileWriter fw = new FileWriter(testFile);
                 fw.append("This is a text in the file!");
                 fw.close();
             }
 
-            ANetworkNode node = new ANetworkNode(InetAddress.getLocalHost(), 21, "Robbe");
-            //Setup AFile object
-            AFile fileObj = new AFile(testFile.getAbsolutePath(), testFile.getName(), node);
-            
-            //Create FileTranseiver object and transfer file
+            ANetworkNode nodeSend = new ANetworkNode(InetAddress.getLocalHost(), 21, "Robbe");
+            // Setup AFile object
+            AFile fileObj = new AFile(testFile.getAbsolutePath(), testFile.getName(), nodeSend);
+
+            fileObj.getDirPath();
+
+            // Create FileTranseiver object and transfer file
             FileTranseiverService ftss = new FileTranseiverService();
 
-            ftss.sendFile(fileObj, node.getAddress().getHostAddress());
+            ftss.sendFile(fileObj, nodeSend.getAddress().getHostAddress());
 
             System.out.println("Sended over");
 
+            try {
+                Thread.sleep(500); // Sleep for 500 milliseconds
+            } catch (InterruptedException e) {
+                // Handle interruption if needed
+                e.printStackTrace();
+            }
+
+            //receiver side
+            // Create FileTranseiver object and transfer file
+            //FileTranseiverService ftssRes = new FileTranseiverService();
+            ANetworkNode nodeRec = new ANetworkNode(InetAddress.getLocalHost(), 21, "Robbe receive");
+
             boolean ok = false;
-            String path = "";
+            AFile newFileObject = null;
 
-            while(!ok){
-                if(ftss.available()){
-                    FileMessage m = ftss.getFileMessage();
-
-                    if(m != null){
-                        path = m.getFileObject().getPath() + "received";
-                        FileOutputStream fos = new FileOutputStream(path);
-                        fos.write(m.getFileInByte());
-                        fos.close();
-                    }
+            while (!ok) {
+                //newFileObject = ftss.saveIncommingFile(nodeRec, "/home/robbe/Documents");
+                newFileObject = ftss.saveIncommingFile(nodeRec);
+                if (newFileObject != null) {
                     ok = true;
                 }
             }
 
-            //Check if file exists on the system
-            assertTrue(new File(path).exists());
+            // Check if file exists on the system
+            assertTrue(new File(newFileObject.getAbsolutePath()).exists());
+
+            //show logs
+            System.out.println(newFileObject.getFormattedLogs());
+
+            // Delete the used files
+            testFile.delete();
+            new File(newFileObject.getAbsolutePath()).delete();
 
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
-        } //gets the .tmp suffix
-        
-        //Create file object
+        } // gets the .tmp suffix
+
+        // Create file object
     }
 }

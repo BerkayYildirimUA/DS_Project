@@ -14,7 +14,7 @@ public class FileMessage implements Serializable{
     public FileMessage(AFile fileObject){
         //Create bytes
         try {
-            FileInputStream temp = new FileInputStream(fileObject.getPath());
+            FileInputStream temp = new FileInputStream(fileObject.getAbsolutePath());
             this.fileInByte = new byte[(int) fileObject.getFile().length()];
             temp.read(this.fileInByte);
             this.fileObject = fileObject;
