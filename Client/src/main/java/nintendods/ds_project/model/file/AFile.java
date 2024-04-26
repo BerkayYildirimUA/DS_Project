@@ -1,22 +1,23 @@
 package nintendods.ds_project.model.file;
 
 import java.io.File;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import nintendods.ds_project.model.ABaseNode;
+import nintendods.ds_project.model.ANode;
 import nintendods.ds_project.model.file.log.ALog;
 import nintendods.ds_project.model.file.log.eLog;
 import nintendods.ds_project.utility.NameToHash;
 
-public class AFile
+public class AFile implements Serializable
 {
     String path; //A path (absolute)
     String name; //A name (with extention)
     int id;  //the hashed id of the name
     List<ALog> logs; //All the logs that happend with the file
-    ABaseNode owner;    //The base owner of the file where the file has its origine.
-    ABaseNode replicatedOwner;  //The replicated Owner where the file is located
+    ANode owner;    //The base owner of the file where the file has its origine.
+    ANode replicatedOwner;  //The replicated Owner where the file is located
 
     /**
      * Create a new file object that creates a log with the provided ABaseNode. It finds the file based on the absolute path.
@@ -24,7 +25,7 @@ public class AFile
      * @param name the name of the file 
      * @param owner the ABaseNode object that we want to set as the owner of the file
      */
-    public AFile(String path, String name, ABaseNode creator){
+    public AFile(String path, String name, ANode creator){
         setName(name);
         setPath(path);
         logs = new ArrayList<>();
@@ -43,7 +44,7 @@ public class AFile
      * @param prevList
      * @param replicatedOwner
      */
-    public AFile(String path, String name, ABaseNode creator, List<ALog> prevList){
+    public AFile(String path, String name, ANode creator, List<ALog> prevList){
     }
 
     /**

@@ -1,6 +1,6 @@
 package nintendods.ds_project.service;
 
-import nintendods.ds_project.model.ABaseNode;
+import nintendods.ds_project.model.ANetworkNode;
 import nintendods.ds_project.model.message.MNObject;
 import nintendods.ds_project.model.message.UNAMNObject;
 import nintendods.ds_project.model.message.eMessageTypes;
@@ -106,7 +106,7 @@ public class MulticastListenService {
         }
     }
 
-    public void sendReply(UNAMNObject reply, ABaseNode toNode) throws IOException {
+    public void sendReply(UNAMNObject reply, ANetworkNode toNode) throws IOException {
         long id = System.currentTimeMillis();
         reply.setMessageId(id);
 

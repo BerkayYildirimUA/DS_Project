@@ -2,7 +2,7 @@ package nintendods.ds_project.service;
 
 import nintendods.ds_project.exeption.DuplicateNodeException;
 import nintendods.ds_project.exeption.NotEnoughMessageException;
-import nintendods.ds_project.model.ABaseNode;
+import nintendods.ds_project.model.ANetworkNode;
 import nintendods.ds_project.model.ClientNode;
 import nintendods.ds_project.model.message.*;
 import nintendods.ds_project.utility.JsonConverter;
@@ -52,7 +52,7 @@ public class DiscoveryService {
         this.multicastPort = multicastPort;
         this.waitTimeDiscovery = waitTime;
     }
-    public ClientNode discover(ABaseNode node) throws Exception {
+    public ClientNode discover(ANetworkNode node) throws Exception {
         // Set up the UDPServer
         Thread udpListenerThread = new Thread(() -> {
             try { udpListener(this.waitTimeDiscovery, this.listener); } 

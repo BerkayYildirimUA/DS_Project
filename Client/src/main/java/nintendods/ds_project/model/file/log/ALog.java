@@ -1,25 +1,27 @@
 package nintendods.ds_project.model.file.log;
 
-import nintendods.ds_project.model.ABaseNode;
+import java.io.Serializable;
 
-public class ALog {
-    ABaseNode issuer; // The node that has issued the log file.
+import nintendods.ds_project.model.ANode;
+
+public class ALog implements Serializable {
+    ANode issuer; // The node that has issued the log file.
     long timestamp; // The timestamp of writing.
     eLog logType; // The type of logging.
     String message; // Some extra info for the logging. Is not mandetory.
 
-    public ALog(ABaseNode issuer, eLog type, String message) {
+    public ALog(ANode issuer, eLog type, String message) {
         setIssuer(issuer);
         setType(type);
         setTimestamp(System.currentTimeMillis());
         setMessage(message);
     }
 
-    public ABaseNode getIssuer() {
+    public ANode getIssuer() {
         return this.issuer;
     }
 
-    private void setIssuer(ABaseNode issuer) {
+    private void setIssuer(ANode issuer) {
         this.issuer = issuer;
     }
 
