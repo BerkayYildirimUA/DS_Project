@@ -69,6 +69,7 @@ public class NodeDB {
 
     /* --------------------------------- CHECK --------------------------------- */
     public boolean exists(int nodeID) {
+        System.out.println(nodeID_to_nodeIP);
         return nodeID_to_nodeIP.containsKey(nodeID);
     }
 
@@ -77,7 +78,6 @@ public class NodeDB {
     }
 
     public boolean exists(int nodeID, String ip) {
-
         if (nodeID_to_nodeIP.containsKey(nodeID)) {
             return nodeID_to_nodeIP.get(nodeID).equals(ip);
         } else {
