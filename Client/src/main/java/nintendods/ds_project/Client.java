@@ -11,6 +11,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.concurrent.TimeUnit;
 
 @SpringBootApplication(exclude = { DataSourceAutoConfiguration.class })
@@ -50,6 +52,7 @@ public class Client {
             switch (nodeState) {
                 case Discovery -> {
                     // Set Discovery on
+                    System.out.println("Start: DISCOVERY\t" + Timestamp.from(Instant.now()));
 
                     if (discoveryRetries == DISCOVERY_RETRIES) {
                         // Max retries reached
@@ -86,6 +89,7 @@ public class Client {
                     nodeState = eNodeState.Listening;
                 }
                 case Listening -> {
+                    System.out.println("Start: LISTENING\t" + Timestamp.from(Instant.now()));
                     if (listenerService == null)
                         listenerService = new ListenerService(MULTICAST_ADDRESS, MULTICAST_PORT, LISTENER_BUFFER_SIZE);
                     try {
@@ -105,19 +109,12 @@ public class Client {
                     // nodeState = eNodeState.Transfer;
                 }
                 case Transfer -> {
+                    System.out.println("Start: TRANSFER\t" + Timestamp.from(Instant.now()));
                     // TODO:
-
-                    // nodeState = eNodeState.Listening;
-                    try {
-                        System.out.println("Client: Start sleep");
-                        TimeUnit.SECONDS.sleep(10);
-                        nodeState = eNodeState.Error;
-                    } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
-                    }
-                    nodeState = eNodeState.Error;
+                    nodeState = eNodeState.Listening;
                 }
                 case Shutdown -> {
+                    System.out.println("Start: SHUTDOWN\t" + Timestamp.from(Instant.now()));
                     // TODO
                     // Gracefully, update the side nodes on its own and leave the ring topology.
 
@@ -128,6 +125,7 @@ public class Client {
                     */
                 }
                 case Error -> {
+                    System.out.println("Start: ERROR\t" + Timestamp.from(Instant.now()));
                     // TODO
                     // Hard, only transmit to naming server and the naming server needs to deal with it.
 
