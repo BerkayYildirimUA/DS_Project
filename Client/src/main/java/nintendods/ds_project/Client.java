@@ -52,8 +52,6 @@ public class Client {
             switch (nodeState) {
                 case Discovery -> {
                     // Set Discovery on
-                    System.out.println("Start: DISCOVERY\t" + Timestamp.from(Instant.now()));
-
                     if (discoveryRetries == DISCOVERY_RETRIES) {
                         // Max retries reached
                         System.out.println("Max discovery retries reached");
@@ -109,7 +107,6 @@ public class Client {
                     } else nodeState = eNodeState.Transfer;
                 }
                 case Transfer -> {
-                    System.out.println("Start: TRANSFER\t" + Timestamp.from(Instant.now()));
                     // TODO:
                     nodeState = eNodeState.Listening;
                 }
