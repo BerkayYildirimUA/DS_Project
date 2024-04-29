@@ -61,11 +61,11 @@ On failure of a node, the network must be self healing.
     2. [x] Check the amount of available nodes and set the prev and next node accordingly
 
 
-## Shutdown (Berkay and Ahmad)
-  ### Naming Server (Ahmad)
+## Shutdown (Berkay)
+  ### Naming Server
   - [] needs a method (or API call) that removes a node that then shuts itself down.
     - This removes the Node ID from the NameServer database
-  ### Node (Berkay)
+  ### Node
   - [] needs to be able to send out the deletion of its own ID in the Naming Server at shutdown.
   - [] needs to be able to send out the renewal of the neighbour nodes (previous and next node) configurations so the ring doesn't break.
     - The node that shutdowns, has the data of the direct neighbour nodes so the communication is direct.
@@ -93,7 +93,7 @@ To ensure easy coding, we'll create a file transfer class that can be used by th
 
 This will be done in 3 phases.
 
-## starting
+## starting (Ahmad)
 All files that are stored on each node should be replicated to corresponding nodes in the ring topology. This way, a new node to which the file is replicated becomes the owner of the file.
 
 After bootstrap and discovery, the new node has to verify its local files (folder on
