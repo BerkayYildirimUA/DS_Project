@@ -43,6 +43,9 @@ public class NSAPIService {
             connection.setUseCaches(false);
             connection.setDoOutput(true);
 
+            System.out.println("Request: " + connection.toString());
+            System.out.println("Header: " + connection.getHeaderFields().toString());
+
             // Send request
             DataOutputStream wr = new DataOutputStream (connection.getOutputStream());
             // wr.writeBytes(json);

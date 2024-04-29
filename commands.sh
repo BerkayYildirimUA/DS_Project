@@ -2,7 +2,7 @@
 
 ssh -p 2031 root@6dist.idlab.uantwerpen.be
 
-git clone git@github.com:BerkayYildirimUA/DS_Project.git
+git clone https://github.com/BerkayYildirimUA/DS_Project.git
 git checkout <branch>
 git pull
 git reset --hard HEAD~1

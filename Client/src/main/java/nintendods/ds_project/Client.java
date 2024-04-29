@@ -101,7 +101,7 @@ public class Client {
 
                     try {
                         System.out.println("Client: Start sleep");
-                        TimeUnit.SECONDS.sleep(10);
+                        TimeUnit.SECONDS.sleep(15);
                         nodeState = eNodeState.Error;
                     } catch (InterruptedException e) {
                         throw new RuntimeException(e);
