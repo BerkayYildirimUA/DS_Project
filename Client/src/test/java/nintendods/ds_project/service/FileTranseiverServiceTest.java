@@ -1,28 +1,25 @@
 package nintendods.ds_project.service;
 
 import static org.junit.Assert.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.InetAddress;
-import java.nio.file.Files;
 
 import org.junit.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import nintendods.ds_project.model.ANetworkNode;
 import nintendods.ds_project.model.file.AFile;
-import nintendods.ds_project.model.message.FileMessage;
 
 @SpringBootTest
 public class FileTranseiverServiceTest {
     @Test
     public void testFileTransfer() {
         try {
+
+            // A file on the system is created
             File testFile = new File("TestFile.txt");
             if (testFile.createNewFile()) {
                 FileWriter fw = new FileWriter(testFile);
@@ -30,17 +27,18 @@ public class FileTranseiverServiceTest {
                 fw.close();
             }
 
+            // A node is created
             ANetworkNode nodeSend = new ANetworkNode(InetAddress.getLocalHost(), 21, "Robbe");
-            // Setup AFile object
+
+            // Node sees if a file is on his system and it will create an object of it.
             AFile fileObj = new AFile(testFile.getAbsolutePath(), testFile.getName(), nodeSend);
 
-            fileObj.getDirPath();
-
+            // Lets say that the file needs to be transfered
             // Create FileTranseiver object and transfer file
             FileTranseiverService ftss = new FileTranseiverService();
 
+            // Send the file to itself. Can be any node received from the namingserver.
             ftss.sendFile(fileObj, nodeSend.getAddress().getHostAddress());
-
             System.out.println("Sended over");
 
             try {
@@ -50,16 +48,16 @@ public class FileTranseiverServiceTest {
                 e.printStackTrace();
             }
 
-            //receiver side
+            // receiver side
             // Create FileTranseiver object and transfer file
-            //FileTranseiverService ftssRes = new FileTranseiverService();
+            // FileTranseiverService ftssRes = new FileTranseiverService();
             ANetworkNode nodeRec = new ANetworkNode(InetAddress.getLocalHost(), 21, "Robbe receive");
 
             boolean ok = false;
             AFile newFileObject = null;
 
             while (!ok) {
-                //newFileObject = ftss.saveIncommingFile(nodeRec, "/home/robbe/Documents");
+                // newFileObject = ftss.saveIncommingFile(nodeRec, "/home/robbe/Documents");
                 newFileObject = ftss.saveIncommingFile(nodeRec);
                 if (newFileObject != null) {
                     ok = true;
@@ -69,13 +67,12 @@ public class FileTranseiverServiceTest {
             // Check if file exists on the system
             assertTrue(new File(newFileObject.getAbsolutePath()).exists());
 
-            //show logs
+            // show logs
             System.out.println(newFileObject.getFormattedLogs());
 
             // Delete the used files
             testFile.delete();
             new File(newFileObject.getAbsolutePath()).delete();
-
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
