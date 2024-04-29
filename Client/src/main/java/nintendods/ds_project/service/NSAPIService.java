@@ -32,7 +32,10 @@ public class NSAPIService {
 
         try {
             // Create connection
+            System.out.println("URL");
             URL url = new URL(getBaseUrl() + path);
+
+            System.out.println("Connection");
             connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("DELETE");
             connection.setRequestProperty("Content-Type", "application/json");
