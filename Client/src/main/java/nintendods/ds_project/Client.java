@@ -5,6 +5,7 @@ import nintendods.ds_project.model.message.UNAMObject;
 import nintendods.ds_project.service.DiscoveryService;
 import nintendods.ds_project.service.ListenerService;
 import nintendods.ds_project.service.NSAPIService;
+import nintendods.ds_project.service.UnicastListenService;
 import nintendods.ds_project.utility.JsonConverter;
 
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -21,6 +22,7 @@ public class Client {
     private static ClientNode node;
 
     private static NSAPIService nsapiService;
+    private static UnicastListenService unicastService;
 
     private static final int NODE_NAME_LENGTH = 20;
     private static final int NODE_GLOBAL_PORT = 21;
