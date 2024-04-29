@@ -98,8 +98,15 @@ public class Client {
                         nodeState = eNodeState.Error;
                     }
 
-                    if (node.getId() < node.getPrevNodeId())    nodeState = eNodeState.Error;
-                    else                                        nodeState = eNodeState.Transfer;
+                    if (node.getId() < node.getPrevNodeId())    {
+                        System.out.println("Client sleep");
+                        try {
+                            TimeUnit.SECONDS.sleep(3);
+                        } catch (InterruptedException e) {
+                            throw new RuntimeException(e);
+                        }
+                        nodeState = eNodeState.Error;
+                    } else nodeState = eNodeState.Transfer;
                 }
                 case Transfer -> {
                     System.out.println("Start: TRANSFER\t" + Timestamp.from(Instant.now()));
