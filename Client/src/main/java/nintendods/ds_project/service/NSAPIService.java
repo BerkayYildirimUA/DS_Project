@@ -24,7 +24,7 @@ public class NSAPIService {
     }
 
     private String getBaseUrl () {
-        return ip + ":" + port;
+        return "http://" + ip + ":" + port;
     }
 
     public String executeErrorDelete(String path) {
@@ -39,6 +39,15 @@ public class NSAPIService {
             connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("DELETE");
             connection.setRequestProperty("Content-Type", "application/json");
+
+            /*
+                java.net.MalformedURLException: no protocol: 172.30.0.5:8089/nodes/2223/error
+                    at java.base/java.net.URL.<init>(URL.java:772)
+                    at java.base/java.net.URL.<init>(URL.java:654)
+                    at java.base/java.net.URL.<init>(URL.java:590)
+                    at nintendods.ds_project.service.NSAPIService.executeErrorDelete(NSAPIService.java:36)
+                    at nintendods.ds_project.Client.main(Client.java:133)
+            */
 
             //  connection.setRequestProperty("Content-Length", Integer.toString(json.getBytes().length));
             //  connection.setRequestProperty("Content-Language", "en-US");
