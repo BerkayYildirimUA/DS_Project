@@ -89,26 +89,17 @@ public class Client {
                     nodeState = eNodeState.Listening;
                 }
                 case Listening -> {
+                    if (listenerService == null)
+                        listenerService = new ListenerService(MULTICAST_ADDRESS, MULTICAST_PORT, LISTENER_BUFFER_SIZE);
                     try {
-                        while (node.getId() >= node.getPrevNodeId()) {
-                            //System.out.println("Start: LISTENING\t" + Timestamp.from(Instant.now()));
-                            if (listenerService == null)
-                                listenerService = new ListenerService(MULTICAST_ADDRESS, MULTICAST_PORT, LISTENER_BUFFER_SIZE);
-                            try {
-                                listenerService.listenAndUpdate(node);
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                                nodeState = eNodeState.Error;
-                            }
-
-                            //System.out.println("Client: Start sleep");
-                            //TimeUnit.SECONDS.sleep(1);
-                        }
+                        listenerService.listenAndUpdate(node);
+                    } catch (Exception e) {
+                        e.printStackTrace();
                         nodeState = eNodeState.Error;
-                    } catch (Exception e) { // InterruptedException
-                        throw new RuntimeException(e);
                     }
-                    // nodeState = eNodeState.Transfer;
+
+                    if (node.getId() < node.getPrevNodeId())    nodeState = eNodeState.Error;
+                    else                                        nodeState = eNodeState.Transfer;
                 }
                 case Transfer -> {
                     System.out.println("Start: TRANSFER\t" + Timestamp.from(Instant.now()));
