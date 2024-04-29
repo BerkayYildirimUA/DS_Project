@@ -61,11 +61,11 @@ On failure of a node, the network must be self healing.
     2. [x] Check the amount of available nodes and set the prev and next node accordingly
 
 
-## Shutdown (Berkay)
-  ### Naming Server
+## Shutdown (Berkay and Ahmad)
+  ### Naming Server (Ahmad)
   - [] needs a method (or API call) that removes a node that then shuts itself down.
     - This removes the Node ID from the NameServer database
-  ### Node
+  ### Node (Berkay)
   - [] needs to be able to send out the deletion of its own ID in the Naming Server at shutdown.
   - [] needs to be able to send out the renewal of the neighbour nodes (previous and next node) configurations so the ring doesn't break.
     - The node that shutdowns, has the data of the direct neighbour nodes so the communication is direct.
