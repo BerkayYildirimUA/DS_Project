@@ -39,16 +39,7 @@ public class NSAPIService {
             connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("DELETE");
             connection.setRequestProperty("Content-Type", "application/json");
-
-            /*
-                java.net.MalformedURLException: no protocol: 172.30.0.5:8089/nodes/2223/error
-                    at java.base/java.net.URL.<init>(URL.java:772)
-                    at java.base/java.net.URL.<init>(URL.java:654)
-                    at java.base/java.net.URL.<init>(URL.java:590)
-                    at nintendods.ds_project.service.NSAPIService.executeErrorDelete(NSAPIService.java:36)
-                    at nintendods.ds_project.Client.main(Client.java:133)
-            */
-
+            
             //  connection.setRequestProperty("Content-Length", Integer.toString(json.getBytes().length));
             //  connection.setRequestProperty("Content-Language", "en-US");
 
@@ -58,23 +49,37 @@ public class NSAPIService {
             System.out.println("Request: " + connection.toString());
             System.out.println("Header: " + connection.getHeaderFields().toString());
 
-            // Send request
-            DataOutputStream wr = new DataOutputStream (connection.getOutputStream());
-            // wr.writeBytes(json);
-            wr.close();
 
-            // Get Response
-            InputStream is = connection.getInputStream();
-            BufferedReader rd = new BufferedReader(new InputStreamReader(is));
-            StringBuilder response = new StringBuilder(); // or StringBuffer if Java version 5+
-            String line;
-            while ((line = rd.readLine()) != null) {
-                response.append(line);
-                response.append('\r');
+            /*
+                Request: sun.net.www.protocol.http.HttpURLConnection:http://172.30.0.5:8089/nodes/32651/error
+                Header: {null=[HTTP/1.1 404], Keep-Alive=[timeout=60], Connection=[keep-alive], Content-Length=[68], Date=[Mon, 29 Apr 2024 08:39:20 GMT], Content-Type=[text/plain;charset=UTF-8]}
+                java.net.ProtocolException: Cannot write output after reading input.
+                    at java.base/sun.net.www.protocol.http.HttpURLConnection.getOutputStream0(HttpURLConnection.java:1442)
+                    at java.base/sun.net.www.protocol.http.HttpURLConnection.getOutputStream(HttpURLConnection.java:1417)
+                    at nintendods.ds_project.service.NSAPIService.executeErrorDelete(NSAPIService.java:62)
+                    at nintendods.ds_project.Client.main(Client.java:133)
+                            */
+
+
+            int responseCode = connection.getResponseCode();
+            System.out.println("GET Response Code :: " + responseCode);
+            if (responseCode == HttpURLConnection.HTTP_OK) { // success
+                BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                String inputLine;
+                StringBuffer response = new StringBuffer();
+
+                while ((inputLine = in.readLine()) != null) {
+                    response.append(inputLine);
+                }
+                in.close();
+
+                // print result
+                System.out.println(response);
+                return response.toString();
+            } else {
+                System.out.println("GET request did not work.");
+                return "";
             }
-            rd.close();
-            System.out.println(response);
-            return response.toString();
         } catch (Exception e) {
             e.printStackTrace();
             return null;
