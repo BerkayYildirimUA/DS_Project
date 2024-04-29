@@ -78,9 +78,11 @@ public class NameServerAPI {
     @DeleteMapping("/nodes/{id}/error")
     public ResponseEntity<String> deleteDueToError(@PathVariable("id") int id) {
         logger.info("DELETE: Remove client node due to error");
+        System.out.println("DELETE: Remove client node due to error");
         ResponseObject<Integer> response = new ResponseObject<>(id);
 
         if (nodeDB.exists(id)) {
+            System.out.println(String.format("Item with id = %d does not exists", id));
             response.setMessage(String.format("Item with id = %d does not exists", id));
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(jsonConverter.toJson(response));
         }
@@ -89,9 +91,11 @@ public class NameServerAPI {
         Thread previousNodeThread = new Thread(() -> {
             TCPClient client = new TCPClient();
             try {
+                System.out.println("Start connection with previous nodes");
                 logger.info("Start connection with previous nodes");
                 client.connect(nodeDB.getIpFromId(nodeDB.getPreviousId(id)));
             } catch (IOException e) {
+                System.out.println("Failed to connect with previous nodes");
                 logger.info("Failed to connect with previous nodes");
                 throw new RuntimeException(e);
             }
@@ -100,15 +104,18 @@ public class NameServerAPI {
         Thread nextNodeThread = new Thread(() -> {
             TCPClient client = new TCPClient();
             try {
+                System.out.println("Start connection with next nodes");
                 logger.info("Start connection with next nodes");
                 client.connect(nodeDB.getIpFromId(nodeDB.getNextId(id)));
             } catch (IOException e) {
+                System.out.println("Failed to connect with next nodes");
                 logger.info("Failed to connect with next nodes");
                 throw new RuntimeException(e);
             }
         });
         nextNodeThread.start();
 
+        System.out.println("Delete node");
         nodeDB.deleteNode(id);
         return ResponseEntity.status(HttpStatus.OK).body(jsonConverter.toJson(id));
     }
