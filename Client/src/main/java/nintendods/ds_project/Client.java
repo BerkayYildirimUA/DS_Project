@@ -89,19 +89,18 @@ public class Client {
                     nodeState = eNodeState.Listening;
                 }
                 case Listening -> {
-                    System.out.println("Start: LISTENING\t" + Timestamp.from(Instant.now()));
-                    if (listenerService == null)
-                        listenerService = new ListenerService(MULTICAST_ADDRESS, MULTICAST_PORT, LISTENER_BUFFER_SIZE);
                     try {
-                        listenerService.listenAndUpdate(node);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        nodeState = eNodeState.Error;
-                    }
-
-                    try {
-                        System.out.println("Client: Start sleep");
                         while (node.getId() >= node.getPrevNodeId()) {
+                            System.out.println("Start: LISTENING\t" + Timestamp.from(Instant.now()));
+                            if (listenerService == null)
+                                listenerService = new ListenerService(MULTICAST_ADDRESS, MULTICAST_PORT, LISTENER_BUFFER_SIZE);
+                            try {
+                                listenerService.listenAndUpdate(node);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                                nodeState = eNodeState.Error;
+                            }
+
                             System.out.println("Client: Start sleep");
                             TimeUnit.SECONDS.sleep(20);
                         }
