@@ -101,7 +101,7 @@ public class Client {
 
                     try {
                         System.out.println("Client: Start sleep");
-                        while (node.getId() > node.getPrevNodeId()) {
+                        while (node.getId() >= node.getPrevNodeId()) {
                             System.out.println("Client: Start sleep");
                             TimeUnit.SECONDS.sleep(20);
                         }
