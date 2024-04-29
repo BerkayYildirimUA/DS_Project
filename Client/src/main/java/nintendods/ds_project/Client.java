@@ -105,7 +105,7 @@ public class Client {
                             //TimeUnit.SECONDS.sleep(1);
                         }
                         nodeState = eNodeState.Error;
-                    } catch (InterruptedException e) {
+                    } catch (Exception e) { // InterruptedException
                         throw new RuntimeException(e);
                     }
                     // nodeState = eNodeState.Transfer;
