@@ -1,13 +1,14 @@
 package nintendods.ds_project.database;
 
-import nintendods.ds_project.Exeptions.NameServerFullExeption;
+import com.google.gson.reflect.TypeToken;
+import nintendods.ds_project.Exeptions.EntryNotInDBExeption;
+import nintendods.ds_project.Exeptions.IDTakenExeption;
+import nintendods.ds_project.utility.JsonConverter;
 import nintendods.ds_project.utility.NameToHash;
 import org.springframework.stereotype.Repository;
-import nintendods.ds_project.utility.JsonConverter;
 
 import java.lang.reflect.Type;
-import java.util.*;
-import com.google.gson.reflect.TypeToken;
+import java.util.TreeMap;
 
 @Repository
 public class NodeDB {
@@ -18,46 +19,52 @@ public class NodeDB {
         nodeID_to_nodeIP = new TreeMap<>();
     }
 
+    private void put(Integer nodeID, String ip) {
+        nodeID_to_nodeIP.put(nodeID, ip);
+        this.saveDB();
+    }
     /* --------------------------------- ADD --------------------------------- */
 
     /**
      * <p>Add a server to the list.</p>
      *
-     * <p>Since the ID is based on name, it's possible that 2 different names have the same Hash.
-     * To not override a name that has come before we will move the new ID by 1 until it finds an empty spot.</p>
      *
-     * <p>If it can't find an empty spot NameServerFullExeption is thrown.</p>
+     * <p>If it can't find an empty spot IDTakenExeption is thrown.</p>
      *
      * @param name the name of the node
      * @param ip   the ip of the node
      * @return ID of server
-     * @throws NameServerFullExeption if the name server is full
+     * @throws IDTakenExeption if the name server is full
      */
-    public Integer addNode(String name, String ip) throws NameServerFullExeption {
+    public Integer addNode(String name, String ip) throws IDTakenExeption {
         Integer nodeID = NameToHash.convert(name);
 
-        for (int i = 0; i < NameToHash.MAX_NODES; ++i) {
-            if (!nodeID_to_nodeIP.containsKey(nodeID)) {
-                nodeID_to_nodeIP.put(nodeID, ip);
-                return nodeID;
-            }
-
-            nodeID++;
-            if (nodeID > NameToHash.MAX_NODES) {
-                nodeID = 0;
-            }
+        if (!nodeID_to_nodeIP.containsKey(nodeID)) {
+            this.put(nodeID, ip);
+            return nodeID;
         }
 
-        throw new NameServerFullExeption();
+        throw new IDTakenExeption();
     }
 
     /* --------------------------------- DELETE --------------------------------- */
     public void deleteNode(String ip) {
         nodeID_to_nodeIP.entrySet().removeIf(entry -> entry.getValue().equals(ip));
+        this.saveDB();
     }
 
     public void deleteNode(int nodeID) {
         nodeID_to_nodeIP.entrySet().removeIf(entry -> entry.getKey().equals(nodeID));
+        this.saveDB();
+    }
+
+    public void deleteNode(int nodeID, String ip) throws EntryNotInDBExeption {
+        if (this.exists(nodeID, ip)) {
+            nodeID_to_nodeIP.remove(nodeID);
+        } else {
+            throw new EntryNotInDBExeption();
+        }
+        this.saveDB();
     }
 
     /* --------------------------------- CHECK --------------------------------- */
@@ -69,18 +76,26 @@ public class NodeDB {
         return nodeID_to_nodeIP.containsValue(ip);
     }
 
+    public boolean exists(int nodeID, String ip) {
+
+        if (nodeID_to_nodeIP.containsKey(nodeID)) {
+            return nodeID_to_nodeIP.get(nodeID).equals(ip);
+        } else {
+            return false;
+        }
+    }
+
 
     /* --------------------------------- GET --------------------------------- */
     public int getSize() {
         return this.nodeID_to_nodeIP.size();
     }
+    public String getIpFromId(int id) {
+        return nodeID_to_nodeIP.get(id);
+    }
 
     /**
      * Retrieves the IP address of the server with the hash closest to the given file name.
-     * <p> <b>WARNING! Just because you input the exact name of a server doesn't mean you will definitely get its IP back! </b></p>
-     *
-     * <p>See {@link #addNode(String, String)} to learn on how servers are added and how their hashes are determined,
-     * which causes the warning.</p>
      *
      * @param name file name
      * @return ipp of server for the file
@@ -91,10 +106,6 @@ public class NodeDB {
 
     /**
      * Retrieves the closest ID address of the server with the hash closest to the given file name.
-     * <p> <b>WARNING! Just because you input the exact name of a server doesn't mean you will definitely get its ID back! </b></p>
-     *
-     * <p>See {@link #addNode(String, String)} to learn on how servers are added and how their hashes are determined,
-     * which causes the warning.</p>
      *
      * @param name file name
      * @return ID of server for the file
@@ -106,10 +117,14 @@ public class NodeDB {
         Integer ceiling = nodeID_to_nodeIP.ceilingKey(tempID);
 
         // if no upper key, then we loop back to beginning
-        if (ceiling == null) {ceiling = nodeID_to_nodeIP.firstKey();}
+        if (ceiling == null) {
+            ceiling = nodeID_to_nodeIP.firstKey();
+        }
 
         // if no lower key, then we loop to end
-        if (floor == null) {floor = nodeID_to_nodeIP.lastKey();}
+        if (floor == null) {
+            floor = nodeID_to_nodeIP.lastKey();
+        }
 
         int distToFloor = (tempID - floor + (NameToHash.MAX_NODES + 1)) % (NameToHash.MAX_NODES + 1); // Wrap-around distance to floor
         int distToCeiling = (ceiling - tempID + (NameToHash.MAX_NODES + 1)) % (NameToHash.MAX_NODES + 1); // Wrap-around distance to ceiling
@@ -124,23 +139,38 @@ public class NodeDB {
         return closestKey;
     }
 
-    public void saveDB(){
+    public int getPreviousId(int id) {
+        int previousId;
+        if (nodeID_to_nodeIP.firstKey() == id)  previousId = nodeID_to_nodeIP.lastKey();
+        else                                    previousId = nodeID_to_nodeIP.lowerKey(id);
+        return previousId;
+    }
+
+    public int getNextId(int id) {
+        int nextId;
+        if (nodeID_to_nodeIP.lastKey() == id)   nextId = nodeID_to_nodeIP.firstKey();
+        else                                    nextId = nodeID_to_nodeIP.higherKey(id);
+        return nextId;
+    }
+
+    public void saveDB() {
         saveDB("NodeDB.json");
     }
 
-    public void loadDB(){
+    public void loadDB() {
         loadDB("NodeDB.json");
     }
 
     public void loadDB(String fileName) {
         JsonConverter jsonConverter = new JsonConverter(fileName);
 
-        Type type = new TypeToken<TreeMap<Integer, String>>(){}.getType();
+        Type type = new TypeToken<TreeMap<Integer, String>>() {
+        }.getType();
 
         nodeID_to_nodeIP = (TreeMap<Integer, String>) jsonConverter.fromFile(type);
     }
 
-    public void saveDB(String fileName){
+    public void saveDB(String fileName) {
         JsonConverter jsonConverter = new JsonConverter(fileName);
 
         jsonConverter.toFile(nodeID_to_nodeIP);

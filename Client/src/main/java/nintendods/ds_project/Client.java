@@ -106,7 +106,16 @@ public class Client {
                 }
                 case Transfer -> {
                     // TODO:
-                    nodeState = eNodeState.Listening;
+
+                    // nodeState = eNodeState.Listening;
+                    try {
+                        System.out.println("Client: Start sleep");
+                        TimeUnit.SECONDS.sleep(10);
+                        nodeState = eNodeState.Error;
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                    nodeState = eNodeState.Error;
                 }
                 case Shutdown -> {
                     // TODO

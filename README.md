@@ -2,7 +2,7 @@
 
 This projects will create a ring topology with clients. A Naming server that will manage the resources and namings of the nodes files in the ring topology
 
-# Tasks
+# Naming Server part
 
 - Robbe:
   - [x] Algorithm for file names convertion to hash value
@@ -82,3 +82,61 @@ On failure of a node, the network must be self healing.
 ### Node
   - needs to have a failback method at every exception to transmit the ID's to the next and previous.
     - The node is suddenly gone so the neighbour nodes must detect these with a ping or alive packet.
+
+
+# Replication part
+We have files with a name. This name can be hashed by our simple hash algorithm. Now we can compare these hashes with the known node's ID's that are situated in the ring topology.
+
+The goal of this part is to ensure that all files, with a specific hash range, are located at the same node. Now we know through the naming server, where a file might be located.
+
+To ensure easy coding, we'll create a file transfer class that can be used by the nodes to transfer a file over a TCP socket from node to node.
+
+This will be done in 3 phases.
+
+## starting
+All files that are stored on each node should be replicated to corresponding nodes in the ring topology. This way, a new node to which the file is replicated becomes the owner of the file.
+
+After bootstrap and discovery, the new node has to verify its local files (folder on
+the hard drive). The node will send over each file name to the naming server and the naming server will send back a destination node if the file has to be replicated. The replicated node is the first smaller hash ID node the n the file hash.
+
+So there are 3 nodes with the fommowing hash ID: 1 5 7. We have a file on node 1 with hash equal to 6. Then the new replication node will be node 5 because this is the 1 lesser then node based on the hash ID of the file.
+
+The naming server will respond to the original node where to transfer through. If a replication node receives the file, it adds a log to the file logging.
+
+Each file will have a full log available to track its replications and owners of the file.
+
+## Update
+If new files are added locally to certain node, or deleted from a node, this state has to be synchronized in the whole system. If a new file is added, then it has to be replicated. Otherwise, if deleted, it has to be deleted from the replicated files of the file owner as well.
+
+When we add a local file, this should be replicated immediately. We can startup a thread to check if the file three has changed, in a given interval (eg 2 seconds interval).
+
+The replication can be used from the starting phase where we send the file name to the namingserver API and then determine where to transfer it to over a TCP socket.
+
+## shutdown
+If needed, all files locally stored on a node that is about to shutdown should be transferred to other nodes. Otherwise, they can be deleted and this change needs to be synced as described above in the Update.
+
+Shutdown has a couple of steps:
+
+### shutdown of replication node
+When the node is terminated, the files that are replicated on this node, needs to be replicated to the previous node (because this will be the smallest hash ID in line now).
+
+If the previous node has a locally stored file of the receiving files, it will send it to his previous node. (remember -> node.id < file.id).
+
+When transfering the files, we must include the logging file as well.
+
+### shutdown of owner node
+
+I'am confused by the given specifications, so this section has to be revised.
+
+## Group division
+
+### Robbe
+
+- Create log class
+- Ensure that when a new file arrives, the log can be created of that file.
+- Create the File Transfer class
+- Ensure that when transfering a file, the log of that file is automatically included.
+
+### Berkay
+### Tom
+### Ahmad

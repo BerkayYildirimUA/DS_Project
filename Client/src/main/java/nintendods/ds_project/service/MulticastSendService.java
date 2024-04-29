@@ -1,6 +1,9 @@
 package nintendods.ds_project.service;
 
 import nintendods.ds_project.utility.JsonConverter;
+import org.hibernate.annotations.Cache;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -8,12 +11,14 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
+@Component("Send1")
 public class MulticastSendService {
     private DatagramSocket socket;
     private InetAddress group;
     private int port;
     private byte[] buf;
-    public MulticastSendService(String multicastAddress, int port ) throws UnknownHostException{
+    public MulticastSendService(@Value("${udp.multicast.address}") String multicastAddress,
+                                @Value("${udp.multicast.port}") int port ) throws UnknownHostException{
         this.group = InetAddress.getByName(multicastAddress);
         this.port = port;
     }

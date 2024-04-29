@@ -22,7 +22,7 @@ public class UDPServer {
         serverSoc.setReuseAddress(true);
     }
 
-    public String listen(int timeout) throws IOException {
+    public String listen() throws IOException {
         this.serverSoc.receive(packet);
         var data = packet.getData(); //Blocking method
         String text = new String(data, 0, packet.getLength());
