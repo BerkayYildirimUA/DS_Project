@@ -16,14 +16,32 @@ import nintendods.ds_project.model.message.FileMessage;
  */
 public class FileTranseiverService {
 
-    @Value("${tcp.file.receive.port}")
-    private int port = 12346; // this is final, do not change.
+    //TODO: with fix of berkay to assign "static" values.
+    //@Value("${tcp.file.receive.port}")
+    private static int port = 12346; // this is final, do not change.
+
+    //@Value("${tcp.file.receive.buffer}")
+    private static int buffer = 50;
 
     private static BlockingQueue<FileMessage> receiveQueue;
 
+    /**
+     * Create a File tranceiver object that will automatically create a thread where it wil listen for file receives.
+     * The default TCP port is 12346 and the file capacity is 50.
+     */
     public FileTranseiverService() {
+        this(port, buffer);
+    }
+
+    /**
+     * Create a File tranceiver object that will automatically create a thread where it wil listen for file receives.
+     * 
+     * @param port the receiving port to listen on
+     * @param buffer the amount of files that can be buffered
+     */
+    public FileTranseiverService(int port, int buffer) {
         Thread receiverThread = new Thread(() -> receiveFile());
-        receiveQueue = new LinkedBlockingQueue<>(10);
+        receiveQueue = new LinkedBlockingQueue<>(buffer);
         receiverThread.start();
 
         try {
@@ -127,16 +145,19 @@ public class FileTranseiverService {
 
                 // Set the new owner of the file
                 fileObject.setOwner(node);
+                File f;
 
                 try {
                     if (directoryPath.equals("")) {
-                        newPath = m.getFileObject().getName();
+                        f = new File(m.getFileObject().getName());
+                        //newPath = m.getFileObject().getName();
                     } else {
-                        newPath = directoryPath + "/" + m.getFileObject().getName();
+                        f = new File(directoryPath, m.getFileObject().getName());
+                        //newPath = directoryPath + "/" + m.getFileObject().getName();
                     }
 
                     FileOutputStream fos;
-                    fos = new FileOutputStream(newPath);
+                    fos = new FileOutputStream(f); //TODO there is a problem
                     fos.write(m.getFileInByte());
                     fos.close();
 

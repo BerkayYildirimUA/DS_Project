@@ -17,7 +17,7 @@ import org.springframework.context.ApplicationContext;
  * Spring Boot application for managing a distributed system node's lifecycle excluding database auto-configuration.
  */
 @SpringBootApplication(exclude = { DataSourceAutoConfiguration.class })
-public class DsProjectApplication {
+public class Client {
 
     private static ClientNode node;
     private static eNodeState nodeState;
@@ -32,7 +32,7 @@ public class DsProjectApplication {
     private static final int MULTICAST_PORT = 12345; // Port for multicast communication
     private static boolean isRunning = true;
     public static void main(String[] args) throws UnknownHostException {
-        ApplicationContext context = SpringApplication.run(DsProjectApplication.class, args);
+        ApplicationContext context = SpringApplication.run(Client.class, args);
         runNodeLifecycle(context);
     }
     private static void runNodeLifecycle(ApplicationContext context) throws UnknownHostException {
