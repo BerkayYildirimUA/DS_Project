@@ -90,7 +90,7 @@ public class NameServerAPI {
             TCPClient client = new TCPClient();
             try {
                 logger.info("Start connection with previous nodes");
-                client.connect(nodeDB.getIpFromId(nodeDB.getPreviousId(id)));
+                client.connect(nodeDB.getClosestIpFromName(nodeDB.getPreviousId(id)));
             } catch (IOException e) {
                 logger.info("Failed to connect with previous nodes");
                 throw new RuntimeException(e);
@@ -101,7 +101,7 @@ public class NameServerAPI {
             TCPClient client = new TCPClient();
             try {
                 logger.info("Start connection with next nodes");
-                client.connect(nodeDB.getIpFromId(nodeDB.getNextId(id)));
+                client.connect(nodeDB.getClosestIpFromName(nodeDB.getNextId(id)));
             } catch (IOException e) {
                 logger.info("Failed to connect with next nodes");
                 throw new RuntimeException(e);

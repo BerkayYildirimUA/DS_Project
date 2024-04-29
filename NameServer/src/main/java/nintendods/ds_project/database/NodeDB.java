@@ -158,4 +158,14 @@ public class NodeDB {
 
         jsonConverter.toFile(nodeID_to_nodeIP);
     }
+
+    public String getPreviousId(int id) {
+        //TODO
+        return "";
+    }
+
+    public String getNextId(int id) {
+        //TODO
+        return "";
+    }
 }
