@@ -130,7 +130,7 @@ public class Client {
                     // Hard, only transmit to naming server and the naming server needs to deal with it.
 
                     System.out.println("Client: Send error");
-                    nsapiService.executeErrorDelete("/nodes/" + node.getId() + "error");
+                    nsapiService.executeErrorDelete("/nodes/" + node.getId() + "/error");
                     /**
                     * When the node gets in the Error state, we'll access the 
                     * NamingServer API to handle everything from here.
