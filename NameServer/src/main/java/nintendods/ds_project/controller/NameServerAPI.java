@@ -42,7 +42,7 @@ public class NameServerAPI {
             return ResponseEntity.status(HttpStatus.NO_CONTENT).body(jsonConverter.toJson(badResponse));
         }
 
-        if (nodeDB.exists(newNode.getAddress().getHostAddress())) {
+        if (!nodeDB.exists(newNode.getAddress().getHostAddress())) {
             badResponse.setMessage(String.format("Item with id = %d or name "+ newNode.getName() +" already exists", newNode.getId()));
             return ResponseEntity.status(HttpStatus.CONFLICT).body(jsonConverter.toJson(badResponse));
         }
@@ -66,7 +66,7 @@ public class NameServerAPI {
         logger.info("DELETE: Remove client node from database by ID");
         ResponseObject<Integer> response = new ResponseObject<>(id);
 
-        if (nodeDB.exists(id)) {
+        if (!nodeDB.exists(id)) {
             response.setMessage(String.format("Item with id = %d does not exists", id));
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(jsonConverter.toJson(response));
         }
@@ -81,7 +81,7 @@ public class NameServerAPI {
         System.out.println("DELETE: Remove client node due to error");
         ResponseObject<Integer> response = new ResponseObject<>(id);
 
-        if (nodeDB.exists(id)) {
+        if (!nodeDB.exists(id)) {
             System.out.println(String.format("Item with id = %d does not exists", id));
             response.setMessage(String.format("Item with id = %d does not exists", id));
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(jsonConverter.toJson(response));
@@ -127,7 +127,7 @@ public class NameServerAPI {
 
         /* Code for shutdown */
 
-        if (nodeDB.exists(id)) {
+        if (!nodeDB.exists(id)) {
             response.setMessage(String.format("Item with id = %d does not exists", id));
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(jsonConverter.toJson(response));
         }
