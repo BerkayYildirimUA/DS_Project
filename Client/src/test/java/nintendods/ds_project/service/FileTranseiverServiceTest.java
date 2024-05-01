@@ -41,14 +41,6 @@ public class FileTranseiverServiceTest {
             // Send the file to itself. Can be any node received from the namingserver.
             ftss.sendFile(fileObj, nodeSend.getAddress().getHostAddress());
 
-            // try {
-            //     // Delay for 500 milliseconds
-            //     Thread.sleep(500);
-            //     System.out.println("Delay of 500 milliseconds completed.");
-            // } catch (InterruptedException e) {
-            //     System.out.println("Thread interrupted.");
-            // }
-
             // receiver side must create FileTranseiverService to receive incomming
             // messages.
             // Here a node has to be created ofcource and the create FileTranseiver object.
@@ -107,13 +99,6 @@ public class FileTranseiverServiceTest {
             // Send the file to itself. Can be any node received from the namingserver.
             ftss.sendFile(fileObj, nodeSend.getAddress().getHostAddress());
             System.out.println("Sended over");
-
-            // try {
-            //     Thread.sleep(500); // Sleep for 500 milliseconds
-            // } catch (InterruptedException e) {
-            //     // Handle interruption if needed
-            //     e.printStackTrace();
-            // }
 
             // receiver side must create FileTranseiverService to receive incomming
             // messages.

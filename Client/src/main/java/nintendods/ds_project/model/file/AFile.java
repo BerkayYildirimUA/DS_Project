@@ -9,8 +9,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.filechooser.FileSystemView;
-
 import nintendods.ds_project.model.ANode;
 import nintendods.ds_project.model.file.log.ALog;
 import nintendods.ds_project.model.file.log.eLog;

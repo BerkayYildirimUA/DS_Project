@@ -16,16 +16,8 @@ import nintendods.ds_project.utility.Generator;
  */
 public class FileTranseiverService {
 
-    // TODO: with fix of berkay to assign "static" values.
-    // @Value("${tcp.file.receive.port}")
-    private int port = 12346; // this is final, do not change.
-
-    // @Value("${tcp.file.receive.buffer}")
-    private int buffer = 50;
-
+    private int port = 12346;
     private static BlockingQueue<FileMessage> receiveQueue;
-    // private static boolean running = false;
-
     private Thread receiverThread;
 
     /**
@@ -47,22 +39,19 @@ public class FileTranseiverService {
     public FileTranseiverService(int port, int buffer) {
         // Maintain 1 static creation of this
         // if (running)
-        //     return;
+        // return;
         // running = true;
         this.port = port;
-        this.buffer = buffer;
 
         this.receiverThread = new Thread(() -> receiveFile(port));
         receiveQueue = new LinkedBlockingQueue<>(buffer);
         this.receiverThread.start();
 
-        //Let the thread startup
+        // Let the thread startup
         try {
             // Delay for 500 milliseconds
             Thread.sleep(500);
-            System.out.println("Delay of 500 milliseconds completed.");
         } catch (InterruptedException e) {
-            System.out.println("Thread interrupted.");
         }
     }
 
@@ -88,7 +77,7 @@ public class FileTranseiverService {
 
             FileMessage message = new FileMessage(fileObject);
 
-            socket = new Socket(receiverAddress, this.port); //We assume that the receiver side uses the same port.
+            socket = new Socket(receiverAddress, this.port); // We assume that the receiver side uses the same port.
             OutputStream outputStream = socket.getOutputStream(); // get the output stream from the socket.
             // create an object output stream from the output stream so we can send an
             // object through it
@@ -122,22 +111,21 @@ public class FileTranseiverService {
                 try {
                     socket = ss.accept(); // blocking call, this will wait until a connection is attempted on this port.
                     // System.out.println("Connection from " + socket + "!");
-    
+
                     // get the input stream from the connected socket
                     inputStream = socket.getInputStream();
                     // create a DataInputStream so we can read data from it.
                     objectInputStream = new ObjectInputStream(inputStream);
-    
+
                     // read the list of messages from the socket and cast to FileMessage object
                     FileMessage receiveMessage = (FileMessage) objectInputStream.readObject();
                     // System.out.println("Received messages from: " + socket);
-    
+
                     // print out the text of every message
                     // System.out.println("message:" + receiveMessage.getFileObject().getName());
-    
+
                     receiveQueue.add(receiveMessage);
-                }
-                catch (Exception ex){
+                } catch (Exception ex) {
                     error = true;
                 }
             }
@@ -164,7 +152,7 @@ public class FileTranseiverService {
      * Save a file that is present in the incoming buffer. If a file is present, we
      * save it in the given directory.
      * 
-     * @param node the issuer who saves the file
+     * @param node          the issuer who saves the file
      * @param directoryPath The new directory path to save the file in
      * @return null if nothing has arrived and an object if something has arrived.
      */
@@ -181,8 +169,8 @@ public class FileTranseiverService {
 
                 try {
                     if (directoryPath.equals("")) {
-                        //Use system default path
-                        //System.getProperty("user.dir")
+                        // Use system default path
+                        // System.getProperty("user.dir")
                         f = new File(m.getFileObject().getName());
                     } else {
                         f = new File(directoryPath, m.getFileObject().getName());
@@ -202,7 +190,7 @@ public class FileTranseiverService {
                         System.out.println("File already exists. Creating a new name.");
                         // Add random chars at the end and log this to the object
                         do {
-                            f = new File(f.getParent(), renameFile(f.getName(), 5));
+                            f = new File(f.getParent(), Generator.renameText(f.getName(), 5));
                         } while (!f.createNewFile());
                     }
 
@@ -225,31 +213,6 @@ public class FileTranseiverService {
             return null;
         }
         return null;
-    }
-
-    /**
-     * Replaces the filename with random chars at the end. Does this on the end of
-     * the filename or before the last dot.
-     * 
-     * @param fileName
-     * @return
-     */
-    private String renameFile(String fileName, int randomTextLength) {
-
-        int lastIndex = fileName.lastIndexOf(".");
-        String resultString = fileName;
-        String randomText = Generator.randomString(randomTextLength);
-        // Check if "." exists in the string
-        if (lastIndex != -1) {
-            resultString = fileName.substring(0, lastIndex) + randomText + fileName.substring(lastIndex);
-        } else {
-            // If "." does not exist, add it at the end of the file
-            resultString = fileName + randomText;
-        }
-
-        System.out.println(fileName + " -> " + resultString);
-
-        return resultString;
     }
 
     private boolean available() {
