@@ -7,25 +7,12 @@ public class FileModifier {
     public static File createFile(String directory, String fileName, boolean createNewNameIfNeeded) {
         try {
             File file;
-            File dir = new File(directory);
 
-            // Check if directory exists
-            if (!directory.equals("")) {
-                if (!dir.exists()) {
-                    dir.mkdirs();
-                }
-                file = new File(dir, fileName);
-            } else {
-                file = new File(fileName);
-            }
+            file = new File(createDirectory(directory), fileName);
 
             // Creating the file
-            if (file.createNewFile()) {
-                System.out.println("File created successfully.");
-            } else {
+            if (!file.createNewFile()) {
                 if (createNewNameIfNeeded) {
-                    //System.out.println("File already exists. Creating a new name.");
-
                     // Add random chars at the end and log this to the object
                     do {
                         file = new File(file.getParent(), Generator.renameText(file.getName(), 5));
@@ -43,5 +30,19 @@ public class FileModifier {
 
     public static File createFile(String fileName, boolean createNewName) {
         return FileModifier.createFile("", fileName, createNewName);
+    }
+
+    public static String createDirectory(String path){
+        // Check if directory exists
+
+        if (!path.equals("")) {
+            File dir = new File(path);
+            if (!dir.exists()) {
+                dir.mkdirs();
+            }
+            return dir.getAbsolutePath();
+        } else {
+            return System.getProperty("user.dir");
+        }
     }
 }

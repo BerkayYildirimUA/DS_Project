@@ -98,7 +98,6 @@ public class FileTranseiverServiceTest {
 
             // Send the file to itself. Can be any node received from the namingserver.
             ftss.sendFile(fileObj, nodeSend.getAddress().getHostAddress());
-            System.out.println("Sended over");
 
             // receiver side must create FileTranseiverService to receive incomming
             // messages.
@@ -151,7 +150,6 @@ public class FileTranseiverServiceTest {
 
             // Send the file to itself. Can be any node received from the namingserver.
             ftss.sendFile(fileObj, nodeSend.getAddress().getHostAddress());
-            System.out.println("Sended over");
 
             ANetworkNode nodeRec = new ANetworkNode(InetAddress.getLocalHost(), 21, "Robbe receive");
 
@@ -161,8 +159,6 @@ public class FileTranseiverServiceTest {
             // Create custom folder in the same project directory
 
             String newPath = System.getProperty("user.dir") +  "/newDir";
-
-            System.out.println(newPath);
 
             // Wait for an incomming message.
             while (!ok) {

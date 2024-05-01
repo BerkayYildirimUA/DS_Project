@@ -168,47 +168,6 @@ public class FileTranseiverService {
                 // Set the new owner of the file
                 fileObject.setOwner(node);
 
-                // try {
-                //     if (directoryPath.equals("")) {
-                //         // Use system default path
-                //         // System.getProperty("user.dir")
-                //         f = new File(m.getFileObject().getName());
-                //     } else {
-                //         f = new File(directoryPath, m.getFileObject().getName());
-
-                //         File directory = new File(directoryPath);
-                //         if (!directory.exists()) {
-                //             if (directory.mkdirs()) {
-                //                 System.out.println("Directory created successfully.");
-                //             }
-                //         }
-                //     }
-
-                //     // Creating the file
-                //     if (f.createNewFile()) {
-                //         System.out.println("File created successfully.");
-                //     } else {
-                //         System.out.println("File already exists. Creating a new name.");
-                //         // Add random chars at the end and log this to the object
-                //         do {
-                //             f = new File(f.getParent(), Generator.renameText(f.getName(), 5));
-                //         } while (!f.createNewFile());
-                //     }
-
-                //     // Copy the received file to the created file.
-                //     FileOutputStream fos;
-                //     fos = new FileOutputStream(f);
-                //     fos.write(m.getFileInByte());
-                //     fos.close();
-
-                    
-
-                //     return fileObject;
-                // } catch (IOException e) {
-                //     // TODO Auto-generated catch block
-                //     e.printStackTrace();
-                // }
-
                 File f = FileModifier.createFile(directoryPath, m.getFileObject().getName(), true);
 
                 // set file path and name
