@@ -4,13 +4,13 @@ import java.io.File;
 import java.io.IOException;
 
 public class FileModifier {
-    public static File createFile(String directory, String fileName, boolean createNewName) {
+    public static File createFile(String directory, String fileName, boolean createNewNameIfNeeded) {
         try {
             File file;
             File dir = new File(directory);
 
             // Check if directory exists
-            if (dir.equals("")) {
+            if (!directory.equals("")) {
                 if (!dir.exists()) {
                     dir.mkdirs();
                 }
@@ -23,9 +23,9 @@ public class FileModifier {
             if (file.createNewFile()) {
                 System.out.println("File created successfully.");
             } else {
-                System.out.println("File already exists. Creating a new name.");
+                if (createNewNameIfNeeded) {
+                    //System.out.println("File already exists. Creating a new name.");
 
-                if (createNewName) {
                     // Add random chars at the end and log this to the object
                     do {
                         file = new File(file.getParent(), Generator.renameText(file.getName(), 5));
@@ -34,10 +34,11 @@ public class FileModifier {
                     return null;
                 }
             }
+            return file;
+
         } catch (IOException ex) {
             return null;
         }
-        return null;
     }
 
     public static File createFile(String fileName, boolean createNewName) {

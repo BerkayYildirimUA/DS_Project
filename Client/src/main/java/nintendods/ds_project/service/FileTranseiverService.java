@@ -5,10 +5,12 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.logging.FileHandler;
 
 import nintendods.ds_project.model.ANode;
 import nintendods.ds_project.model.file.AFile;
 import nintendods.ds_project.model.message.FileMessage;
+import nintendods.ds_project.utility.FileModifier;
 import nintendods.ds_project.utility.Generator;
 
 /**
@@ -165,52 +167,56 @@ public class FileTranseiverService {
 
                 // Set the new owner of the file
                 fileObject.setOwner(node);
-                File f;
 
-                try {
-                    if (directoryPath.equals("")) {
-                        // Use system default path
-                        // System.getProperty("user.dir")
-                        f = new File(m.getFileObject().getName());
-                    } else {
-                        f = new File(directoryPath, m.getFileObject().getName());
+                // try {
+                //     if (directoryPath.equals("")) {
+                //         // Use system default path
+                //         // System.getProperty("user.dir")
+                //         f = new File(m.getFileObject().getName());
+                //     } else {
+                //         f = new File(directoryPath, m.getFileObject().getName());
 
-                        File directory = new File(directoryPath);
-                        if (!directory.exists()) {
-                            if (directory.mkdirs()) {
-                                System.out.println("Directory created successfully.");
-                            }
-                        }
-                    }
+                //         File directory = new File(directoryPath);
+                //         if (!directory.exists()) {
+                //             if (directory.mkdirs()) {
+                //                 System.out.println("Directory created successfully.");
+                //             }
+                //         }
+                //     }
 
-                    // Creating the file
-                    if (f.createNewFile()) {
-                        System.out.println("File created successfully.");
-                    } else {
-                        System.out.println("File already exists. Creating a new name.");
-                        // Add random chars at the end and log this to the object
-                        do {
-                            f = new File(f.getParent(), Generator.renameText(f.getName(), 5));
-                        } while (!f.createNewFile());
-                    }
+                //     // Creating the file
+                //     if (f.createNewFile()) {
+                //         System.out.println("File created successfully.");
+                //     } else {
+                //         System.out.println("File already exists. Creating a new name.");
+                //         // Add random chars at the end and log this to the object
+                //         do {
+                //             f = new File(f.getParent(), Generator.renameText(f.getName(), 5));
+                //         } while (!f.createNewFile());
+                //     }
 
-                    // Copy the received file to the created file.
-                    FileOutputStream fos;
-                    fos = new FileOutputStream(f);
-                    fos.write(m.getFileInByte());
-                    fos.close();
+                //     // Copy the received file to the created file.
+                //     FileOutputStream fos;
+                //     fos = new FileOutputStream(f);
+                //     fos.write(m.getFileInByte());
+                //     fos.close();
 
-                    // set file path and name
-                    fileObject.setPath(f.getAbsolutePath());
-                    fileObject.setName(f.getName());
+                    
 
-                    return fileObject;
-                } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
+                //     return fileObject;
+                // } catch (IOException e) {
+                //     // TODO Auto-generated catch block
+                //     e.printStackTrace();
+                // }
+
+                File f = FileModifier.createFile(directoryPath, m.getFileObject().getName(), true);
+
+                // set file path and name
+                fileObject.setPath(f.getAbsolutePath());
+                fileObject.setName(f.getName());
+
+                return fileObject;
             }
-            return null;
         }
         return null;
     }
