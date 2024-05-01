@@ -134,8 +134,9 @@ I'am confused by the given specifications, so this section has to be revised.
 
 - Create log class
 - Ensure that when a new file arrives, the log can be created of that file.
-- Create the File Transfer class
+- Create the File Transfer class.
 - Ensure that when transfering a file, the log of that file is automatically included.
+- Create File Controlling class for easy interaction with the files.
 
 ### Berkay
 ### Tom
