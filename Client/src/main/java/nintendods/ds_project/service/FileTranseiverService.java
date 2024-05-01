@@ -10,6 +10,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import nintendods.ds_project.model.ANode;
 import nintendods.ds_project.model.file.AFile;
 import nintendods.ds_project.model.message.FileMessage;
+import nintendods.ds_project.utility.Generator;
 
 /**
  * Transfer/ receive a file to/from another node.
@@ -24,6 +25,9 @@ public class FileTranseiverService {
     private static int buffer = 50;
 
     private static BlockingQueue<FileMessage> receiveQueue;
+    private static boolean running = false;
+
+    private Thread receiverThread;
 
     /**
      * Create a File tranceiver object that will automatically create a thread where it wil listen for file receives.
@@ -40,9 +44,13 @@ public class FileTranseiverService {
      * @param buffer the amount of files that can be buffered
      */
     public FileTranseiverService(int port, int buffer) {
-        Thread receiverThread = new Thread(() -> receiveFile());
+        //Maintain 1 static creation of this
+        if(running) return;
+        running = true;
+
+        this.receiverThread = new Thread(() -> receiveFile());
         receiveQueue = new LinkedBlockingQueue<>(buffer);
-        receiverThread.start();
+        this.receiverThread.start();
 
         try {
             Thread.sleep(200); // Sleep for 500 milliseconds
@@ -150,19 +158,37 @@ public class FileTranseiverService {
                 try {
                     if (directoryPath.equals("")) {
                         f = new File(m.getFileObject().getName());
-                        //newPath = m.getFileObject().getName();
                     } else {
                         f = new File(directoryPath, m.getFileObject().getName());
-                        //newPath = directoryPath + "/" + m.getFileObject().getName();
+
+                        File directory = new File(directoryPath);
+                        if (!directory.exists()) {
+                            if (directory.mkdirs()) {
+                                System.out.println("Directory created successfully.");
+                            }
+                        }
                     }
 
+                    // Creating the file
+                    if (f.createNewFile()) {
+                        System.out.println("File created successfully.");
+                    } else {
+                        System.out.println("File already exists. Creating a new name.");
+                        //Add random chars at the end and log this to the object
+                        do{
+                            f = new File(f.getParent(), renameFile(f.getName(), 5));
+                        } while (!f.createNewFile());
+                    }
+
+                    //Copy the received file to the created file.
                     FileOutputStream fos;
-                    fos = new FileOutputStream(f); //TODO there is a problem
+                    fos = new FileOutputStream(f);
                     fos.write(m.getFileInByte());
                     fos.close();
 
-                    //set file path
-                    fileObject.setPath(new File(newPath).getAbsolutePath());
+                    //set file path and name
+                    fileObject.setPath(f.getAbsolutePath());
+                    fileObject.setName(f.getName());
 
                     return fileObject;
                 } catch (IOException e) {
@@ -170,10 +196,32 @@ public class FileTranseiverService {
                     e.printStackTrace();
                 }
             }
-
             return null;
         }
         return null;
+    }
+
+    /**
+     * Replaces the filename with random chars at the end. Does this on the end of the filename or before the last dot.
+     * @param fileName
+     * @return
+     */
+    private String renameFile(String fileName, int randomTextLength){
+
+        int lastIndex = fileName.lastIndexOf(".");
+        String resultString = fileName;
+        String randomText = Generator.randomString(randomTextLength);
+        // Check if "." exists in the string
+        if (lastIndex != -1) {
+            resultString = fileName.substring(0, lastIndex) + randomText + fileName.substring(lastIndex);
+        } else {
+            // If "." does not exist, add it at the end of the file
+            resultString = fileName + randomText;
+        }
+
+        System.out.println(fileName + " -> " + resultString);
+
+        return resultString;
     }
 
     private boolean available() {
