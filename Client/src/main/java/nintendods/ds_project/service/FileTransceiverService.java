@@ -1,22 +1,25 @@
 package nintendods.ds_project.service;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.logging.FileHandler;
 
 import nintendods.ds_project.model.ANode;
 import nintendods.ds_project.model.file.AFile;
 import nintendods.ds_project.model.message.FileMessage;
 import nintendods.ds_project.utility.FileModifier;
-import nintendods.ds_project.utility.Generator;
 
 /**
  * Transfer/ receive a file to/from another node.
  */
-public class FileTranseiverService {
+public class FileTransceiverService {
 
     private int port = 12346;
     private static BlockingQueue<FileMessage> receiveQueue;
@@ -27,7 +30,7 @@ public class FileTranseiverService {
      * it wil listen for file receives.
      * The default TCP port is 12346 and the file capacity is 50.
      */
-    public FileTranseiverService() {
+    public FileTransceiverService() {
         this(12346, 50);
     }
 
@@ -38,7 +41,7 @@ public class FileTranseiverService {
      * @param port   the receiving port to listen on
      * @param buffer the amount of files that can be buffered
      */
-    public FileTranseiverService(int port, int buffer) {
+    public FileTransceiverService(int port, int buffer) {
         // Maintain 1 static creation of this
         // if (running)
         // return;
@@ -64,7 +67,7 @@ public class FileTranseiverService {
      * @param fileObject      the object that contains the file information. Will be
      *                        used to retrieve the file itself.
      * @param receiverAddress the address of the receiver
-     * @return true if succeed and false if not.
+     * @return true if succeeded and false if not.
      */
     public boolean sendFile(AFile fileObject, String receiverAddress) {
         Socket socket = null;
@@ -101,7 +104,7 @@ public class FileTranseiverService {
      * 
      * @param port
      */
-    public void receiveFile(int port) {
+    private void receiveFile(int port) {
         try {
             ServerSocket ss = new ServerSocket(port);
             Socket socket;

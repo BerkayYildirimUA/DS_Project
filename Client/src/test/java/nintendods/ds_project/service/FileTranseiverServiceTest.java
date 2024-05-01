@@ -36,7 +36,7 @@ public class FileTranseiverServiceTest {
             AFile fileObj = new AFile(testFile.getAbsolutePath(), testFile.getName(), nodeSend);
 
             // Create FileTranseiver object and transfer file
-            FileTranseiverService ftss = new FileTranseiverService(12344, 20);
+            FileTransceiverService ftss = new FileTransceiverService(12344, 20);
 
             // Send the file to itself. Can be any node received from the namingserver.
             ftss.sendFile(fileObj, nodeSend.getAddress().getHostAddress());
@@ -94,7 +94,7 @@ public class FileTranseiverServiceTest {
 
             // Lets say that the file needs to be transfered
             // Create FileTranseiver object and transfer file
-            FileTranseiverService ftss = new FileTranseiverService(12346, 20);
+            FileTransceiverService ftss = new FileTransceiverService(12346, 20);
 
             // Send the file to itself. Can be any node received from the namingserver.
             ftss.sendFile(fileObj, nodeSend.getAddress().getHostAddress());
@@ -146,7 +146,7 @@ public class FileTranseiverServiceTest {
             ANetworkNode nodeSend = new ANetworkNode(InetAddress.getLocalHost(), 21, "Robbe");
             AFile fileObj = new AFile(testFile.getAbsolutePath(), testFile.getName(), nodeSend);
 
-            FileTranseiverService ftss = new FileTranseiverService(12347, 20);
+            FileTransceiverService ftss = new FileTransceiverService(12347, 20);
 
             // Send the file to itself. Can be any node received from the namingserver.
             ftss.sendFile(fileObj, nodeSend.getAddress().getHostAddress());
