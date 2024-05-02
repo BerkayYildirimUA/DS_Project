@@ -23,6 +23,8 @@ public class MulticastListenService {
     private static BlockingQueue<MNObject> multicastQueue;
     private final JsonConverter jsonConverter = new JsonConverter();
 
+    private static boolean isRunning = true;
+
     String multicastAddress;
     int multicastPort;
     int multicastBufferCapacity;
@@ -73,7 +75,7 @@ public class MulticastListenService {
             byte[] buffer = new byte[BUFFER_SIZE];
             DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
 
-            while (true) {
+            while (isRunning) {
                 multicastSocket.receive(packet);
                 System.out.println("MulticastService - Received a multicast: " + packet.getAddress().getHostAddress());
                 String message = new String(packet.getData(), 0, packet.getLength());
@@ -88,7 +90,7 @@ public class MulticastListenService {
     }
 
     private void processPackets(BlockingQueue<String> packetQueue) {
-        while (true) {
+        while (isRunning) {
             String packet = null;
             try {
                 packet = packetQueue.take();
@@ -121,5 +123,9 @@ public class MulticastListenService {
 
     public MNObject getMessage() throws NullPointerException{
         return multicastQueue.poll();
+    }
+
+    public void stopThreads() {
+        isRunning = false;
     }
 }

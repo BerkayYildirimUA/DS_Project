@@ -3,14 +3,15 @@ package nintendods.ds_project.service;
 import java.io.IOException;
 
 public class UnicastListenService {
-    private TCPClient client;
+    private TCPServer client;
 
     public UnicastListenService() {
         Thread receiverThread = new Thread(() -> {
             try {
-                client = new TCPClient();
+                client = new TCPServer();
+                client.connect();
             } catch (IOException e) {
-                System.out.println("Error:\tconstructor\n" + e.toString() + "\n");
+                System.out.println("UnicastListenService - Error:\tconstructor\n" + e + "\n");
                 throw new RuntimeException(e);
             }
         });
@@ -21,7 +22,7 @@ public class UnicastListenService {
         try {
             client.stop();
         } catch (IOException e) {
-            System.out.println("Error:\tstop\n" + e.toString() + "\n");
+            System.out.println("UnicastListenService - Error:\tstop\n" + e + "\n");
             throw new RuntimeException(e);
         }
     }

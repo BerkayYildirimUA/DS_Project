@@ -124,4 +124,9 @@ public class ListenerService {
     public void stopTCP() {
         unicastService.stop();
     }
+
+    public void stopListening() {
+        multicastService.stopThreads();
+        stopTCP();
+    }
 }

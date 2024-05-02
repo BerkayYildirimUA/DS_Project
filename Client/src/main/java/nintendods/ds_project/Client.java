@@ -22,11 +22,11 @@ public class Client {
 
     private static ClientNode node;
 
-    private static NSAPIService nsapiService;
+    private static NSAPIService API = NSAPIService.getAPI();
     private static UnicastListenService unicastService;
 
     private static final int NODE_NAME_LENGTH = 20;
-    private static final int NODE_GLOBAL_PORT = 23;
+    private static final int NODE_GLOBAL_PORT = 21;
 
     private static final int DISCOVERY_RETRIES = 6;
     private static final int DISCOVERY_TIMEOUT = 8000; //In microseconds
@@ -38,7 +38,6 @@ public class Client {
 
     public static void main(String[] args) throws IOException {
         // Create Node
-
         node = new ClientNode(InetAddress.getLocalHost(), NODE_GLOBAL_PORT, generateRandomString(NODE_NAME_LENGTH));
         System.out.println(node);
 
@@ -57,7 +56,7 @@ public class Client {
                     // Set Discovery on
                     if (discoveryRetries == DISCOVERY_RETRIES) {
                         // Max retries reached
-                        System.out.println("Max discovery retries reached");
+                        System.out.println("DISCOVERY:\t Max discovery retries reached");
                         nodeState = eNodeState.Error;
                         break;
                     }
@@ -67,26 +66,27 @@ public class Client {
                     try {
                         node = ds.discover(node);
                     } catch (Exception e) {
-                        System.out.println("Retried discovery for the " + discoveryRetries + "(th) time");
+                        System.out.println("DISCOVERY:\t Retried discovery for the " + discoveryRetries + "(th) time");
                         nodeState = eNodeState.Discovery;
                         //Create new node
                         node = new ClientNode(InetAddress.getLocalHost(), NODE_GLOBAL_PORT, generateRandomString(NODE_NAME_LENGTH));
                         System.out.println(node);
                         break;
                     }
-                    
+
                     // //Discovery has succeeded so continue
                     // //get NSObject from discovery service
                     nsObject = ds.getNSObject();
 
-                    // //Define the api object
-                    nsapiService = new NSAPIService(nsObject.getNSAddress(), nsObject.getNSPort());
+                    // Configure the api object
+                    API.setIp(nsObject.getNSAddress());
+                    API.setPort(nsObject.getNSPort());
 
                     // //Add node to Naming Server
                     // nsapiService.executePost("/nodes", jsonConverter.toJson(nsObject));
 
                     System.out.println(node.toString());
-                    System.out.println("Successfully reply in " + discoveryRetries + " discoveries.");
+                    System.out.println("DISCOVERY:\t Successfully reply in " + discoveryRetries + " discoveries.");
                     nodeState = eNodeState.Listening;
                 }
                 case Listening -> {
@@ -100,9 +100,9 @@ public class Client {
                     }
 
                     if (node.getId() < node.getPrevNodeId())    {
-                        System.out.println("Client sleep");
+                        System.out.println("LISTENING:\t Client sleep");
                         try {
-                            TimeUnit.SECONDS.sleep(3);
+                            TimeUnit.SECONDS.sleep(15);
                         } catch (InterruptedException e) {
                             throw new RuntimeException(e);
                         }
@@ -114,30 +114,33 @@ public class Client {
                     nodeState = eNodeState.Listening;
                 }
                 case Shutdown -> {
-                    System.out.println("Start: SHUTDOWN\t" + Timestamp.from(Instant.now()));
+                    System.out.println("SHUTDOWN:\t Start:" + Timestamp.from(Instant.now()));
                     // TODO
                     // Gracefully, update the side nodes on its own and leave the ring topology.
 
                     /**
-                    * When the node gets in the Shutdown state inside the discovery service, we'll access the 
+                    * When the node gets in the Shutdown state inside the discovery service, we'll access the
                     * NamingServer API to handle everything from here.
                     * call: {NSAddress}:{NSPort}/nodes/{id}/shutdown
                     */
                 }
                 case Error -> {
-                    System.out.println("Start: ERROR\t" + Timestamp.from(Instant.now()));
+                    System.out.println("ERROR:\t Start:" + Timestamp.from(Instant.now()));
                     // TODO
                     // Hard, only transmit to naming server and the naming server needs to deal with it.
 
-                    System.out.println("Client: Send error");
-                    nsapiService.executeErrorDelete("/nodes/" + node.getId() + "/error");
+                    if (API.hasAddress()) {
+                        System.out.println("ERROR:\t Client: Send error");
+                        API.executeErrorDelete("/nodes/" + node.getId() + "/error");
+                    }
                     /**
-                    * When the node gets in the Error state, we'll access the 
+                    * When the node gets in the Error state, we'll access the
                     * NamingServer API to handle everything from here.
                     * call: {NSAddress}:{NSPort}/nodes/{id}/error
                     */
 
                     isRunning = false;
+                    listenerService.stopListening();
                 }
                 case null, default -> {
                     // Same as error?
