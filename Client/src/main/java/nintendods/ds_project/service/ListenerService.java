@@ -28,19 +28,14 @@ public class ListenerService {
         this.multicastBufferCapacity = multicastBufferCapacity;
 
         unicastService = new UnicastListenService();
+        initialize_multicast();
     }
 
-//    public void initialize_multicast() {
-//        if (multicastService == null)
-//            multicastService = new MulticastListenService(multicastAddress, multicastPort, multicastBufferCapacity);
-//
-//        try {
-//            System.out.println(InetAddress.getLocalHost().getHostAddress());
-//        } catch (UnknownHostException e) {
-//            throw new RuntimeException(e);
-//        }
-//
-//    }
+    public void initialize_multicast() {
+        if (multicastService == null)
+            multicastService = new MulticastListenService(multicastAddress, multicastPort, multicastBufferCapacity);
+        multicastService.initialize();
+    }
 
     public void listenAndUpdate(ClientNode node) throws Exception {
         // Checks if a multicast has arrived;
