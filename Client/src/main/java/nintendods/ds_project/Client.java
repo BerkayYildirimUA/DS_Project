@@ -8,6 +8,7 @@ import nintendods.ds_project.service.NSAPIService;
 import nintendods.ds_project.service.UnicastListenService;
 import nintendods.ds_project.utility.JsonConverter;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import java.io.IOException;
@@ -25,7 +26,7 @@ public class Client {
     private static UnicastListenService unicastService;
 
     private static final int NODE_NAME_LENGTH = 20;
-    private static final int NODE_GLOBAL_PORT = 21;
+    private static final int NODE_GLOBAL_PORT = 23;
 
     private static final int DISCOVERY_RETRIES = 6;
     private static final int DISCOVERY_TIMEOUT = 8000; //In microseconds
