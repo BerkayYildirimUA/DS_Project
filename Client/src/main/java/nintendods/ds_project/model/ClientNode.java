@@ -33,7 +33,7 @@ public class ClientNode extends ABaseNode{
      * @param prevNodeId
      */
     public void setPrevNodeId(int prevNodeId) {
-        // if (prevNodeId == -1)
+        if (prevNodeId == -1)
             prevNodeId = getId();
         this.prevNodeId = prevNodeId;
     }
