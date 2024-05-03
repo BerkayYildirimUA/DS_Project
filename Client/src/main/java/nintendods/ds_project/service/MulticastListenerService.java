@@ -7,27 +7,25 @@ import nintendods.ds_project.model.message.eMessageTypes;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.net.InetAddress;
+import java.io.IOException;
 import java.net.UnknownHostException;
 
 @Component("Lis1")
-public class ListenerService {
+public class MulticastListenerService {
 
     private static MulticastListenService multicastService = null;
-    private static UnicastListenService unicastService = null;
 
     String multicastAddress;
     int multicastPort;
     int multicastBufferCapacity;
 
-    public ListenerService(@Value("${udp.multicast.address}") String multicastAddress,
-                           @Value("${udp.multicast.port}") int multicastPort,
-                           @Value("${udp.multicast.buffer-capacity}") int multicastBufferCapacity) {
+    public MulticastListenerService(@Value("${udp.multicast.address}") String multicastAddress,
+                                    @Value("${udp.multicast.port}") int multicastPort,
+                                    @Value("${udp.multicast.buffer-capacity}") int multicastBufferCapacity) {
         this.multicastAddress = multicastAddress;
         this.multicastPort = multicastPort;
         this.multicastBufferCapacity = multicastBufferCapacity;
 
-        unicastService = new UnicastListenService();
         initialize_multicast();
     }
 
@@ -37,7 +35,7 @@ public class ListenerService {
         multicastService.initialize();
     }
 
-    public void listenAndUpdate(ClientNode node) throws Exception {
+    public void listenAndUpdate(ClientNode node) throws IOException {
         // Checks if a multicast has arrived;
         MNObject message = null;
         try { message = multicastService.getMessage(); } 
@@ -121,12 +119,7 @@ public class ListenerService {
         }
     }
 
-    public void stopTCP() {
-        unicastService.stop();
-    }
-
     public void stopListening() {
         multicastService.stopThreads();
-        stopTCP();
     }
 }

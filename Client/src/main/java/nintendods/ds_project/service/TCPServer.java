@@ -1,5 +1,6 @@
 package nintendods.ds_project.service;
 
+import org.antlr.v4.runtime.misc.Pair;
 import org.springframework.beans.factory.annotation.Value;
 
 import java.io.*;
@@ -10,33 +11,47 @@ public class TCPServer {
     private ServerSocket server;
     private DataInputStream dataIn;
 
-    @Value("${tcp.unicast.port}")
     private int PORT;
+    private boolean keepListening = true;
+    private String message = "";
 
-    private boolean isRunning = true;
+    public TCPServer(@Value("${tcp.unicast.port}") int port) {
+        PORT = port;
+    }
 
     public void connect() throws IOException {
-        // TODO: Read PORT value from file
-        if (PORT < 1024) PORT = 3780;
+        System.out.println("TCPServer:\t Listening for clients...");
         server = new ServerSocket(PORT);
         server.setReuseAddress(true);
-        System.out.println("TCPServer:\t Listening for clients...");
-        String message = "";
+    }
 
-        while (isRunning) {
+    public void listen() throws IOException {
+        System.out.println("TCPServer:\t Listening for message...");
+
+        while (keepListening) {
             System.out.println("TCPServer:\t Data exchange");
             Socket client = server.accept();
             dataIn = new DataInputStream(new BufferedInputStream(client.getInputStream()));
             message = dataIn.readUTF();
             System.out.println("TCPServer:\t " + message);
-            isRunning = message.isEmpty();
+            keepListening = message.isEmpty(); // Keeps running as long as nothing is received
         }
+    }
 
-        if (NSAPIService.getAPI().hasAddress())
-            NSAPIService.getAPI().executeErrorPatch("/nodes/" + message + "/error");
+    public Pair<Integer, Integer> decryptMessage() {
+        if (message.isEmpty())
+            return null;
+        else {
+            String[] parts = message.split("->");
+            message = "";
+            keepListening = true;
+            return new Pair<>(Integer.parseInt(parts[0]), Integer.parseInt(parts[1]));
+        }
     }
 
     public void stop() throws IOException {
-        isRunning = false;
+        keepListening = false;
+        if (dataIn != null) dataIn.close();
+        if (server != null) server.close();
     }
 }

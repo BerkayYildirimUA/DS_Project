@@ -3,12 +3,11 @@ package nintendods.ds_project;
 import nintendods.ds_project.model.ClientNode;
 import nintendods.ds_project.model.message.UNAMObject;
 import nintendods.ds_project.service.DiscoveryService;
-import nintendods.ds_project.service.ListenerService;
+import nintendods.ds_project.service.MulticastListenerService;
 import nintendods.ds_project.service.NSAPIService;
-import nintendods.ds_project.service.UnicastListenService;
+import nintendods.ds_project.service.UnicastListenerService;
 import nintendods.ds_project.utility.JsonConverter;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import java.io.IOException;
@@ -23,7 +22,6 @@ public class Client {
     private static ClientNode node;
 
     private static NSAPIService API = NSAPIService.getAPI();
-    private static UnicastListenService unicastService;
 
     private static final int NODE_NAME_LENGTH = 20;
     private static final int NODE_GLOBAL_PORT = 21;
@@ -41,9 +39,12 @@ public class Client {
         node = new ClientNode(InetAddress.getLocalHost(), NODE_GLOBAL_PORT, generateRandomString(NODE_NAME_LENGTH));
         System.out.println(node);
 
-        eNodeState nodeState = eNodeState.Discovery;
+        eNodeState nodeState = eNodeState.DISCOVERY;
         boolean isRunning = true;
-        ListenerService listenerService = null;
+
+        MulticastListenerService multicastListener = null;
+        UnicastListenerService unicastListener = null;
+
         JsonConverter jsonConverter = new JsonConverter();
         UNAMObject nsObject;
 
@@ -52,12 +53,12 @@ public class Client {
         while (isRunning) {
             // Finite state machine with eNodeState states
             switch (nodeState) {
-                case Discovery -> {
+                case DISCOVERY -> {
                     // Set Discovery on
                     if (discoveryRetries == DISCOVERY_RETRIES) {
                         // Max retries reached
                         System.out.println("DISCOVERY:\t Max discovery retries reached");
-                        nodeState = eNodeState.Error;
+                        nodeState = eNodeState.ERROR;
                         break;
                     }
 
@@ -67,7 +68,7 @@ public class Client {
                         node = ds.discover(node);
                     } catch (Exception e) {
                         System.out.println("DISCOVERY:\t Retried discovery for the " + discoveryRetries + "(th) time");
-                        nodeState = eNodeState.Discovery;
+                        nodeState = eNodeState.DISCOVERY;
                         //Create new node
                         node = new ClientNode(InetAddress.getLocalHost(), NODE_GLOBAL_PORT, generateRandomString(NODE_NAME_LENGTH));
                         System.out.println(node);
@@ -87,16 +88,21 @@ public class Client {
 
                     System.out.println(node.toString());
                     System.out.println("DISCOVERY:\t Successfully reply in " + discoveryRetries + " discoveries.");
-                    nodeState = eNodeState.Listening;
+                    nodeState = eNodeState.LISTENING;
                 }
-                case Listening -> {
-                    if (listenerService == null)
-                        listenerService = new ListenerService(MULTICAST_ADDRESS, MULTICAST_PORT, LISTENER_BUFFER_SIZE);
+                case LISTENING -> {
+                    if (multicastListener == null)
+                        multicastListener = new MulticastListenerService(MULTICAST_ADDRESS, MULTICAST_PORT, LISTENER_BUFFER_SIZE);
+
+                    if (unicastListener == null)
+                        unicastListener = new UnicastListenerService(3780);
+
                     try {
-                        listenerService.listenAndUpdate(node);
-                    } catch (Exception e) {
+                        multicastListener.listenAndUpdate(node);
+                        unicastListener.listenAndUpdate(node);
+                    } catch (IOException e) {
                         e.printStackTrace();
-                        nodeState = eNodeState.Error;
+                        nodeState = eNodeState.ERROR;
                     }
 
                     if (node.getId() < node.getPrevNodeId())    {
@@ -106,14 +112,14 @@ public class Client {
                         } catch (InterruptedException e) {
                             throw new RuntimeException(e);
                         }
-                        nodeState = eNodeState.Error;
-                    } else nodeState = eNodeState.Transfer;
+                        nodeState = eNodeState.ERROR;
+                    } else nodeState = eNodeState.TRANSFER;
                 }
-                case Transfer -> {
+                case TRANSFER -> {
                     // TODO:
-                    nodeState = eNodeState.Listening;
+                    nodeState = eNodeState.LISTENING;
                 }
-                case Shutdown -> {
+                case SHUTDOWN -> {
                     System.out.println("SHUTDOWN:\t Start:" + Timestamp.from(Instant.now()));
                     // TODO
                     // Gracefully, update the side nodes on its own and leave the ring topology.
@@ -124,7 +130,7 @@ public class Client {
                     * call: {NSAddress}:{NSPort}/nodes/{id}/shutdown
                     */
                 }
-                case Error -> {
+                case ERROR -> {
                     System.out.println("ERROR:\t Start:" + Timestamp.from(Instant.now()));
                     // TODO
                     // Hard, only transmit to naming server and the naming server needs to deal with it.
@@ -140,7 +146,8 @@ public class Client {
                     */
 
                     isRunning = false;
-                    listenerService.stopListening();
+                    multicastListener.stopListening();
+                    unicastListener.stopListening();
                 }
                 case null, default -> {
                     // Same as error?

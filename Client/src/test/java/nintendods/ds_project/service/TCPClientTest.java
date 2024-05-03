@@ -1,29 +1,19 @@
 package nintendods.ds_project.service;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
 
+@SpringBootTest
 public class TCPClientTest {
-
-    /*
-    * Setup:
-    * ClientNode contains TCP server and listens
-    * NameServer contains TCP client and sends
-    *
-    * Data exchange:
-    * Error is received at API
-    * NS sends TCP packets to CN
-    * CN does a errorCheck API request
-    * NS stops sending TCP packets
-    * */
 
     @Test
     public void TCPCommunication() {
-        TCPServer server = new TCPServer();
+        TCPServer server = new TCPServer(3780);
         TCPClient client = new TCPClient();
 
         Thread clientThread = new Thread(() -> {
@@ -66,8 +56,8 @@ public class TCPClientTest {
 
         public void stop() throws IOException {
             isRunning = false;
-            dataOut.close();
-            socket.close();
+            if (dataOut != null) dataOut.close();
+            if (socket != null) socket.close();
         }
     }
 }
