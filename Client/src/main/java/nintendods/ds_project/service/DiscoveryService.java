@@ -58,7 +58,7 @@ public class DiscoveryService {
             try { udpListener(this.waitTimeDiscovery, this.listener); } 
             catch (Exception e) { throw new RuntimeException(e); }
         });
-
+    //---------------------------------------BEGIN DISCOVERY---------------------------------------------//
         // Create multicast object
         MulticastSendService ms = new MulticastSendService(multicastAddress, multicastPort);
         long udp_id = System.currentTimeMillis(); // unique messageID
@@ -100,7 +100,8 @@ public class DiscoveryService {
                 filteredMessages.add(m);
             }
         }
-
+    //---------------------------------------END DISCOVERY---------------------------------------------//
+    //---------------------------------------BEGIN BOOTSTRAP---------------------------------------------//
         ClientNode newNode = (ClientNode) node; // Casting
         int prevId = -1;
         int nextId = -1;
@@ -170,6 +171,7 @@ public class DiscoveryService {
 
         System.out.println("\r\nDiscoveryService - New node composed");
         return newNode;
+    //---------------------------------------END BOOTSTRAP---------------------------------------------//
     }
 
     private void udpListener(int timeOutTime, UDPServer listener) throws Exception {
