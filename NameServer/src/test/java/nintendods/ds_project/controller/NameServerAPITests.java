@@ -2,7 +2,6 @@ package nintendods.ds_project.controller;
 
 import com.google.gson.Gson;
 import nintendods.ds_project.model.ClientNode;
-import nintendods.ds_project.model.message.ResponseObject;
 import nintendods.ds_project.utility.NameToHash;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
