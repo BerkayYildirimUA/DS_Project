@@ -4,6 +4,9 @@ import java.io.File;
 import java.io.IOException;
 
 public class FileModifier {
+
+    private static final int maxIterations = 500000;
+
     public static File createFile(String directory, String fileName, boolean createNewNameIfNeeded) {
         try {
             File file;
@@ -14,9 +17,11 @@ public class FileModifier {
             if (!file.createNewFile()) {
                 if (createNewNameIfNeeded) {
                     // Add random chars at the end and log this to the object
+                    int countIterations = 0;
                     do {
                         file = new File(file.getParent(), Generator.renameText(file.getName(), 5));
-                    } while (!file.createNewFile());
+                        countIterations++;
+                    } while (!file.createNewFile() || countIterations >= maxIterations);
                 } else {
                     return null;
                 }
@@ -32,11 +37,11 @@ public class FileModifier {
         return FileModifier.createFile("", fileName, createNewName);
     }
 
-    public static String createDirectory(String path){
+    public static String createDirectory(String dirName){
         // Check if directory exists
 
-        if (!path.equals("")) {
-            File dir = new File(path);
+        if (!dirName.equals("")) {
+            File dir = new File(dirName);
             if (!dir.exists()) {
                 dir.mkdirs();
             }

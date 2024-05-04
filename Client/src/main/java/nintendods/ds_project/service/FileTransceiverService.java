@@ -48,8 +48,8 @@ public class FileTransceiverService {
         // running = true;
         this.port = port;
 
-        this.receiverThread = new Thread(() -> receiveFile(port));
         receiveQueue = new LinkedBlockingQueue<>(buffer);
+        this.receiverThread = new Thread(() -> receiveFile(port));
         this.receiverThread.start();
 
         // Let the thread startup
@@ -115,29 +115,18 @@ public class FileTransceiverService {
             while (!error) {
                 try {
                     socket = ss.accept(); // blocking call, this will wait until a connection is attempted on this port.
-                    // System.out.println("Connection from " + socket + "!");
 
-                    // get the input stream from the connected socket
                     inputStream = socket.getInputStream();
-                    // create a DataInputStream so we can read data from it.
                     objectInputStream = new ObjectInputStream(inputStream);
 
                     // read the list of messages from the socket and cast to FileMessage object
                     FileMessage receiveMessage = (FileMessage) objectInputStream.readObject();
-                    // System.out.println("Received messages from: " + socket);
-
-                    // print out the text of every message
-                    // System.out.println("message:" + receiveMessage.getFileObject().getName());
-
                     receiveQueue.add(receiveMessage);
                 } catch (Exception ex) {
                     error = true;
                 }
             }
-
-            System.out.println("Closing sockets.");
             ss.close();
-
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

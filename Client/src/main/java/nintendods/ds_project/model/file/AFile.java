@@ -16,19 +16,20 @@ import nintendods.ds_project.utility.NameToHash;
 
 public class AFile implements Serializable {
     String path = ""; // The path
-    String name = ""; // A name (with extention)
-    int id = -1; // the hashed id of the name
+    String name = ""; // A filename (with extention)
+    int id = -1; // the hashed id of the filename
     List<ALog> logs; // All the logs that happend with the file
-    ANode owner = null; // The base owner of the file where the file has its origine.
+    ANode owner = null; // The owner of the file where the file is hosted.
 
     /**
      * Create a new file object that creates a log with the provided ABaseNode. It
      * finds the file based on the absolute path.
      * 
-     * @param path  the absolute path of the given file with the file name included
-     * @param name  the name of the file
-     * @param owner the ABaseNode object that we want to set as the owner of the
-     *              file
+     * @param path    the absolute path of the given file with the file name
+     *                included
+     * @param name    the name of the file
+     * @param creator the ABaseNode object that we want to set as the owner of the
+     *                file
      */
     public AFile(String path, String name, ANode creator) {
         logs = new ArrayList<>();
@@ -124,6 +125,20 @@ public class AFile implements Serializable {
 
     public ANode getOwner() {
         return this.owner;
+    }
+
+    public ANode getCreator(){
+        if(!this.logs.isEmpty()){
+            if( this.logs.get(0).getType() == eLog.fileCreation) {
+                return  this.logs.get(0).getIssuer();
+            }
+            return (ANode) this.logs.stream().filter(l -> l.getType() == eLog.fileCreation).toList().get(0).getIssuer();
+        }
+        return null;
+    }
+
+    public List<ALog> getLogs() {
+        return this.logs;
     }
 
     public String getFormattedLogs() {
