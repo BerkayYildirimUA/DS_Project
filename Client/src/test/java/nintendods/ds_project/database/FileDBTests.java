@@ -14,14 +14,14 @@ class FileDBTests {
     @Test
     void testAddOrUpdateFile() {
         FileDB fileDB = new FileDB();
-        fileDB.addOrUpdateFile("testFile.txt", "10.10.10.10");
+        fileDB.addOrUpdateFile("testFile.txt", eFileTypes.Local, "10.10.10.10");
         assertEquals("10.10.10.10", fileDB.getFileLocation("testFile.txt"));
     }
 
     @Test
     void testRemoveFile() {
         FileDB fileDB = new FileDB();
-        fileDB.addOrUpdateFile("testFile.txt", "10.10.10.10");
+        fileDB.addOrUpdateFile("testFile.txt", eFileTypes.Local, "10.10.10.10");
         assertTrue(fileDB.removeFile("testFile.txt"));
         assertFalse(fileDB.fileExists("testFile.txt"));
     }
@@ -29,7 +29,7 @@ class FileDBTests {
     @Test
     void testFileExists() {
         FileDB fileDB = new FileDB();
-        fileDB.addOrUpdateFile("testFile.txt", "10.10.10.10");
+        fileDB.addOrUpdateFile("testFile.txt", eFileTypes.Local, "10.10.10.10");
         assertTrue(fileDB.fileExists("testFile.txt"));
         assertFalse(fileDB.fileExists("nonExistentFile.txt"));
     }

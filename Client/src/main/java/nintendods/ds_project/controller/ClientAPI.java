@@ -1,5 +1,6 @@
 package nintendods.ds_project.controller;
 import nintendods.ds_project.database.FileDB;
+import nintendods.ds_project.database.eFileTypes;
 import nintendods.ds_project.service.FileDBService;
 import nintendods.ds_project.utility.JsonConverter;
 import org.slf4j.Logger;
@@ -38,10 +39,14 @@ public class ClientAPI {
     }
 
     @PostMapping("/")
-    public ResponseEntity<String> addFile(@RequestParam("fileName") String fileName, @RequestParam("nodeIP") String nodeIP) {
+    public ResponseEntity<String> addFile(@RequestParam("fileName") String fileName,@RequestParam("filetype") String filetype, @RequestParam("nodeIP") String nodeIP) {
         logger.debug("Attempting to add/update file: {} at {}", fileName, nodeIP);
         try {
-            fileDB.addOrUpdateFile(fileName, nodeIP);
+            if (filetype.strip().equalsIgnoreCase("local"))
+                fileDB.addOrUpdateFile(fileName, eFileTypes.Local, nodeIP);
+            else if (filetype.strip().equalsIgnoreCase("replicated")) {
+                fileDB.addOrUpdateFile(fileName, eFileTypes.Replicated, nodeIP);
+            }
             logger.info("File added/updated successfully: {}", fileName);
             return ResponseEntity.status(HttpStatus.CREATED).body(jsonConverter.toJson("File added/updated successfully."));
         } catch (IllegalArgumentException e) {
