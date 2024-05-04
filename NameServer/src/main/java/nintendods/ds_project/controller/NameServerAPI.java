@@ -66,4 +66,10 @@ public class NameServerAPI {
         nodeDB.deleteNode(id);
         return ResponseEntity.status(HttpStatus.OK).body(jsonConverter.toJson(id));
     }
+
+    @PostMapping("/api/report-hashes")
+    public ResponseEntity<?> receiveHashes(@RequestBody Map<String, Integer> hashes) {
+        // Process hashes, e.g., storing them, checking for replication needs, etc.
+        return ResponseEntity.ok("Hashes received and will be processed");
+    }
 }

@@ -1,5 +1,7 @@
 package nintendods.ds_project.service;
 
+import org.springframework.stereotype.Service;
+
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.InputStream;
@@ -7,6 +9,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+//@Service
 public class NSAPIService {
     private String ip;
     private int port;
@@ -70,5 +73,44 @@ public class NSAPIService {
             }
         }
     }
+
+    public String executePost_json(String path, String json) {
+        HttpURLConnection connection = null;
+
+        try {
+            URL url = new URL(getBaseUrl() + path);
+            connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("POST");
+            connection.setRequestProperty("Content-Type", "application/json");
+
+            connection.setRequestProperty("Content-Length", Integer.toString(json.getBytes().length));
+            connection.setUseCaches(false);
+            connection.setDoOutput(true);
+
+            try (DataOutputStream wr = new DataOutputStream(connection.getOutputStream())) {
+                wr.writeBytes(json);
+            }
+
+            StringBuilder response = new StringBuilder();
+            try (InputStream is = connection.getInputStream();
+                 BufferedReader rd = new BufferedReader(new InputStreamReader(is))) {
+                String line;
+                while ((line = rd.readLine()) != null) {
+                    response.append(line);
+                    response.append('\r');
+                }
+            }
+            System.out.println(response);
+            return response.toString();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        } finally {
+            if (connection != null) {
+                connection.disconnect();
+            }
+        }
+    }
+
 
 }
