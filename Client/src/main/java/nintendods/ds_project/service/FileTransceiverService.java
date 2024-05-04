@@ -91,6 +91,9 @@ public class FileTransceiverService {
             // Write the message over
             objectOutputStream.writeObject(message);
             socket.close();
+
+            //File is replicated towards another node
+            fileObject.setReplicated(true);
         } catch (Exception ex) {
             return false;
         }

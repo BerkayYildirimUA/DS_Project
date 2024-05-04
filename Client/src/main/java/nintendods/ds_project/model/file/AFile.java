@@ -20,6 +20,7 @@ public class AFile implements Serializable {
     int id = -1; // the hashed id of the filename
     List<ALog> logs; // All the logs that happend with the file
     ANode owner = null; // The owner of the file where the file is hosted.
+    boolean isReplicated; // If the file has been replicated from the creating node
 
     /**
      * Create a new file object that creates a log with the provided ABaseNode. It
@@ -38,6 +39,7 @@ public class AFile implements Serializable {
         setId(name);
         this.path = path;
         this.owner = creator;
+        setReplicated(false);
 
         // Set a new log of initial creation with the owner of the file
         logs.add(new ALog(getOwner(), eLog.fileCreation, "initial creation of the file"));
@@ -127,10 +129,10 @@ public class AFile implements Serializable {
         return this.owner;
     }
 
-    public ANode getCreator(){
-        if(!this.logs.isEmpty()){
-            if( this.logs.get(0).getType() == eLog.fileCreation) {
-                return  this.logs.get(0).getIssuer();
+    public ANode getCreator() {
+        if (!this.logs.isEmpty()) {
+            if (this.logs.get(0).getType() == eLog.fileCreation) {
+                return this.logs.get(0).getIssuer();
             }
             return (ANode) this.logs.stream().filter(l -> l.getType() == eLog.fileCreation).toList().get(0).getIssuer();
         }
@@ -159,5 +161,18 @@ public class AFile implements Serializable {
             }
         }
         return text;
+    }
+
+    public void setReplicated(boolean isReplicated, String toNodeIp) {
+
+        if (isReplicated() == false) {
+            logs.add(new ALog(getOwner(), eLog.fileReplicated,
+                    "The file is replicated from node: " + getOwner().getName() + " to node with IP: " + toNodeIp));
+        }
+        this.isReplicated = isReplicated;
+    }
+
+    public boolean isReplicated() {
+        return this.isReplicated;
     }
 }
