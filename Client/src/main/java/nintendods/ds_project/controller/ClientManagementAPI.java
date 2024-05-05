@@ -11,14 +11,10 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/Management")
 public class ClientManagementAPI {
 
-    private static ClientNode node;
+    @Autowired
+    private ClientNode node;
 
     private static final Logger logger = LoggerFactory.getLogger(ClientManagementAPI.class);
-
-    @Autowired
-    public void setTest(ClientNode node) {
-        ClientManagementAPI.node = node;
-    }
 
     @PutMapping("/nextNodeID/")
     public ResponseEntity<String> changeNextNode(@RequestParam("ID") int ID){
@@ -31,7 +27,7 @@ public class ClientManagementAPI {
     @PutMapping("/prevNodeID/")
     public ResponseEntity<String> changePrevNode(@RequestParam("ID") int ID){
         logger.info("Request to change prev Node to {}", ID);
-        node.setNextNodeId(ID);
+        node.setPrevNodeId(ID);
         return ResponseEntity.ok().build();
     }
 

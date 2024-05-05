@@ -28,6 +28,8 @@ public class ClientNodeConfig {
     private String multicastAddress; // Multicast address for network communication
     @Value("${MULTICAST_PORT}")
     private int multicastPort; // Port for multicast communication
+    @Value("${TESTING}")
+    private int testing;
 
     public static int NODE_NAME_LENGTH; // Length of the random node name
     public static int NODE_GLOBAL_PORT; //Fixed port for node operations
@@ -36,6 +38,7 @@ public class ClientNodeConfig {
     public static int LISTENER_BUFFER_SIZE; // Buffer size for the listener service
     public static String MULTICAST_ADDRESS; // Multicast address for network communication
     public static int MULTICAST_PORT; // Port for multicast communication
+    public static int TESTING;
 
     @PostConstruct
     private void init() {
@@ -46,11 +49,12 @@ public class ClientNodeConfig {
         LISTENER_BUFFER_SIZE = listenerBufferSize;
         MULTICAST_ADDRESS = multicastAddress;
         MULTICAST_PORT = multicastPort;
+        TESTING = testing;
     }
 
     @Bean
     public ClientNode clientNode() throws Exception {
-        return new ClientNode(InetAddress.getLocalHost(), NODE_GLOBAL_PORT, Generator.randomString(NODE_NAME_LENGTH));
+         return new ClientNode(InetAddress.getLocalHost(), NODE_GLOBAL_PORT, Generator.randomString(NODE_NAME_LENGTH));
     }
 
 }

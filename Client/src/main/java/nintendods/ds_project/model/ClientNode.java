@@ -11,8 +11,8 @@ import java.net.UnknownHostException;
  */
 public class ClientNode extends ABaseNode{
     private int id = -1;
-    private int prevNodeId = -1;
-    private int nextNodeId = -1;
+    private volatile int prevNodeId = -1;
+    private volatile int nextNodeId = -1;
     public ClientNode(InetAddress address, int port, String name) {
         super(address, port, name);
         setId(NameToHash.convert(name));
@@ -25,6 +25,7 @@ public class ClientNode extends ABaseNode{
     public int getId() { return id; }
 
     public int getPrevNodeId() {
+
         return prevNodeId;
     }
 
@@ -38,9 +39,10 @@ public class ClientNode extends ABaseNode{
      * Set the previous node ID. If prevNodeId == -1, it gets set to id;
      * @param prevNodeId
      */
-    public void setPrevNodeId(int prevNodeId) {
+    public synchronized void setPrevNodeId(int prevNodeId) {
         if (prevNodeId == -1)
             prevNodeId = getId();
+        System.out.println(id + "prev bacame: " + prevNodeId);
         this.prevNodeId = prevNodeId;
     }
 
@@ -51,9 +53,10 @@ public class ClientNode extends ABaseNode{
      * Set the next node ID. If nextNodeId == -1, it gets set to id;
      * @param nextNodeId
      */
-    public void setNextNodeId(int nextNodeId) {
+    public synchronized void setNextNodeId(int nextNodeId) {
         if (nextNodeId == -1)
             nextNodeId = getId();
+        System.out.println(id + "next bacame: " + nextNodeId);
         this.nextNodeId = nextNodeId;
     }
 
