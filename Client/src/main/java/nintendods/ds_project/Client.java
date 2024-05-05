@@ -35,11 +35,8 @@ import java.util.Scanner;
 /**
  * Spring Boot application for managing a distributed system node's lifecycle excluding database auto-configuration.
  */
-@SpringBootApplication(exclude = {DataSourceAutoConfiguration.class})
-public class DsProjectApplication {
-    private static final Logger logger = LoggerFactory.getLogger(DsProjectApplication.class);
-
-    private ClientNode node;
+@SpringBootApplication(exclude = { DataSourceAutoConfiguration.class })
+public class Client {
 
     public ClientNode getNode() {
         return node;

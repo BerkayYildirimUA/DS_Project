@@ -93,13 +93,13 @@ To ensure easy coding, we'll create a file transfer class that can be used by th
 
 This will be done in 3 phases.
 
-## starting
+## starting (Ahmad)
 All files that are stored on each node should be replicated to corresponding nodes in the ring topology. This way, a new node to which the file is replicated becomes the owner of the file.
 
 After bootstrap and discovery, the new node has to verify its local files (folder on
 the hard drive). The node will send over each file name to the naming server and the naming server will send back a destination node if the file has to be replicated. The replicated node is the first smaller hash ID node the n the file hash.
 
-So there are 3 nodes with teh fommowing hash ID: 1 5 7. We have a file on node 1 with hash equal to 6. Then the new replication node will be node 5 because this is the 1 lesser then node based on the hash ID of the file.
+So there are 3 nodes with the fommowing hash ID: 1 5 7. We have a file on node 1 with hash equal to 6. Then the new replication node will be node 5 because this is the 1 lesser then node based on the hash ID of the file.
 
 The naming server will respond to the original node where to transfer through. If a replication node receives the file, it adds a log to the file logging.
 
@@ -108,7 +108,7 @@ Each file will have a full log available to track its replications and owners of
 ## Update
 If new files are added locally to certain node, or deleted from a node, this state has to be synchronized in the whole system. If a new file is added, then it has to be replicated. Otherwise, if deleted, it has to be deleted from the replicated files of the file owner as well.
 
-When we add a local file, this should be replicated immediately. We can startup a thread to check if the file three has changed, in a given intervan (eg 2 seconds interval).
+When we add a local file, this should be replicated immediately. We can startup a thread to check if the file three has changed, in a given interval (eg 2 seconds interval).
 
 The replication can be used from the starting phase where we send the file name to the namingserver API and then determine where to transfer it to over a TCP socket.
 
@@ -134,8 +134,9 @@ I'am confused by the given specifications, so this section has to be revised.
 
 - Create log class
 - Ensure that when a new file arrives, the log can be created of that file.
-- Create the File Transfer class
+- Create the File Transfer class.
 - Ensure that when transfering a file, the log of that file is automatically included.
+- Create File Controlling class for easy interaction with the files.
 
 ### Berkay
 ### Tom

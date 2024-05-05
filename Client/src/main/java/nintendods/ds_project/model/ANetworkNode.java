@@ -6,16 +6,17 @@ import java.net.InetAddress;
 /**
  * An abstract base Node that will be used onto a network interface and has a name
  */
-public abstract class ABaseNode {
+public class ANetworkNode extends ANode {
     private InetAddress address;
     private int port;
     private String name;
 
-    public ABaseNode(InetAddress address, int port, String name){
+    public ANetworkNode(InetAddress address, int port, String name){
+        super(name);
         setAddress(address);
         setPort(port);
-        setName(name);
     }
+
     public InetAddress getAddress() {
         return address;
     }
@@ -31,16 +32,10 @@ public abstract class ABaseNode {
     public void setPort(int port) {
         this.port = port;
     }
-    public String getName() {
-        return name;
-    }
-    public void setName(String name) {
-        this.name = name;
-    }
 
     @Override
     public String toString() {
-        return "ABaseNode{" +
+        return "ANetworkNode{" +
                 "address=" + address +
                 ", port=" + port +
                 ", name='" + name + '\'' +

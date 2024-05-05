@@ -7,22 +7,32 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 /**
- * A specific implementation of a Client node that will be used inside a ring topology.
+ * A specific implementation of a Client node that will be used inside a ring
+ * topology.
  */
-public class ClientNode extends ABaseNode{
+public class ClientNode extends ANetworkNode {
     private int id = -1;
-    private volatile int prevNodeId = -1;
-    private volatile int nextNodeId = -1;
+    private int prevNodeId = -1;
+    private int nextNodeId = -1;
+
     public ClientNode(InetAddress address, int port, String name) {
         super(address, port, name);
         setId(NameToHash.convert(name));
     }
+
     public ClientNode(MNObject multicastNodeObject) throws UnknownHostException {
-        super(InetAddress.getByName(multicastNodeObject.getAddress()), multicastNodeObject.getPort(), multicastNodeObject.getName());
+        super(InetAddress.getByName(multicastNodeObject.getAddress()), multicastNodeObject.getPort(),
+                multicastNodeObject.getName());
         setId(NameToHash.convert(multicastNodeObject.getName()));
     }
-    private void setId(int id) { this.id = id; }
-    public int getId() { return id; }
+
+    private void setId(int id) {
+        this.id = id;
+    }
+
+    public int getId() {
+        return id;
+    }
 
     public int getPrevNodeId() {
 
@@ -37,6 +47,7 @@ public class ClientNode extends ABaseNode{
 
     /**
      * Set the previous node ID. If prevNodeId == -1, it gets set to id;
+     *
      * @param prevNodeId
      */
     public synchronized void setPrevNodeId(int prevNodeId) {
@@ -49,8 +60,10 @@ public class ClientNode extends ABaseNode{
     public int getNextNodeId() {
         return nextNodeId;
     }
+
     /**
      * Set the next node ID. If nextNodeId == -1, it gets set to id;
+     *
      * @param nextNodeId
      */
     public synchronized void setNextNodeId(int nextNodeId) {
