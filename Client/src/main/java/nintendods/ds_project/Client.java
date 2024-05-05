@@ -3,6 +3,7 @@ package nintendods.ds_project;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import nintendods.ds_project.config.ClientNodeConfig;
+import nintendods.ds_project.controller.ClientAPI;
 import nintendods.ds_project.controller.ClientManagementAPI;
 import nintendods.ds_project.exeption.DuplicateNodeException;
 import nintendods.ds_project.exeption.NotEnoughMessageException;
@@ -38,14 +39,13 @@ import java.util.Scanner;
 @SpringBootApplication(exclude = { DataSourceAutoConfiguration.class })
 public class Client {
 
+    @Autowired
+    ClientNode node;
+
     public ClientNode getNode() {
         return node;
     }
-
-    @Autowired
-    public void addNode(ClientNode node){
-        this.node = node;
-    }
+    private static final Logger logger = LoggerFactory.getLogger(Client.class);
 
     @Autowired
     ApplicationContext context;
@@ -74,7 +74,7 @@ public class Client {
 
 
     public static void main(String[] args) throws UnknownHostException {
-        SpringApplication.run(DsProjectApplication.class, args);
+        SpringApplication.run(Client.class, args);
     }
 
 

@@ -1,11 +1,14 @@
 package nintendods.ds_project.service;
 
+import nintendods.ds_project.config.ClientNodeConfig;
 import nintendods.ds_project.exeption.DuplicateNodeException;
 import nintendods.ds_project.exeption.NotEnoughMessageException;
 import nintendods.ds_project.model.ANetworkNode;
 import nintendods.ds_project.model.ClientNode;
 import nintendods.ds_project.model.message.*;
 import nintendods.ds_project.utility.JsonConverter;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.net.*;
@@ -15,8 +18,8 @@ import java.util.List;
 @Component("Dis1")
 public class DiscoveryService {
     private List<String> receivedMessages;
-    private String multicastAddress = "224.0.0.100";
-    private int multicastPort = 12345;
+    private String multicastAddress = ClientNodeConfig.MULTICAST_ADDRESS;
+    private int multicastPort = ClientNodeConfig.MULTICAST_PORT;
     private int waitTimeDiscovery = 20000;
     private UDPServer listener;
     private ServerSocket socket;
@@ -169,7 +172,6 @@ public class DiscoveryService {
         node.setPrevNodeId(prevId);
 
         System.out.println("\r\nDiscoveryService - New node composed");
-        return newNode;
     //---------------------------------------END BOOTSTRAP---------------------------------------------//
     }
 

@@ -11,17 +11,20 @@ import java.net.Socket;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import nintendods.ds_project.config.ClientNodeConfig;
 import nintendods.ds_project.model.ANode;
 import nintendods.ds_project.model.file.AFile;
 import nintendods.ds_project.model.message.FileMessage;
 import nintendods.ds_project.utility.FileModifier;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 
 /**
  * Transfer/ receive a file to/from another node.
  */
 public class FileTransceiverService {
 
-    private int port = 12346;
+    private int port;
     private static BlockingQueue<FileMessage> receiveQueue;
     private Thread receiverThread;
 
@@ -31,7 +34,7 @@ public class FileTransceiverService {
      * The default TCP port is 12346 and the file capacity is 50.
      */
     public FileTransceiverService() {
-        this(12346, 50);
+        this(ClientNodeConfig.TCP_FILE_RECEIVE_PORT, 50);
     }
 
     /**
@@ -93,7 +96,7 @@ public class FileTransceiverService {
             socket.close();
 
             //File is replicated towards another node
-            fileObject.setReplicated(true);
+            //fileObject.setReplicated(true);
         } catch (Exception ex) {
             return false;
         }

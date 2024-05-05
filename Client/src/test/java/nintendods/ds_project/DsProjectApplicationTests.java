@@ -21,8 +21,7 @@ class DsProjectApplicationTests {
     void contextLoads() {
     }
 
-    @Test
-        //if it fails, try running it a few more times. First time I'm working with threads this complex so sometimes things don't proparly work because of the way the threads interact, not because of the project itself. It seems pretty stable now though.
+    @Test //if it fails, try running it a few more times. First time I'm working with threads this complex so sometimes things don't proparly work because of the way the threads interact, not because of the project itself. It seems pretty stable now though.
     void shutdownTest() throws InterruptedException, ExecutionException {
         System.out.println("START NAMESERVER FOR THIS TEST BY HAND ");
 
@@ -39,7 +38,7 @@ class DsProjectApplicationTests {
                 String threadName = "Node-807" + i;
                 Thread.currentThread().setName(threadName);
                 Thread.currentThread().setPriority(7);
-                ConfigurableApplicationContext context = SpringApplication.run(DsProjectApplication.class, arg);
+                ConfigurableApplicationContext context = SpringApplication.run(Client.class, arg);
                 System.out.println(threadName + " started.");
 
                 Runtime.getRuntime().addShutdownHook(new Thread(context::close));
@@ -56,50 +55,8 @@ class DsProjectApplicationTests {
             futureContexts.add(future);
         });
 
-
         System.out.println("waiting for latches");
         latch.await();
-
-
-        /*
-        //grab a random node to destroy
-        Random random = new Random();
-        SimpleNode[] values = nodesBeforeDestruction.values().toArray(new SimpleNode[0]);
-        SimpleNode nodeThatWillBeDestroyed = values[random.nextInt(values.length)];
-
-        //ckeck of hij bestaat
-        assertEquals(nodesBeforeDestruction.get(nodeThatWillBeDestroyed.nextID).prevID, nodeThatWillBeDestroyed.myID);
-        assertEquals(nodesBeforeDestruction.get(nodeThatWillBeDestroyed.prevID).nextID, nodeThatWillBeDestroyed.myID);
-        RestTemplate restTemplate = new RestTemplate();
-        String urlGetPrevNodeID = "http://127.0.0.1:8089/node/" + nodeThatWillBeDestroyed.myID;
-        ResponseEntity<String> getMyNodeIDResponse = restTemplate.getForEntity(urlGetPrevNodeID, String.class);
-        assertSame(getMyNodeIDResponse.getStatusCode(), HttpStatus.OK);
-
-        //making him ready for deletion
-        DsProjectApplication app = nodeThatWillBeDestroyed.future.get().getBean(DsProjectApplication.class);
-        app.t_nextNodePort = nodeThatWillBeDestroyed.nextPort;
-        app.t_prevNodePort = nodeThatWillBeDestroyed.prevPort;
-
-
-        nodeThatWillBeDestroyed.future.thenAccept(ConfigurableApplicationContext::close)
-                .join();
-
-        futureContexts.remove(nodeThatWillBeDestroyed.future);
-        TimeUnit.SECONDS.sleep(5);
-
-
-        Map<Integer, SimpleNode> nodesPostDestruction = getCurenntNodes(futureContexts);
-
-        assertEquals(nodesPostDestruction.get(nodeThatWillBeDestroyed.prevID).nextID, nodeThatWillBeDestroyed.nextID);
-        assertEquals(nodesPostDestruction.get(nodeThatWillBeDestroyed.nextID).prevID, nodeThatWillBeDestroyed.prevID);
-
-        try {
-            restTemplate.getForEntity(urlGetPrevNodeID, String.class);
-            fail("Expected HttpClientErrorException.NotFound");
-
-        } catch (HttpClientErrorException.NotFound e) {
-            assertTrue(e.getStatusCode().isSameCodeAs(HttpStatus.NOT_FOUND));
-        }*/
 
         while (futureContexts.isEmpty()) {
             Map<Integer, SimpleNode> nodesBeforeDestruction = getCurenntNodes(futureContexts);
@@ -119,7 +76,7 @@ class DsProjectApplicationTests {
             assertSame(getMyNodeIDResponse.getStatusCode(), HttpStatus.OK);
 
             // Making him ready for deletion
-            DsProjectApplication app = nodeThatWillBeDestroyed.future.get().getBean(DsProjectApplication.class);
+            Client app = nodeThatWillBeDestroyed.future.get().getBean(Client.class);
             app.t_nextNodePort = nodeThatWillBeDestroyed.nextPort;
             app.t_prevNodePort = nodeThatWillBeDestroyed.prevPort;
 
@@ -151,7 +108,7 @@ class DsProjectApplicationTests {
 
         //loop to read the data of all the nodes all the nodes
         for (CompletableFuture<ConfigurableApplicationContext> future : futures) {
-            ClientNode node = future.get().getBean(DsProjectApplication.class).getNode();
+            ClientNode node = future.get().getBean(Client.class).getNode();
             SimpleNode data = new SimpleNode(future, node);
             nodes.put(node.getId(), data);
         }
