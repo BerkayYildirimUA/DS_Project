@@ -39,26 +39,6 @@ class DsProjectApplicationTests {
         CountDownLatch latch = new CountDownLatch(numberOfInstances);
         ExecutorService executorService = Executors.newFixedThreadPool(numberOfInstances);
 
-
-       /* for (int i = 0; i < numberOfInstances; i++) {
-            int finalI = i;
-            Callable<ConfigurableApplicationContext> task = () -> {
-                String[] arg = {"--server.port=807" + finalI, "TESTING=true"};
-                String threadName = "Node-807" + finalI;
-                Thread.currentThread().setName(threadName);
-
-                ConfigurableApplicationContext context = SpringApplication.run(DsProjectApplication.class, arg);
-                System.out.println(threadName + " started.");
-
-                Runtime.getRuntime().addShutdownHook(new Thread(context::close));
-
-                latch.countDown();
-                return context;
-            };
-            futureContexts.add(executorService.submit(task));
-            TimeUnit.SECONDS.sleep(5);
-        }*/
-
         IntStream.range(0, numberOfInstances).forEach(i -> {
             CompletableFuture<ConfigurableApplicationContext> future = CompletableFuture.supplyAsync(() -> {
                 String[] arg = {"--server.port=807" + i, "--TESTING=1"};
