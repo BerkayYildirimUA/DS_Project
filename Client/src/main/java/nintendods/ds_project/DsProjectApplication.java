@@ -223,45 +223,47 @@ public class DsProjectApplication {
     private void shutdown() {
         RestTemplate restTemplate = new RestTemplate();
 
-        int nextNodePort;
-        int prevNodePort;
+        if (node.getId() != node.getPrevNodeId()) {
+            int nextNodePort;
+            int prevNodePort;
 
-        String prevNodeIP;
-        String nextNodeIP;
+            String prevNodeIP;
+            String nextNodeIP;
 
 
-        if (testing == 1){
-            nextNodePort = t_nextNodePort;
-            prevNodePort = t_prevNodePort;
+            if (testing == 1) {
+                nextNodePort = t_nextNodePort;
+                prevNodePort = t_prevNodePort;
 
-            prevNodeIP = "/127.0.0.1";
-            nextNodeIP = "/127.0.0.1";
-        } else {
-            nextNodePort = apiPort;
-            prevNodePort = apiPort;
+                prevNodeIP = "/127.0.0.1";
+                nextNodeIP = "/127.0.0.1";
+            } else {
+                nextNodePort = apiPort;
+                prevNodePort = apiPort;
 
-            String urlGetNextNodeID = "http://" + nsObject.getNSAddress() + ":8089/node/" + node.getNextNodeId();
-            logger.info("GET from: " + urlGetNextNodeID);
-            ResponseEntity<String> getNextNodeIDResponse = restTemplate.getForEntity(urlGetNextNodeID, String.class);
-             nextNodeIP = getNextNodeIDResponse.getBody();
+                String urlGetNextNodeID = "http://" + nsObject.getNSAddress() + ":8089/node/" + node.getNextNodeId();
+                logger.info("GET from: " + urlGetNextNodeID);
+                ResponseEntity<String> getNextNodeIDResponse = restTemplate.getForEntity(urlGetNextNodeID, String.class);
+                nextNodeIP = getNextNodeIDResponse.getBody();
 
-            String urlGetPrevNodeID = "http://" + nsObject.getNSAddress() + ":8089/node/" + node.getPrevNodeId();
-            logger.info("GET from: " + urlGetPrevNodeID);
-            ResponseEntity<String> getPrevNodeIDResponse = restTemplate.getForEntity(urlGetPrevNodeID, String.class);
-             prevNodeIP = getPrevNodeIDResponse.getBody();
+                String urlGetPrevNodeID = "http://" + nsObject.getNSAddress() + ":8089/node/" + node.getPrevNodeId();
+                logger.info("GET from: " + urlGetPrevNodeID);
+                ResponseEntity<String> getPrevNodeIDResponse = restTemplate.getForEntity(urlGetPrevNodeID, String.class);
+                prevNodeIP = getPrevNodeIDResponse.getBody();
 
+            }
+
+            // in PREV node I need to change their NEXT node to my NEXT node
+            // http heeft 1 '/' in de plaats van 2 want the IP's strings starten met '/' en ik will dit niet uit filtreren.
+            String UrlForPrevNode = "http:/" + prevNodeIP + ":" + prevNodePort + "/api/Management/nextNodeID/?ID=" + node.getNextNodeId();
+            logger.info("PUT to: " + UrlForPrevNode);
+            restTemplate.put(UrlForPrevNode, String.class);
+
+            // in NEXT node I need to change their PREV node to my PREV node
+            String urlForNextNode = "http:/" + nextNodeIP + ":" + nextNodePort + "/api/Management/prevNodeID/?ID=" + node.getPrevNodeId();
+            logger.info("PUT to: " + urlForNextNode);
+            restTemplate.put(urlForNextNode, String.class);
         }
-
-        // in PREV node I need to change their NEXT node to my NEXT node
-        // http heeft 1 '/' in de plaats van 2 want the IP's strings starten met '/' en ik will dit niet uit filtreren.
-        String UrlForPrevNode = "http:/" + prevNodeIP + ":" + prevNodePort + "/api/Management/nextNodeID/?ID=" + node.getNextNodeId();
-        logger.info("PUT to: " + UrlForPrevNode);
-        restTemplate.put(UrlForPrevNode, String.class);
-
-        // in NEXT node I need to change their PREV node to my PREV node
-        String urlForNextNode = "http:/" + nextNodeIP + ":" + nextNodePort + "/api/Management/prevNodeID/?ID=" + node.getPrevNodeId();
-        logger.info("PUT to: " + urlForNextNode);
-        restTemplate.put(urlForNextNode, String.class);
 
         String urlDeleteNode = "http://" + nsObject.getNSAddress() + ":8089/nodes/" + node.getId();
         logger.info("DELETE from: " + urlDeleteNode);
