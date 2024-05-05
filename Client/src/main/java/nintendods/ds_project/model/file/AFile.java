@@ -39,7 +39,7 @@ public class AFile implements Serializable {
         setId(name);
         this.path = path;
         this.owner = creator;
-        setReplicated(false);
+        //setReplicated(false);
 
         // Set a new log of initial creation with the owner of the file
         logs.add(new ALog(getOwner(), eLog.fileCreation, "initial creation of the file"));

@@ -26,6 +26,14 @@ public class NameServerAPI {
         else            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
     }
 
+    @GetMapping("/node/{id}")
+    public ResponseEntity<String> getNodeIPfromID(@PathVariable("id") int id) {
+        String ip = nodeDB.getIPfromID(id);
+
+        if (ip != null && !ip.isEmpty()) return ResponseEntity.status(HttpStatus.OK).body(ip);
+        else            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+    }
+
     @PostMapping("/nodes")
     public ResponseEntity<String> postFile(@RequestBody ClientNode newNode) {
         ResponseObject<ClientNode> badResponse = new ResponseObject<>(newNode);
@@ -58,7 +66,7 @@ public class NameServerAPI {
     public ResponseEntity<String> deleteFileById(@PathVariable("id") int id) {
         ResponseObject<Integer> response = new ResponseObject<>(id);
 
-        if (nodeDB.exists(id)) {
+        if (!nodeDB.exists(id)) {
             response.setMessage(String.format("Item with id = %d does not exists", id));
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(jsonConverter.toJson(response));
         }

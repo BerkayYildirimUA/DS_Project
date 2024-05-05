@@ -35,17 +35,25 @@ public class ClientNode extends ANetworkNode {
     }
 
     public int getPrevNodeId() {
+
         return prevNodeId;
+    }
+
+    @Override
+    public void setName(String name) {
+        super.setName(name);
+        setId(NameToHash.convert(name));
     }
 
     /**
      * Set the previous node ID. If prevNodeId == -1, it gets set to id;
-     * 
+     *
      * @param prevNodeId
      */
-    public void setPrevNodeId(int prevNodeId) {
+    public synchronized void setPrevNodeId(int prevNodeId) {
         if (prevNodeId == -1)
             prevNodeId = getId();
+        System.out.println(id + "prev bacame: " + prevNodeId);
         this.prevNodeId = prevNodeId;
     }
 
@@ -55,12 +63,13 @@ public class ClientNode extends ANetworkNode {
 
     /**
      * Set the next node ID. If nextNodeId == -1, it gets set to id;
-     * 
+     *
      * @param nextNodeId
      */
-    public void setNextNodeId(int nextNodeId) {
+    public synchronized void setNextNodeId(int nextNodeId) {
         if (nextNodeId == -1)
             nextNodeId = getId();
+        System.out.println(id + "next bacame: " + nextNodeId);
         this.nextNodeId = nextNodeId;
     }
 

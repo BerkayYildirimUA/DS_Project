@@ -1,11 +1,14 @@
 package nintendods.ds_project.service;
 
+import nintendods.ds_project.config.ClientNodeConfig;
 import nintendods.ds_project.exeption.DuplicateNodeException;
 import nintendods.ds_project.exeption.NotEnoughMessageException;
 import nintendods.ds_project.model.ANetworkNode;
 import nintendods.ds_project.model.ClientNode;
 import nintendods.ds_project.model.message.*;
 import nintendods.ds_project.utility.JsonConverter;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.net.*;
@@ -15,8 +18,8 @@ import java.util.List;
 @Component("Dis1")
 public class DiscoveryService {
     private List<String> receivedMessages;
-    private String multicastAddress = "224.0.0.100";
-    private int multicastPort = 12345;
+    private String multicastAddress = ClientNodeConfig.MULTICAST_ADDRESS;
+    private int multicastPort = ClientNodeConfig.MULTICAST_PORT;
     private int waitTimeDiscovery = 20000;
     private UDPServer listener;
     private ServerSocket socket;
@@ -52,7 +55,7 @@ public class DiscoveryService {
         this.multicastPort = multicastPort;
         this.waitTimeDiscovery = waitTime;
     }
-    public ClientNode discover(ANetworkNode node) throws Exception {
+    public void discover(ClientNode node) throws Exception {
         // Set up the UDPServer
         Thread udpListenerThread = new Thread(() -> {
             try { udpListener(this.waitTimeDiscovery, this.listener); } 
@@ -102,7 +105,6 @@ public class DiscoveryService {
         }
     //---------------------------------------END DISCOVERY---------------------------------------------//
     //---------------------------------------BEGIN BOOTSTRAP---------------------------------------------//
-        ClientNode newNode = (ClientNode) node; // Casting
         int prevId = -1;
         int nextId = -1;
 
@@ -134,16 +136,16 @@ public class DiscoveryService {
                 //Check if a received message has the same id as the node itself
                 // All the nodes will send back and if a node has the same ID as the received ID, it will send also a message back. 
                 // Now the discovery node can check if his ID is a duplicate in the network.
-                if(nodeMessages.stream().anyMatch(m -> m.getNodeHashId() == ((ClientNode) node).getId())) {
+                if(nodeMessages.stream().anyMatch(m -> m.getNodeHashId() == node.getId())) {
                     System.out.println("Node is already in network!");
                     throw new DuplicateNodeException();
                 }
 
                 //Check the incomming messages from the nodes that have been changed
-                try { prevId = nodeMessages.stream().filter(m -> m.getNextNodeId() == ((ClientNode) node).getId()).toList().getFirst().getNodeHashId(); } 
+                try { prevId = nodeMessages.stream().filter(m -> m.getNextNodeId() == ( node).getId()).toList().getFirst().getNodeHashId(); }
                 catch (Exception ex) { }
 
-                try { nextId = nodeMessages.stream().filter(m -> m.getPrevNodeId() == ((ClientNode) node).getId()).toList().getFirst().getNodeHashId(); } 
+                try { nextId = nodeMessages.stream().filter(m -> m.getPrevNodeId() == ( node).getId()).toList().getFirst().getNodeHashId(); }
                 catch (Exception ex) { }
             }
         }
@@ -158,7 +160,7 @@ public class DiscoveryService {
             //Check if a received message has the same id as the node itself
             // All the nodes will send back and if a node has the same ID as the received ID, it will send also a message back. 
             // Now the discovery node can check if his ID is a duplicate in the network.
-            if (nodeMessages.stream().anyMatch(m -> m.getNodeHashId() == ((ClientNode) node).getId()))
+            if (nodeMessages.stream().anyMatch(m -> m.getNodeHashId() == node.getId()))
             {
                 System.out.println("Node is already in network!");
                 throw new DuplicateNodeException();
@@ -166,11 +168,10 @@ public class DiscoveryService {
         }
 
         // Assign value to node
-        newNode.setNextNodeId(nextId);
-        newNode.setPrevNodeId(prevId);
+        node.setNextNodeId(nextId);
+        node.setPrevNodeId(prevId);
 
         System.out.println("\r\nDiscoveryService - New node composed");
-        return newNode;
     //---------------------------------------END BOOTSTRAP---------------------------------------------//
     }
 
@@ -188,7 +189,7 @@ public class DiscoveryService {
     }
 
     //later use
-    // public UNAMObject getNSObject(){
-    //     return nsObject;
-    // }
+    public UNAMObject getNSObject(){
+         return nsObject;
+    }
 }
