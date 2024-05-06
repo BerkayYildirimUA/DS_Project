@@ -98,7 +98,6 @@ public class Client {
     @PreDestroy
     public void prepareForShutdown() {
         if (nodeState != eNodeState.Discovery) {
-            nodeState = eNodeState.Shutdown;
             System.out.println("Preparing for shutdown...");
             shutdown();
             System.out.println("Nodes prepared.");
@@ -194,7 +193,6 @@ public class Client {
                 }
                 case Shutdown -> {
                     // Gracefully, update the side nodes on its own and leave the ring topology.
-                    isRunning = false;
                 }
                 case Error -> {
                     // TODO: Handle error state, possibly attempt to recover or shutdown gracefully
