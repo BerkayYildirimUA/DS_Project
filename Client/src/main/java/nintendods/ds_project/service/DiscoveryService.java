@@ -192,4 +192,15 @@ public class DiscoveryService {
     public UNAMObject getNSObject(){
          return nsObject;
     }
+
+    // Setter for UDPServer
+    public void setUdpServer(UDPServer server) {
+        this.listener = server;
+    }
+
+    // Getter for receivedMessages
+    public List<String> getReceivedMessages() {
+        return this.receivedMessages;
+    }
+
 }

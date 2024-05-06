@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 @Component("Lis1")
 public class ListenerService {
 
-    private static MulticastListenService multicastService = null;
+    static MulticastListenService multicastService = null;
 
     String multicastAddress;
     int multicastPort;

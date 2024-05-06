@@ -26,7 +26,7 @@ public class ClientNode extends ANetworkNode {
         setId(NameToHash.convert(multicastNodeObject.getName()));
     }
 
-    private void setId(int id) {
+    void setId(int id) {
         this.id = id;
     }
 
