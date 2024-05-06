@@ -58,8 +58,9 @@ public class UnicastListenerService {
         try {
             server.stop();
         } catch (IOException e) {
-            System.out.println("UnicastListenService - Error:\tstop\n" + e + "\n");
-            throw new RuntimeException(e);
+            // System.out.println("UnicastListenService - Error:\tstop\n" + e + "\n");
+            System.out.println("Socket and data-stream already closed");
+            // throw new RuntimeException(e);
         }
     }
 
