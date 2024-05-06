@@ -5,6 +5,8 @@ import org.antlr.v4.runtime.misc.Pair;
 import org.springframework.beans.factory.annotation.Value;
 
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 
 public class UnicastListenerService {
     private TCPServer server;
@@ -16,7 +18,12 @@ public class UnicastListenerService {
                 server.connect();
                 server.listen();
             } catch (IOException e) {
-                System.out.println("UnicastListenService - Error:\tconstructor\n" + e + "\n");
+                System.out.println("UnicastListenService - Error:\tconstructor\n");
+                try {
+                    System.out.println(InetAddress.getLocalHost().getHostAddress());
+                } catch (UnknownHostException ex) {
+                    throw new RuntimeException(ex);
+                }
                 throw new RuntimeException(e);
             }
         });
