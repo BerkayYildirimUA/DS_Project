@@ -12,7 +12,7 @@ import java.net.UnknownHostException;
 
 @Component("Send1")
 public class MulticastSendService {
-    private DatagramSocket socket;
+    DatagramSocket socket;
     private InetAddress group;
     private int port;
     private byte[] buf;
