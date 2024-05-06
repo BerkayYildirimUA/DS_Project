@@ -83,6 +83,8 @@ On failure of a node, the network must be self healing.
   - needs to have a failback method at every exception to transmit the ID's to the next and previous.
     - The node is suddenly gone so the neighbour nodes must detect these with a ping or alive packet.
 
+## DsProjectApplication (Ahmad)
+- [x] Integrating discovery in the DsProjectApplication
 ## Unit test (Ahmad)
 
 ### Client
