@@ -73,13 +73,13 @@ public class Client {
     public int t_prevNodePort;
 
 
-    public static void main(String[] args) throws UnknownHostException {
+    public static void main(String[] args) {
         SpringApplication.run(Client.class, args);
     }
 
 
     @PostConstruct
-    private void init() throws UnknownHostException {
+    private void init()  {
         NODE_NAME_LENGTH = ClientNodeConfig.NODE_NAME_LENGTH;
         NODE_GLOBAL_PORT = ClientNodeConfig.NODE_GLOBAL_PORT;
         DISCOVERY_RETRIES = ClientNodeConfig.DISCOVERY_RETRIES;
@@ -97,7 +97,7 @@ public class Client {
 
     @PreDestroy
     public void prepareForShutdown() {
-        // check so we known that Discvory has happend. Don't mess with other nodes if you haven't entered the network.
+        // check so we know that Discovery has happend. Don't mess with other nodes if you haven't entered the network.
         if (nodeState != eNodeState.Discovery) {
             System.out.println("Preparing for shutdown...");
             shutdown();

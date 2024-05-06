@@ -6,6 +6,8 @@ import nintendods.ds_project.model.message.ResponseObject;
 import nintendods.ds_project.database.NodeDB;
 import nintendods.ds_project.service.NodeDBService;
 import nintendods.ds_project.utility.JsonConverter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,6 +19,7 @@ import java.util.TreeMap;
 public class NameServerAPI {
     JsonConverter jsonConverter = new JsonConverter("Database.json");
     NodeDB nodeDB = NodeDBService.getNodeDB();
+    private static final Logger logger = LoggerFactory.getLogger(NameServerAPI.class);
 
     @GetMapping("/files/{file_name}")
     public ResponseEntity<String> getFileAddressByName(@PathVariable("file_name") String name) {
@@ -72,6 +75,7 @@ public class NameServerAPI {
         }
 
         nodeDB.deleteNode(id);
+        logger.info("{} has been deleted from the server", id);
         return ResponseEntity.status(HttpStatus.OK).body(jsonConverter.toJson(id));
     }
 }

@@ -13,13 +13,11 @@ public class ClientManagementAPI {
 
     @Autowired
     private ClientNode node;
-
     private static final Logger logger = LoggerFactory.getLogger(ClientManagementAPI.class);
 
     @PutMapping("/nextNodeID/")
     public ResponseEntity<String> changeNextNode(@RequestParam("ID") int ID){
         logger.info("Request to change next Node to {}", ID);
-
         node.setNextNodeId(ID);
         return ResponseEntity.ok().build();
     }
@@ -30,5 +28,4 @@ public class ClientManagementAPI {
         node.setPrevNodeId(ID);
         return ResponseEntity.ok().build();
     }
-
 }
