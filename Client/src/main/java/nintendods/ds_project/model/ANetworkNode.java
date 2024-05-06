@@ -1,5 +1,5 @@
 package nintendods.ds_project.model;
-import jakarta.persistence.Entity;
+
 import java.net.InetAddress;
 
 //@Entity

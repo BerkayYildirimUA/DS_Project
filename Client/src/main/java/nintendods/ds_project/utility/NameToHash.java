@@ -1,8 +1,6 @@
 package nintendods.ds_project.utility;
 
 
-import org.springframework.beans.factory.annotation.Value;
-
 public class NameToHash{
     /**
      * Create a hash between 0 and 32768 based on the fileName string value

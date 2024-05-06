@@ -3,8 +3,6 @@ package nintendods.ds_project;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import nintendods.ds_project.config.ClientNodeConfig;
-import nintendods.ds_project.controller.ClientAPI;
-import nintendods.ds_project.controller.ClientManagementAPI;
 import nintendods.ds_project.exeption.DuplicateNodeException;
 import nintendods.ds_project.exeption.NotEnoughMessageException;
 import nintendods.ds_project.model.ClientNode;
@@ -12,7 +10,6 @@ import nintendods.ds_project.model.message.UNAMObject;
 import nintendods.ds_project.service.DiscoveryService;
 import nintendods.ds_project.service.ListenerService;
 import nintendods.ds_project.utility.Generator;
-import org.hibernate.annotations.Synchronize;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,16 +19,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.client.RestTemplate;
-
-import java.net.UnknownHostException;
-import java.util.Scanner;
 
 /**
  * Spring Boot application for managing a distributed system node's lifecycle excluding database auto-configuration.

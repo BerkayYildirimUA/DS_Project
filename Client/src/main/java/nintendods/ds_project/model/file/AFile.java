@@ -1,5 +1,10 @@
 package nintendods.ds_project.model.file;
 
+import nintendods.ds_project.model.ANode;
+import nintendods.ds_project.model.file.log.ALog;
+import nintendods.ds_project.model.file.log.eLog;
+import nintendods.ds_project.utility.NameToHash;
+
 import java.io.File;
 import java.io.Serializable;
 import java.time.Instant;
@@ -8,11 +13,6 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-
-import nintendods.ds_project.model.ANode;
-import nintendods.ds_project.model.file.log.ALog;
-import nintendods.ds_project.model.file.log.eLog;
-import nintendods.ds_project.utility.NameToHash;
 
 public class AFile implements Serializable {
     String path = ""; // The path

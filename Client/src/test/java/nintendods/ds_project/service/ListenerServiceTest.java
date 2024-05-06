@@ -1,8 +1,5 @@
 package nintendods.ds_project.service;
 
-import static org.mockito.Mockito.*;
-import static org.junit.jupiter.api.Assertions.*;
-
 import nintendods.ds_project.model.ClientNode;
 import nintendods.ds_project.model.message.MNObject;
 import nintendods.ds_project.model.message.eMessageTypes;
@@ -11,6 +8,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class ListenerServiceTest {

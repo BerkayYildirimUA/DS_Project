@@ -1,7 +1,8 @@
 package nintendods.ds_project.model.file.log;
 
-import java.io.Serializable;
 import nintendods.ds_project.model.ANode;
+
+import java.io.Serializable;
 
 public class ALog implements Serializable {
     ANode issuer; // The node that has issued the log file.

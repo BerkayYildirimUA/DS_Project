@@ -1,17 +1,16 @@
 package nintendods.ds_project.service;
 
-import static org.junit.Assert.assertTrue;
+import nintendods.ds_project.model.ANetworkNode;
+import nintendods.ds_project.model.file.AFile;
+import org.junit.Test;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.InetAddress;
 
-import org.junit.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-
-import nintendods.ds_project.model.ANetworkNode;
-import nintendods.ds_project.model.file.AFile;
+import static org.junit.Assert.assertTrue;
 
 @SpringBootTest
 public class FileTranseiverServiceTest {
