@@ -83,6 +83,18 @@ On failure of a node, the network must be self healing.
   - needs to have a failback method at every exception to transmit the ID's to the next and previous.
     - The node is suddenly gone so the neighbour nodes must detect these with a ping or alive packet.
 
+## Unit test (Ahmad)
+
+### Client
+  - [x] Discovery
+  - [x] Bootstrap
+  - [ ] Failure
+  - [ ] Shutdown 
+### Naming server
+  - [ ] Discovery
+  - [ ] Bootstrap
+  - [ ] Failure
+  - [ ] Shutdown 
 
 # Replication part
 We have files with a name. This name can be hashed by our simple hash algorithm. Now we can compare these hashes with the known node's ID's that are situated in the ring topology.
