@@ -15,15 +15,20 @@ public class UnicastListenerService {
         this.server = new TCPServer(port);
         Thread receiverThread = new Thread(() -> {
             try {
+                System.out.println(InetAddress.getLocalHost().getHostAddress());
+            } catch (UnknownHostException ex) {
+                throw new RuntimeException(ex);
+            }
+            try {
                 server.connect();
+            } catch (IOException e) {
+                System.out.println("UnicastListenService - Error:\tconnect failed\n");
+                throw new RuntimeException(e);
+            }
+            try {
                 server.listen();
             } catch (IOException e) {
-                System.out.println("UnicastListenService - Error:\tconstructor\n");
-                try {
-                    System.out.println(InetAddress.getLocalHost().getHostAddress());
-                } catch (UnknownHostException ex) {
-                    throw new RuntimeException(ex);
-                }
+                System.out.println("UnicastListenService - Error:\tlisten failed\n");
                 throw new RuntimeException(e);
             }
         });
