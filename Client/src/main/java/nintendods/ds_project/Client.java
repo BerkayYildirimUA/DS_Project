@@ -134,6 +134,8 @@ public class Client {
                     System.out.println("ERROR:\t Start:" + Timestamp.from(Instant.now()));
                     // TODO
                     // Hard, only transmit to naming server and the naming server needs to deal with it.
+                    unicastListener.stopListening();
+                    multicastListener.stopListening();
 
                     if (API.hasAddress()) {
                         System.out.println("ERROR:\t Client: Send error");
@@ -144,10 +146,7 @@ public class Client {
                     * NamingServer API to handle everything from here.
                     * call: {NSAddress}:{NSPort}/nodes/{id}/error
                     */
-
                     isRunning = false;
-                    multicastListener.stopListening();
-                    unicastListener.stopListening();
                 }
                 case null, default -> {
                     // Same as error?
