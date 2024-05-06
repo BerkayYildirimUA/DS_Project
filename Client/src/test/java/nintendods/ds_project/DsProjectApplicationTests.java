@@ -62,7 +62,7 @@ class DsProjectApplicationTests {
         System.out.println("waiting for latches");
         latch.await();
 
-        while (futureContexts.isEmpty()) {
+        while (!futureContexts.isEmpty()) {
 
             Map<Integer, SimpleNode> nodesBeforeDestruction = getCurenntNodes(futureContexts);
 
@@ -121,13 +121,13 @@ class DsProjectApplicationTests {
 
         //loop to fill in next and prev node ports
         System.out.println(nodes);
+
         for (Integer id : nodes.keySet()) {
             SimpleNode node = nodes.get(id);
             System.out.println(node.toString());
             System.out.println(id);
             node.prevPort = nodes.get(node.prevID).myPort;
             node.nextPort = nodes.get(node.nextID).myPort;
-            break;
         }
 
         return nodes;
