@@ -93,13 +93,12 @@ public class Client {
             t_prevNodePort = 0;
             t_nextNodePort = 0;
         }
-
-      //  runNodeLifecycle(context);
     }
 
     @PreDestroy
-    public void prepareForShutdown() throws InterruptedException {
+    public void prepareForShutdown() {
         if (nodeState != eNodeState.Discovery) {
+            nodeState = eNodeState.Shutdown;
             System.out.println("Preparing for shutdown...");
             shutdown();
             System.out.println("Nodes prepared.");
@@ -194,12 +193,8 @@ public class Client {
                     nodeState = eNodeState.Listening; // Loop back to Listening for simplicity
                 }
                 case Shutdown -> {
-            /*        System.out.println("Prepare nodes for shutdown");
-                    System.out.println("Nodes prepared. Latch Down");
-                    latch.countDown();
-                    isRunning = false;*/
-                    // TODO: Handle shutdown process, ensuring all connections are closed properly
                     // Gracefully, update the side nodes on its own and leave the ring topology.
+                    isRunning = false;
                 }
                 case Error -> {
                     // TODO: Handle error state, possibly attempt to recover or shutdown gracefully
@@ -219,6 +214,7 @@ public class Client {
 
     private void shutdown() {
         RestTemplate restTemplate = new RestTemplate();
+
 
         if (node.getId() != node.getPrevNodeId()) {
             int nextNodePort;
