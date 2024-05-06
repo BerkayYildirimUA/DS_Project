@@ -32,10 +32,11 @@ public class TCPService {
             tcpClients.put(neighborId, client);
             // Send delete to neighboring nodes
             try {
-                printAndLog("TCPService: Start connection with "+ neighborId +" nodes");
+                printAndLog("TCPService: Start connection with node "+ neighborId);
                 client.connect(nodeDB.getIpFromId(neighborId), deletedId + "->" + replacementId);
             } catch (IOException e) {
-                printAndLog("TCPService: Failed connection with "+ neighborId +" nodes");
+                printAndLog("TCPService: Failed connection with node "+ neighborId);
+                printAndLog("TCPService: IP address: " + nodeDB.getIpFromId(neighborId));
                 tcpClients.remove(neighborId);
                 throw new RuntimeException(e);
             }
