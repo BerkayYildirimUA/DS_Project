@@ -21,8 +21,9 @@ public class UnicastListenerService {
             }
             try {
                 server.connect();
-            } catch (IOException e) {
+            } catch (Exception e) {
                 System.out.println("UnicastListenService - Error:\tconnect failed\n");
+                System.out.println(e);
                 //throw new RuntimeException(e);
             }
             try {

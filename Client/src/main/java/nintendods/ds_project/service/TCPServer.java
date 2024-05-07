@@ -4,6 +4,7 @@ import org.antlr.v4.runtime.misc.Pair;
 import org.springframework.beans.factory.annotation.Value;
 
 import java.io.*;
+import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 
@@ -21,8 +22,9 @@ public class TCPServer {
 
     public void connect() throws IOException {
         System.out.println("TCPServer:\t Listening for clients...");
-        server = new ServerSocket(PORT);
+        server = new ServerSocket();
         server.setReuseAddress(true);
+        server.bind(new InetSocketAddress(PORT));
     }
 
     public void listen() throws IOException {

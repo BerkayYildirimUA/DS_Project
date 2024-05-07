@@ -198,22 +198,25 @@ public class Client {
                 }
                 case LISTENING -> {
                     //System.out.println("Entering Listening");
-                    if (multicastListener == null)
+                    if (multicastListener == null){
                         multicastListener = new MulticastListenerService(MULTICAST_ADDRESS, MULTICAST_PORT, LISTENER_BUFFER_SIZE);
+                        multicastListener.initialize_multicast();
+                    }
 
-                    if (unicastListener == null)
+                    if (unicastListener == null) {
                         unicastListener = new UnicastListenerService(3780);
+                    }
 
                     try {
-                        multicastListener.initialize_multicast();
                         multicastListener.listenAndUpdate(node);
                         unicastListener.listenAndUpdate(node);
                     } catch (Exception e) {
                         e.printStackTrace();
                         nodeState = eNodeState.ERROR; // Move to Error state on exception
                     }
+                    /*
 
-                    if (node.getId() < node.getPrevNodeId())    {
+                    if (node.getId() < node.getPrevNodeId())    {  // ---> gaat altijd een error geven vanaf je netwerk meer dan 2 nodes heeft
                         System.out.println("LISTENING:\t Client sleep");
                         try {
                             TimeUnit.SECONDS.sleep(15);
@@ -221,7 +224,7 @@ public class Client {
                             throw new RuntimeException(e);
                         }
                         nodeState = eNodeState.ERROR;
-                    } else nodeState = eNodeState.TRANSFER;
+                    } else nodeState = eNodeState.TRANSFER; */
                 }
                 case TRANSFER -> {
                     // TODO: Transfer data or handle other operations

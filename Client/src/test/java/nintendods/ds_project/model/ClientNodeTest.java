@@ -1,6 +1,7 @@
 package nintendods.ds_project.model;
 
 import nintendods.ds_project.model.message.MNObject;
+import nintendods.ds_project.utility.NameToHash;
 import org.junit.Test;
 
 import java.net.InetAddress;
@@ -24,7 +25,7 @@ public class ClientNodeTest {
         assertEquals(name, node.getName());
         assertEquals(address, node.getAddress());
         assertEquals(port, node.getPort());
-        assertEquals(0, node.getId()); // Id is set later by NameToHash
+        assertEquals(NameToHash.convert(node.getName()), node.getId()); // Id is set later by NameToHash
         assertEquals(-1, node.getPrevNodeId());
         assertEquals(-1, node.getNextNodeId());
     }
@@ -42,7 +43,7 @@ public class ClientNodeTest {
         assertEquals(name, node.getName());
         assertEquals(address, node.getAddress());
         assertEquals(port, node.getPort());
-        assertEquals(0, node.getId()); // Id is set later by NameToHash
+        assertEquals(NameToHash.convert(node.getName()), node.getId());
         assertEquals(-1, node.getPrevNodeId());
         assertEquals(-1, node.getNextNodeId());
     }
@@ -106,7 +107,7 @@ public class ClientNodeTest {
         int port = 8080;
         ClientNode node = new ClientNode(address, port, name);
 
-        String expectedString = "ClientNode{id=0, prevNodeId=-1, nextNodeId=-1 ANetworkNode{address=/127.0.0.1, port=8080, name='TestClientNode'}}";
+        String expectedString = "ClientNode{id=" + NameToHash.convert(node.getName()) + ", prevNodeId=-1, nextNodeId=-1 ANetworkNode{address=/127.0.0.1, port=8080, name='TestClientNode'}}";
 
         assertEquals(expectedString, node.toString());
     }

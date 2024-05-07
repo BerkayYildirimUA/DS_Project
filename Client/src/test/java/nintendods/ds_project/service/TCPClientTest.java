@@ -12,7 +12,7 @@ import java.net.Socket;
 public class TCPClientTest {
 
     @Test
-    public void TCPCommunication() {
+    public void TCPCommunication() { //werkt allen als ik Intelij als admin run --Berkay
         TCPServer server = new TCPServer(3780);
         TCPClient client = new TCPClient();
 

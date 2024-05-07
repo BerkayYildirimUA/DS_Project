@@ -52,7 +52,7 @@ class DsProjectApplicationTests {
             }, executorService);
 
             try {
-                TimeUnit.SECONDS.sleep(10);
+                TimeUnit.SECONDS.sleep(20);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
@@ -66,20 +66,23 @@ class DsProjectApplicationTests {
 
             Map<Integer, SimpleNode> nodesBeforeDestruction = getCurenntNodes(futureContexts);
 
+            //if these fail then something went wrong in the setup
+            for(SimpleNode controlNodes: nodesBeforeDestruction.values()){
+                // if these fail it's because discovry went wrong because if the threads
+                assertEquals(nodesBeforeDestruction.get(controlNodes.nextID).prevID, controlNodes.myID);
+                assertEquals(nodesBeforeDestruction.get(controlNodes.prevID).nextID, controlNodes.myID);
+
+                //check if nodes that will be detroyed exists, same thing as abode, if it fails it's probably because of the threads
+                RestTemplate restTemplate = new RestTemplate();
+                String urlGetMyExistence = "http://127.0.0.1:8089/node/" + controlNodes.myID;
+                ResponseEntity<String> getMyNodeIDResponse = restTemplate.getForEntity(urlGetMyExistence, String.class);
+                assertSame(getMyNodeIDResponse.getStatusCode(), HttpStatus.OK);
+            }
+
             // Grab a random node to destroy
             Random random = new Random();
             SimpleNode[] values = nodesBeforeDestruction.values().toArray(new SimpleNode[0]);
             SimpleNode nodeThatWillBeDestroyed = values[random.nextInt(values.length)];
-
-            // if these fail it's because discovry went wrong because if the threads
-            assertEquals(nodesBeforeDestruction.get(nodeThatWillBeDestroyed.nextID).prevID, nodeThatWillBeDestroyed.myID);
-            assertEquals(nodesBeforeDestruction.get(nodeThatWillBeDestroyed.prevID).nextID, nodeThatWillBeDestroyed.myID);
-
-            //check if nodes that will be detroyed exists, same thing as abode, if it fails it's probably because of the threads
-            RestTemplate restTemplate = new RestTemplate();
-            String urlGetMyExistence = "http://127.0.0.1:8089/node/" + nodeThatWillBeDestroyed.myID;
-            ResponseEntity<String> getMyNodeIDResponse = restTemplate.getForEntity(urlGetMyExistence, String.class);
-            assertSame(getMyNodeIDResponse.getStatusCode(), HttpStatus.OK);
 
             // Making him ready for deletion
             Client app = nodeThatWillBeDestroyed.future.get().getBean(Client.class);
@@ -101,6 +104,8 @@ class DsProjectApplicationTests {
             }
 
             try {
+                RestTemplate restTemplate = new RestTemplate();
+                String urlGetMyExistence = "http://127.0.0.1:8089/node/" + nodeThatWillBeDestroyed.myID;
                 restTemplate.getForEntity(urlGetMyExistence, String.class);
                 fail("Expected HttpClientErrorException.NotFound");
             } catch (HttpClientErrorException.NotFound e) {

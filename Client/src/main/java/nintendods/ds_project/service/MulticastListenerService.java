@@ -4,6 +4,8 @@ import nintendods.ds_project.model.ClientNode;
 import nintendods.ds_project.model.message.MNObject;
 import nintendods.ds_project.model.message.UNAMNObject;
 import nintendods.ds_project.model.message.eMessageTypes;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -18,6 +20,8 @@ public class MulticastListenerService {
     String multicastAddress;
     int multicastPort;
     int multicastBufferCapacity;
+
+    private static final Logger logger = LoggerFactory.getLogger(MulticastListenerService.class);
 
     public MulticastListenerService(@Value("${udp.multicast.address}") String multicastAddress,
                                     @Value("${udp.multicast.port}") int multicastPort,
@@ -51,7 +55,7 @@ public class MulticastListenerService {
             if ( node.getId() == incommingNode.getId()){
                 send = true;
 
-                System.out.println("\r\n Duplicate node!\r\n");
+                logger.info("\r\n Duplicate node!\r\n");
             }
 
             // Check the position of own node and incomming node and place it in the ring
@@ -62,7 +66,7 @@ public class MulticastListenerService {
                 // Check if first node of network?
                 if (node.getId() == node.getPrevNodeId())
                     node.setPrevNodeId(incommingNode.getId());
-                System.out.println("\r\n current node is below the incomming node\r\n");
+                logger.info("\r\n current node is below the incomming node\r\n");
                 send = true;
             }
 
@@ -74,7 +78,7 @@ public class MulticastListenerService {
                 if (node.getId() == node.getNextNodeId())
                     node.setNextNodeId(incommingNode.getId());
 
-                System.out.println("\r\nnode is above the next node \r\n");
+                logger.info("\r\nnode is above the next node \r\n");
                 send = true;
             }
 
@@ -89,7 +93,7 @@ public class MulticastListenerService {
                     else
                         node.setPrevNodeId(incommingNode.getId());
                     send = true;
-                    System.out.println("\r\n new tail node!\r\n");
+                    logger.info("\r\n new tail node!\r\n");
                 }
 
                 // The incomming node is a new start node.
@@ -101,7 +105,7 @@ public class MulticastListenerService {
                     else
                         node.setPrevNodeId(incommingNode.getId());
                     send = true;
-                    System.out.println("\r\n new head node!\r\n");
+                    logger.info("\r\n new head node!\r\n");
                 }
             }
 
@@ -112,10 +116,10 @@ public class MulticastListenerService {
 
                 multicastService.sendReply(reply, incommingNode);
 
-                System.out.println(" \r\nThe node has been updated!");
-                System.out.println(node + "\r\n");
+                logger.info("The node has been updated!");
+                logger.info(node + "\r\n");
             } else
-                System.out.println("Node doesn't need to be updated.");
+                logger.info("Node doesn't need to be updated.");
         }
     }
 

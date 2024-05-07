@@ -1,10 +1,13 @@
 package nintendods.ds_project.service;
 
+import nintendods.ds_project.Client;
 import nintendods.ds_project.model.ANetworkNode;
 import nintendods.ds_project.model.message.MNObject;
 import nintendods.ds_project.model.message.UNAMNObject;
 import nintendods.ds_project.model.message.eMessageTypes;
 import nintendods.ds_project.utility.JsonConverter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -20,7 +23,7 @@ public class MulticastListenService {
     private static final int BUFFER_SIZE = 1024;
     private static BlockingQueue<MNObject> multicastQueue;
     JsonConverter jsonConverter = new JsonConverter();
-
+    private static final Logger logger = LoggerFactory.getLogger(MulticastListenService.class);
     private static boolean isRunning = true;
 
     String multicastAddress;
@@ -53,7 +56,7 @@ public class MulticastListenService {
     public void initialize() {
         BlockingQueue<String> packetQueue = new LinkedBlockingQueue<>(multicastBufferCapacity);
         multicastQueue = new LinkedBlockingQueue<>(multicastBufferCapacity);
-        //System.out.println("MulticastService - Setup multicast listener");
+        System.out.println("MulticastService - Setup multicast listener");
         // Start the receiver thread
         Thread receiverThread = new Thread(() -> receivePackets(packetQueue, multicastAddress, multicastPort));
         receiverThread.start();
@@ -62,7 +65,7 @@ public class MulticastListenService {
         Thread processorThread = new Thread(() -> processPackets(packetQueue));
         processorThread.start();
 
-        //System.out.println("MulticastService - Started multicast listener");
+        System.out.println("MulticastService - Started multicast listener");
     }
 
     private void receivePackets(BlockingQueue<String> packetQueue, String multicastAddress, int multicastPort) {
@@ -77,7 +80,7 @@ public class MulticastListenService {
                 multicastSocket.receive(packet);
                 System.out.println("MulticastService - Received a multicast: " + packet.getAddress().getHostAddress());
                 String message = new String(packet.getData(), 0, packet.getLength());
-                //System.out.println(message);
+                System.out.println(message);
                 //Only add if the message is not yet in the queue.
                 // UDP message can be sent more than once.
                 if (packetQueue.stream().noneMatch(c -> (c.equals(message)))) packetQueue.offer(message); // Add packet to the queue
@@ -115,7 +118,7 @@ public class MulticastListenService {
         //Send out 2 times, the receiver must filter out packets with the same ID.
         client.SendMessage(jsonConverter.toJson(reply));
         client.SendMessage(jsonConverter.toJson(reply));
-        System.out.println("MulticastService - Send out 1 packs of UNAMObjects on port: " + toNode.getPort());
+        logger.info("MulticastService - Send out 1 packs of UNAMObjects on port: " + toNode.getPort());
         client.close();
     }
 
