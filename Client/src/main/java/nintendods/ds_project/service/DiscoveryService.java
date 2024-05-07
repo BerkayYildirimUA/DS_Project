@@ -189,7 +189,7 @@ public class DiscoveryService {
 
     //later use
     public UNAMObject getNSObject(){
-         return nsObject;
+        return nsObject;
     }
 
     // Setter for UDPServer
