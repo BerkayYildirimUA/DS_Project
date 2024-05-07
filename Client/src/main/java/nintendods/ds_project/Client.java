@@ -3,13 +3,19 @@ package nintendods.ds_project;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import nintendods.ds_project.config.ClientNodeConfig;
+import nintendods.ds_project.controller.ClientAPI;
+import nintendods.ds_project.controller.ClientManagementAPI;
 import nintendods.ds_project.exeption.DuplicateNodeException;
 import nintendods.ds_project.exeption.NotEnoughMessageException;
 import nintendods.ds_project.model.ClientNode;
 import nintendods.ds_project.model.message.UNAMObject;
 import nintendods.ds_project.service.DiscoveryService;
-import nintendods.ds_project.service.ListenerService;
+import nintendods.ds_project.service.MulticastListenerService;
+import nintendods.ds_project.service.NSAPIService;
+import nintendods.ds_project.service.UnicastListenerService;
+import nintendods.ds_project.utility.JsonConverter;
 import nintendods.ds_project.utility.Generator;
+import org.hibernate.annotations.Synchronize;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,9 +25,22 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.client.RestTemplate;
+
+import java.net.UnknownHostException;
+import java.util.Scanner;
+
+import java.io.IOException;
+import java.net.InetAddress;
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Spring Boot application for managing a distributed system node's lifecycle excluding database auto-configuration.
@@ -30,17 +49,18 @@ import org.springframework.web.client.RestTemplate;
 public class Client {
 
     @Autowired
-    ClientNode node;
+    ClientNode node; // Ahmad_merge: this or node = new ClientNode(InetAddress.getLocalHost(), NODE_GLOBAL_PORT, generateRandomString(NODE_NAME_LENGTH));
 
     public ClientNode getNode() {
         return node;
     }
     private static final Logger logger = LoggerFactory.getLogger(Client.class);
+    private static NSAPIService API = NSAPIService.getAPI();
 
     @Autowired
     ApplicationContext context;
     private eNodeState nodeState;
-    private int discoveryTimeout = 500; //In microseconds: Timeout for discovery
+    private int DISCOVERY_TIMEOUT = 8000; //In microseconds: Timeout for discovery
 
     private int NODE_NAME_LENGTH;      // Length of the random node name
     private int NODE_GLOBAL_PORT;      //Fixed port for node operations
@@ -51,6 +71,11 @@ public class Client {
     private int MULTICAST_PORT;      // Port for multicast communication
     private UNAMObject nsObject;
     private boolean isRunning = true;
+
+    MulticastListenerService multicastListener = null;
+    UnicastListenerService unicastListener = null;
+
+    JsonConverter jsonConverter = new JsonConverter();
 
     @Value("${server.port}")
     private int apiPort;
@@ -63,13 +88,13 @@ public class Client {
     public int t_prevNodePort;
 
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws UnknownHostException, IOException {
         SpringApplication.run(Client.class, args);
     }
 
 
     @PostConstruct
-    private void init()  {
+    private void init() throws UnknownHostException {
         NODE_NAME_LENGTH = ClientNodeConfig.NODE_NAME_LENGTH;
         NODE_GLOBAL_PORT = ClientNodeConfig.NODE_GLOBAL_PORT;
         DISCOVERY_RETRIES = ClientNodeConfig.DISCOVERY_RETRIES;
@@ -86,9 +111,8 @@ public class Client {
     }
 
     @PreDestroy
-    public void prepareForShutdown() {
-        // check so we know that Discovery has happend. Don't mess with other nodes if you haven't entered the network.
-        if (nodeState != eNodeState.Discovery) {
+    public void prepareForShutdown() throws InterruptedException {
+        if (nodeState != eNodeState.DISCOVERY) {
             System.out.println("Preparing for shutdown...");
             shutdown();
             System.out.println("Nodes prepared.");
@@ -110,9 +134,8 @@ public class Client {
         // Initialize the node with a random name and specific network settings
         // Create Node
         logger.info("New node with name: " + node.getName() + " And hash: " + node.getId());
-        nodeState = eNodeState.Discovery; // Initial state of the node
+        nodeState = eNodeState.DISCOVERY; // Initial state of the node
         boolean isRunning = true; // Controls the main loop
-        ListenerService listenerService = null; // Service for handling incoming messages
         int discoveryRetries = 0; // Counter for discovery attempts
 
 
@@ -120,39 +143,41 @@ public class Client {
 
             // Finite state machine with eNodeState states
             switch (nodeState) {
-                case Discovery -> {
+                case DISCOVERY -> {
                     // Set Discovery on
                     if (discoveryRetries == DISCOVERY_RETRIES) {
                         // Max retries reached
+                        System.out.println("DISCOVERY:\t Max discovery retries reached");
                         logger.warn("Max discovery retries reached");
-                        nodeState = eNodeState.Error;
+                        nodeState = eNodeState.ERROR;
                         break;
                     }
-                    DiscoveryService ds = new DiscoveryService(MULTICAST_ADDRESS, MULTICAST_PORT, discoveryTimeout);
+                    DiscoveryService ds = new DiscoveryService(MULTICAST_ADDRESS, MULTICAST_PORT, DISCOVERY_TIMEOUT);
                     try {
                         logger.info("do discovery with node");
                         logger.info(node.toString());
 
-                        ds.discover(node);
+                        ds.discover(node); // discover returns void
                         logger.info("Discovery done");
 
                     } catch (Exception e) {
                         discoveryRetries++;
                         if (discoveryRetries != DISCOVERY_RETRIES + 1) {
+                            System.out.println("DISCOVERY:\t Retried discovery for the " + discoveryRetries + "(th) time");
                             logger.warn("Retry discovery for the" + discoveryRetries + "(th) time");
                         }
-                        nodeState = eNodeState.Discovery;
+                        nodeState = eNodeState.DISCOVERY;
 
                         if (e instanceof DuplicateNodeException) {
                             //Create new node
-                            node.setName(Generator.randomString(NODE_NAME_LENGTH));
+                            node.setName(Generator.randomString(NODE_NAME_LENGTH)); // Ahmad_merge: this or node = new ClientNode(InetAddress.getLocalHost(), NODE_GLOBAL_PORT, generateRandomString(NODE_NAME_LENGTH));
                             logger.info(node.toString());
                             logger.info("nodeName updated " + node.getName());
                         }
                         if (e instanceof NotEnoughMessageException) {
                             //Create other timeout
-                            discoveryTimeout += DISCOVERY_ADDITION_TIMEOUT;
-                            logger.info("discoveryTimeout updated " + discoveryTimeout);
+                            DISCOVERY_TIMEOUT += DISCOVERY_ADDITION_TIMEOUT;
+                            logger.info("discoveryTimeout updated " + DISCOVERY_TIMEOUT);
                         }
                         break;
                     }
@@ -160,36 +185,82 @@ public class Client {
                     // //Discovery has succeeded so continue
                     // //get NSObject from discovery service
                     nsObject = ds.getNSObject(); //For later use
+
+                    // Configure the api object
+                    API.setIp(nsObject.getNSAddress());
+                    API.setPort(nsObject.getNSPort());
+
+
                     logger.info(node.toString());
+                    System.out.println("DISCOVERY:\t Successfully reply in " + discoveryRetries + " discoveries.");
                     logger.info("Successfully reply in " + discoveryRetries + " discoveries.");
-                    nodeState = eNodeState.Listening; // Move to Listening state after successful discovery
+                    nodeState = eNodeState.LISTENING; // Move to Listening state after successful discovery
                 }
-                case Listening -> {
+                case LISTENING -> {
                     //System.out.println("Entering Listening");
-                    if (listenerService == null) {
-                        listenerService = new ListenerService(MULTICAST_ADDRESS, MULTICAST_PORT, LISTENER_BUFFER_SIZE);
-                        listenerService.initialize_multicast();
-                    }
+                    if (multicastListener == null)
+                        multicastListener = new MulticastListenerService(MULTICAST_ADDRESS, MULTICAST_PORT, LISTENER_BUFFER_SIZE);
+
+                    if (unicastListener == null)
+                        unicastListener = new UnicastListenerService(3780);
+
                     try {
-                        listenerService.listenAndUpdate(node); // Listen for and process incoming messages
+                        multicastListener.initialize_multicast();
+                        multicastListener.listenAndUpdate(node);
+                        unicastListener.listenAndUpdate(node);
                     } catch (Exception e) {
                         e.printStackTrace();
-                        nodeState = eNodeState.Error; // Move to Error state on exception
+                        nodeState = eNodeState.ERROR; // Move to Error state on exception
                     }
-                    nodeState = eNodeState.Transfer; // Assume Transfer state is next step
+
+                    if (node.getId() < node.getPrevNodeId())    {
+                        System.out.println("LISTENING:\t Client sleep");
+                        try {
+                            TimeUnit.SECONDS.sleep(15);
+                        } catch (InterruptedException e) {
+                            throw new RuntimeException(e);
+                        }
+                        nodeState = eNodeState.ERROR;
+                    } else nodeState = eNodeState.TRANSFER;
                 }
-                case Transfer -> {
+                case TRANSFER -> {
                     // TODO: Transfer data or handle other operations
-                    nodeState = eNodeState.Listening; // Loop back to Listening for simplicity
+                    nodeState = eNodeState.LISTENING; // Loop back to Listening for simplicity
                 }
-                case Shutdown -> {
+                case SHUTDOWN -> {
+                    System.out.println("SHUTDOWN:\t Start:" + Timestamp.from(Instant.now()));
+            /*        System.out.println("Prepare nodes for shutdown");
+                    System.out.println("Nodes prepared. Latch Down");
+                    latch.countDown();
+                    isRunning = false;*/
+                    // TODO: Handle shutdown process, ensuring all connections are closed properly
                     // Gracefully, update the side nodes on its own and leave the ring topology.
+                    /**
+                     * When the node gets in the Shutdown state inside the discovery service, we'll access the
+                     * NamingServer API to handle everything from here.
+                     * call: {NSAddress}:{NSPort}/nodes/{id}/shutdown
+                     */
                 }
-                case Error -> {
+                case ERROR -> {
+                    System.out.println("ERROR:\t Start:" + Timestamp.from(Instant.now()));
                     // TODO: Handle error state, possibly attempt to recover or shutdown gracefully
                     // Hard, only transmit to naming server and the naming server needs to deal with
                     // it.
-                    isRunning = false; // Stop the main loop
+                    if (unicastListener != null)
+                        unicastListener.stopListening();
+                    if (multicastListener != null)
+                        multicastListener.stopListening();
+
+                    if (API.hasAddress()) {
+                        System.out.println("ERROR:\t Client: Send error");
+                        API.executeErrorDelete("/nodes/" + node.getId() + "/error");
+                    }
+                    /**
+                     * When the node gets in the Error state, we'll access the
+                     * NamingServer API to handle everything from here.
+                     * call: {NSAddress}:{NSPort}/nodes/{id}/error
+                     */
+                    isRunning = false;
                 }
                 default -> {
                     // Same as error?

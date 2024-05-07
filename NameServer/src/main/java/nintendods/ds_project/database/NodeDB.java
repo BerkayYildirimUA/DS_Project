@@ -77,7 +77,6 @@ public class NodeDB {
     }
 
     public boolean exists(int nodeID, String ip) {
-
         if (nodeID_to_nodeIP.containsKey(nodeID)) {
             return nodeID_to_nodeIP.get(nodeID).equals(ip);
         } else {
@@ -89,6 +88,9 @@ public class NodeDB {
     /* --------------------------------- GET --------------------------------- */
     public int getSize() {
         return this.nodeID_to_nodeIP.size();
+    }
+    public String getIpFromId(int id) {
+        return nodeID_to_nodeIP.get(id);
     }
 
     public String getIPfromID(int ID) {return this.nodeID_to_nodeIP.getOrDefault(ID, "");}
@@ -138,6 +140,20 @@ public class NodeDB {
         return closestKey;
     }
 
+    public int getPreviousId(int id) {
+        int previousId;
+        if (nodeID_to_nodeIP.firstKey() == id)  previousId = nodeID_to_nodeIP.lastKey();
+        else                                    previousId = nodeID_to_nodeIP.lowerKey(id);
+        return previousId;
+    }
+
+    public int getNextId(int id) {
+        int nextId;
+        if (nodeID_to_nodeIP.lastKey() == id)   nextId = nodeID_to_nodeIP.firstKey();
+        else                                    nextId = nodeID_to_nodeIP.higherKey(id);
+        return nextId;
+    }
+
     public void saveDB() {
         saveDB("NodeDB.json");
     }
@@ -147,17 +163,16 @@ public class NodeDB {
     }
 
     public void loadDB(String fileName) {
-        JsonConverter jsonConverter = new JsonConverter(fileName);
-
-        Type type = new TypeToken<TreeMap<Integer, String>>() {
-        }.getType();
-
-        nodeID_to_nodeIP = (TreeMap<Integer, String>) jsonConverter.fromFile(type);
+//        JsonConverter jsonConverter = new JsonConverter(fileName);
+//
+//        Type type = new TypeToken<TreeMap<Integer, String>>() {}.getType();
+//
+//        nodeID_to_nodeIP = (TreeMap<Integer, String>) jsonConverter.fromFile(type);
     }
 
     public void saveDB(String fileName) {
-        JsonConverter jsonConverter = new JsonConverter(fileName);
-
-        jsonConverter.toFile(nodeID_to_nodeIP);
+//        JsonConverter jsonConverter = new JsonConverter(fileName);
+//
+//        jsonConverter.toFile(nodeID_to_nodeIP);
     }
 }
