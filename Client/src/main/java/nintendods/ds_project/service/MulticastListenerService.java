@@ -13,7 +13,7 @@ import java.net.UnknownHostException;
 @Component("Lis1")
 public class MulticastListenerService {
 
-    private static MulticastListenService multicastService = null;
+    static MulticastListenService multicastService = null;
 
     String multicastAddress;
     int multicastPort;

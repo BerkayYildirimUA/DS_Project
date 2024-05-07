@@ -108,8 +108,6 @@ public class Client {
             t_prevNodePort = 0;
             t_nextNodePort = 0;
         }
-
-      //  runNodeLifecycle(context);
     }
 
     @PreDestroy
@@ -274,6 +272,7 @@ public class Client {
     private void shutdown() {
         RestTemplate restTemplate = new RestTemplate();
 
+        //if you are alone in the network then skip
         if (node.getId() != node.getPrevNodeId()) {
             int nextNodePort;
             int prevNodePort;
@@ -281,7 +280,7 @@ public class Client {
             String prevNodeIP;
             String nextNodeIP;
 
-
+            //multiple springboot appliactions can't be run on the same port on the same machine. So this is made, so I can change the Port numbers dynamicly during testing.
             if (testing == 1) {
                 nextNodePort = t_nextNodePort;
                 prevNodePort = t_prevNodePort;
@@ -292,14 +291,15 @@ public class Client {
                 nextNodePort = apiPort;
                 prevNodePort = apiPort;
 
-                String urlGetNextNodeID = "http://" + nsObject.getNSAddress() + ":8089/node/" + node.getNextNodeId();
-                logger.info("GET from: " + urlGetNextNodeID);
-                ResponseEntity<String> getNextNodeIDResponse = restTemplate.getForEntity(urlGetNextNodeID, String.class);
+
+                String urlGetNextNodeIP = "http://" + nsObject.getNSAddress() + ":8089/node/" + node.getNextNodeId();
+                logger.info("GET from: " + urlGetNextNodeIP);
+                ResponseEntity<String> getNextNodeIDResponse = restTemplate.getForEntity(urlGetNextNodeIP, String.class);
                 nextNodeIP = getNextNodeIDResponse.getBody();
 
-                String urlGetPrevNodeID = "http://" + nsObject.getNSAddress() + ":8089/node/" + node.getPrevNodeId();
-                logger.info("GET from: " + urlGetPrevNodeID);
-                ResponseEntity<String> getPrevNodeIDResponse = restTemplate.getForEntity(urlGetPrevNodeID, String.class);
+                String urlGetPrevNodeIP = "http://" + nsObject.getNSAddress() + ":8089/node/" + node.getPrevNodeId();
+                logger.info("GET from: " + urlGetPrevNodeIP);
+                ResponseEntity<String> getPrevNodeIDResponse = restTemplate.getForEntity(urlGetPrevNodeIP, String.class);
                 prevNodeIP = getPrevNodeIDResponse.getBody();
 
             }
@@ -315,7 +315,7 @@ public class Client {
             logger.info("PUT to: " + urlForNextNode);
             restTemplate.put(urlForNextNode, String.class);
         }
-
+        //delete yourself from nameserver
         String urlDeleteNode = "http://" + nsObject.getNSAddress() + ":8089/nodes/" + node.getId();
         logger.info("DELETE from: " + urlDeleteNode);
         restTemplate.delete(urlDeleteNode);

@@ -1,15 +1,14 @@
 package nintendods.ds_project.model;
-import jakarta.persistence.Entity;
+
 import java.net.InetAddress;
 
-@Entity
+//@Entity
 /**
  * An abstract base Node that will be used onto a network interface and has a name
  */
 public class ANetworkNode extends ANode {
     private InetAddress address;
     private int port;
-    private String name;
 
     public ANetworkNode(InetAddress address, int port, String name){
         super(name);
@@ -38,7 +37,7 @@ public class ANetworkNode extends ANode {
         return "ANetworkNode{" +
                 "address=" + address +
                 ", port=" + port +
-                ", name='" + name + '\'' +
+                ", name='" + super.getName() + '\'' +
                 '}';
     }
 }

@@ -100,6 +100,7 @@ public class NameServerAPI {
         }
 
         nodeDB.deleteNode(id);
+        logger.info("{} has been deleted from the server", id);
         return ResponseEntity.status(HttpStatus.OK).body(jsonConverter.toJson(id));
     }
 

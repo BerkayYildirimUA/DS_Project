@@ -19,7 +19,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 public class MulticastListenService {
     private static final int BUFFER_SIZE = 1024;
     private static BlockingQueue<MNObject> multicastQueue;
-    private final JsonConverter jsonConverter = new JsonConverter();
+    JsonConverter jsonConverter = new JsonConverter();
 
     private static boolean isRunning = true;
 

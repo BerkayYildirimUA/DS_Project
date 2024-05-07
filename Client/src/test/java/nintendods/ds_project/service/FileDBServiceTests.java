@@ -4,7 +4,7 @@ import nintendods.ds_project.database.FileDB;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertSame;
 @SpringBootTest(properties = {
         "multicast.address=224.0.0.100",
         "multicast.port=12345",
