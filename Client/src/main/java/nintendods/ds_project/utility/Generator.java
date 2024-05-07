@@ -34,4 +34,27 @@ public class Generator {
         Random rand = new Random();
         return rand.nextInt((max - min) + 1) + min;
     }
+
+     /**
+      * Replaces the text with random chars at the end. Does this on the end of
+      * the text or before the last dot (for not messing up the extension).
+      * 
+      * @param fileName the original name
+      * @param randomTextLength the amount of random chart to put after
+      * @return a new text
+      */
+    public static String renameText(String originalText, int randomTextLength) {
+        int lastIndex = originalText.lastIndexOf(".");
+        String resultString = originalText;
+        String randomText = Generator.randomString(randomTextLength);
+        // Check if "." exists in the string
+        if (lastIndex != -1) {
+            resultString = originalText.substring(0, lastIndex) + randomText + originalText.substring(lastIndex);
+        } else {
+            // If "." does not exist, add it at the end of the file
+            resultString = originalText + randomText;
+        }
+
+        return resultString;
+    }
 }

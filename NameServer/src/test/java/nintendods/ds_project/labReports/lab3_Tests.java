@@ -1,27 +1,17 @@
 package nintendods.ds_project.labReports;
 
-import com.google.gson.Gson;
 import nintendods.ds_project.Exeptions.IDTakenExeption;
-import nintendods.ds_project.NameServer;
 import nintendods.ds_project.database.NodeDB;
 import nintendods.ds_project.model.ClientNode;
-import nintendods.ds_project.model.message.ResponseObject;
-import nintendods.ds_project.utility.JsonConverter;
 import nintendods.ds_project.utility.NameToHash;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.*;

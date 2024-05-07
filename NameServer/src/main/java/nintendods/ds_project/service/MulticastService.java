@@ -11,6 +11,7 @@ import nintendods.ds_project.utility.NameToHash;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.net.*;
@@ -25,6 +26,9 @@ public class MulticastService {
     private static final int PORT = 12345;
     private static final int BUFFER_SIZE = 256;
     private static final int QUEUE_SIZE  = 20;
+
+    @Value("${multicast.port}")
+    private int multicast_port;
 
     /**
      * Handler keeps running and listening for multicasts from joining nodes.
@@ -118,8 +122,8 @@ public class MulticastService {
                 + node.getPort());
         // Send out the multicast message over UDP with the timestamp as ID.
         long messageId = System.currentTimeMillis();
-        //TODO: add correct port from Naming Server
-        UNAMObject unicastMessage = new UNAMObject(messageId, eMessageTypes.UnicastNamingServerToNode, amount, InetAddress.getLocalHost().getHostAddress(), 8089);
+        //TODO: add correct port from Naming Server --> SOLVED
+        UNAMObject unicastMessage = new UNAMObject(messageId, eMessageTypes.UnicastNamingServerToNode, amount, InetAddress.getLocalHost().getHostAddress(), this.multicast_port);
 
         // Setup the UDP sender and send out.
         UDPClient client = new UDPClient(node.getAddress(), node.getPort(), BUFFER_SIZE);

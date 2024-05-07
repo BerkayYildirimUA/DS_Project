@@ -93,7 +93,7 @@ To ensure easy coding, we'll create a file transfer class that can be used by th
 
 This will be done in 3 phases.
 
-## starting
+## starting (Ahmad)
 All files that are stored on each node should be replicated to corresponding nodes in the ring topology. This way, a new node to which the file is replicated becomes the owner of the file.
 
 After bootstrap and discovery, the new node has to verify its local files (folder on
@@ -134,8 +134,9 @@ I'am confused by the given specifications, so this section has to be revised.
 
 - Create log class
 - Ensure that when a new file arrives, the log can be created of that file.
-- Create the File Transfer class
+- Create the File Transfer class.
 - Ensure that when transfering a file, the log of that file is automatically included.
+- Create File Controlling class for easy interaction with the files.
 
 ### Berkay
 ### Tom

@@ -93,6 +93,8 @@ public class NodeDB {
         return nodeID_to_nodeIP.get(id);
     }
 
+    public String getIPfromID(int ID) {return this.nodeID_to_nodeIP.getOrDefault(ID, "");}
+
     /**
      * Retrieves the IP address of the server with the hash closest to the given file name.
      *
