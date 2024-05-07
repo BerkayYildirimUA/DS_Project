@@ -53,7 +53,7 @@ public class MulticastListenService {
     public void initialize() {
         BlockingQueue<String> packetQueue = new LinkedBlockingQueue<>(multicastBufferCapacity);
         multicastQueue = new LinkedBlockingQueue<>(multicastBufferCapacity);
-        System.out.println("MulticastService - Setup multicast listener");
+        //System.out.println("MulticastService - Setup multicast listener");
         // Start the receiver thread
         Thread receiverThread = new Thread(() -> receivePackets(packetQueue, multicastAddress, multicastPort));
         receiverThread.start();
@@ -62,7 +62,7 @@ public class MulticastListenService {
         Thread processorThread = new Thread(() -> processPackets(packetQueue));
         processorThread.start();
 
-        System.out.println("MulticastService - Started multicast listener");
+        //System.out.println("MulticastService - Started multicast listener");
     }
 
     private void receivePackets(BlockingQueue<String> packetQueue, String multicastAddress, int multicastPort) {

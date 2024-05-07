@@ -20,7 +20,7 @@ public class ListenerServiceTest {
     @Mock
     private ClientNode mockNode;
 
-    private ListenerService listenerService;
+    private MulticastListenerService listenerService;
 
     private final String multicastAddress = "224.0.0.1";
     private final int multicastPort = 4446;
@@ -28,7 +28,7 @@ public class ListenerServiceTest {
 
     @BeforeEach
     void setUp() {
-        listenerService = new ListenerService(multicastAddress, multicastPort, multicastBufferCapacity);
+        listenerService = new MulticastListenerService(multicastAddress, multicastPort, multicastBufferCapacity);
         listenerService.multicastService = mockMulticastService;
     }
 
