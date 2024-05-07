@@ -205,6 +205,7 @@ public class Client {
                         unicastListener = new UnicastListenerService(3780);
 
                     try {
+                        multicastListener.initialize_multicast();
                         multicastListener.listenAndUpdate(node);
                         unicastListener.listenAndUpdate(node);
                     } catch (Exception e) {
@@ -245,8 +246,10 @@ public class Client {
                     // TODO: Handle error state, possibly attempt to recover or shutdown gracefully
                     // Hard, only transmit to naming server and the naming server needs to deal with
                     // it.
-                    unicastListener.stopListening();
-                    multicastListener.stopListening();
+                    if (unicastListener != null)
+                        unicastListener.stopListening();
+                    if (multicastListener != null)
+                        multicastListener.stopListening();
 
                     if (API.hasAddress()) {
                         System.out.println("ERROR:\t Client: Send error");

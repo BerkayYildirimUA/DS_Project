@@ -26,7 +26,7 @@ public class MulticastListenerService {
         this.multicastPort = multicastPort;
         this.multicastBufferCapacity = multicastBufferCapacity;
 
-        initialize_multicast();
+        //initialize_multicast();
     }
 
     public void initialize_multicast() {
