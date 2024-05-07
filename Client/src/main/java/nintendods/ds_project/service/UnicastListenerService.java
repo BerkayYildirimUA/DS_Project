@@ -23,13 +23,13 @@ public class UnicastListenerService {
                 server.connect();
             } catch (IOException e) {
                 System.out.println("UnicastListenService - Error:\tconnect failed\n");
-                throw new RuntimeException(e);
+                //throw new RuntimeException(e);
             }
             try {
                 server.listen();
             } catch (IOException e) {
                 System.out.println("UnicastListenService - Error:\tlisten failed\n");
-                throw new RuntimeException(e);
+                //throw new RuntimeException(e);
             }
         });
         receiverThread.start();
