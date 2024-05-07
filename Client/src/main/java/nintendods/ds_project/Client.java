@@ -14,7 +14,6 @@ import nintendods.ds_project.service.MulticastListenerService;
 import nintendods.ds_project.service.NSAPIService;
 import nintendods.ds_project.service.UnicastListenerService;
 import nintendods.ds_project.utility.JsonConverter;
-import nintendods.ds_project.service.ListenerService;
 import nintendods.ds_project.utility.Generator;
 import org.hibernate.annotations.Synchronize;
 import org.slf4j.Logger;
@@ -115,7 +114,7 @@ public class Client {
 
     @PreDestroy
     public void prepareForShutdown() throws InterruptedException {
-        if (nodeState != eNodeState.Discovery) {
+        if (nodeState != eNodeState.DISCOVERY) {
             System.out.println("Preparing for shutdown...");
             shutdown();
             System.out.println("Nodes prepared.");
@@ -139,7 +138,6 @@ public class Client {
         logger.info("New node with name: " + node.getName() + " And hash: " + node.getId());
         nodeState = eNodeState.DISCOVERY; // Initial state of the node
         boolean isRunning = true; // Controls the main loop
-        ListenerService listenerService = null; // Service for handling incoming messages
         int discoveryRetries = 0; // Counter for discovery attempts
 
 
@@ -180,8 +178,8 @@ public class Client {
                         }
                         if (e instanceof NotEnoughMessageException) {
                             //Create other timeout
-                            discoveryTimeout += DISCOVERY_ADDITION_TIMEOUT;
-                            logger.info("discoveryTimeout updated " + discoveryTimeout);
+                            DISCOVERY_TIMEOUT += DISCOVERY_ADDITION_TIMEOUT;
+                            logger.info("discoveryTimeout updated " + DISCOVERY_TIMEOUT);
                         }
                         break;
                     }
