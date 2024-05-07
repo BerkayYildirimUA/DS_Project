@@ -2,6 +2,7 @@ package nintendods.ds_project.utility;
 
 import org.junit.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
