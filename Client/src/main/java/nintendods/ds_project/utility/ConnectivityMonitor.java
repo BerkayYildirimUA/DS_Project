@@ -1,9 +1,8 @@
 package nintendods.ds_project.utility;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.net.Socket;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -22,10 +21,6 @@ public class ConnectivityMonitor {
     public void startMonitoring() {
         ScheduledExecutorService executor = Executors.newScheduledThreadPool(3);
 
-        System.out.println("next:" + this.nextNodeAddress);
-        System.out.println("prev:" + this.previousNodeAddress);
-        System.out.println("nameserver:" + this.namingServerAddress);
-
         // Schedule ping to previous node, next node, and naming server
         schedulePing(executor, this.previousNodeAddress, 8083, "previous node");
         schedulePing(executor, this.nextNodeAddress, 8083, "next node");
@@ -41,33 +36,33 @@ public class ConnectivityMonitor {
                 System.out.println("Failed to connect to " + nodeName + ".");
                 throw new RuntimeException("Failed to connect to " + nodeName + ".");
             }
-        }, 0, 2, TimeUnit.SECONDS); // Ping twice every 5 seconds
+        }, 0, 20, TimeUnit.SECONDS); // Ping twice every 5 seconds
     }
 
     private boolean pingNode(String address, int port) {
-        try (Socket socket = new Socket(address, port);
-             PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
+        try {
+            DatagramSocket socket = new DatagramSocket();
+            socket.setSoTimeout(10000); // 5 seconds timeout
+            InetAddress inetAddress = InetAddress.getByName(address);
 
-            out.println("PING");
-            String response = in.readLine();
+            String message = "PING";
+            byte[] buf = message.getBytes();
+            DatagramPacket packet = new DatagramPacket(buf, buf.length, inetAddress, port);
 
-            return "PONG".equals(response);
+            // Send the ping
+            socket.send(packet);
+
+            // Prepare to receive the pong
+            byte[] buf2 = new byte[256];
+            DatagramPacket packet2 = new DatagramPacket(buf2, buf2.length);
+            socket.receive(packet2);
+            String received = new String(packet2.getData(), 0, packet2.getLength());
+
+            socket.close();
+            return "PONG".equals(received.trim());
         } catch (Exception e) {
             System.out.println("Error pinging node at " + address + ": " + e.getMessage());
             return false;
         }
-    }
-
-    public void setNextNodeAddress(String address) {
-        this.nextNodeAddress = address;
-    }
-
-    public void setPreviousNodeAddress(String address) {
-        this.previousNodeAddress = address;
-    }
-
-    public void setNamingServerAddress(String address) {
-        this.namingServerAddress = address;
     }
 }
