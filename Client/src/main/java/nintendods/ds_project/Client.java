@@ -204,11 +204,12 @@ public class Client {
                     //System.out.println("Entering Listening");
                     //if (!Objects.equals(getPrevAddr(nsObject.getNSAddress(), node.getPrevNodeId()), String.valueOf(node.getAddress())))
                     try {
-                        ConnectivityMonitor monitor = new ConnectivityMonitor(getPrevAddr(nsObject.getNSAddress(), node.getPrevNodeId()), getNextAddr(nsObject.getNSAddress(), node.getNextNodeId()), nsObject.getNSAddress());
+                        ConnectivityMonitor monitor = new ConnectivityMonitor(getPrevAddr(nsObject.getNSAddress(), node.getPrevNodeId()), node.getPrevNodeId(), getNextAddr(nsObject.getNSAddress(), node.getNextNodeId()), node.getNextNodeId(), nsObject.getNSAddress());
                         monitor.startMonitoring();
                     } catch (Exception e) {
-                        logger.info("Something terrible went wrong with the connectivity to the nameserver");
-                        nodeState = eNodeState.ERROR;
+                        logger.info("No connection with nameserver at: " + nsObject.getNSAddress() + ". Going back to discovery");
+                        monitor.stop();
+                        nodeState = eNodeState.DISCOVERY;
                     }
                     if (multicastListener == null){
                         multicastListener = new MulticastListenerService(MULTICAST_ADDRESS, MULTICAST_PORT, LISTENER_BUFFER_SIZE);

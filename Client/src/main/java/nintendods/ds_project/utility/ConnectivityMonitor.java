@@ -12,27 +12,31 @@ import java.util.concurrent.TimeUnit;
 
 public class ConnectivityMonitor {
     private String previousNodeAddress;
+    private int prevID;
     private String nextNodeAddress;
+    private int nextID;
     private String namingServerAddress;
     private ScheduledExecutorService executor;
     private volatile boolean running = true;
 
     private static final Logger logger = LoggerFactory.getLogger(ConnectivityMonitor.class);
 
-    public ConnectivityMonitor(String previousNodeAddress, String nextNodeAddress, String namingServerAddress) {
+    public ConnectivityMonitor(String previousNodeAddress, int prevID, String nextNodeAddress, int nextID, String namingServerAddress) {
         this.previousNodeAddress = previousNodeAddress.substring(1);
         this.nextNodeAddress = nextNodeAddress.substring(1);
         this.namingServerAddress = namingServerAddress;
+        this.nextID = nextID;
+        this.prevID = prevID;
     }
 
     public void startMonitoring() {
         executor = Executors.newScheduledThreadPool(3);
         // Schedule ping to previous node, next node, and naming server
-        schedulePing(executor, this.previousNodeAddress, "previous node");
-        schedulePing(executor, this.nextNodeAddress, "next node");
+        schedulePing(executor, this.previousNodeAddress, String.valueOf(this.prevID));
+        schedulePing(executor, this.nextNodeAddress, String.valueOf(this.nextID));
         schedulePing(executor, this.namingServerAddress, "naming server");
         try {
-            executor.awaitTermination(10, TimeUnit.SECONDS);
+            executor.awaitTermination(20, TimeUnit.SECONDS);
         } catch (Exception e) {
             logger.info("Couldn't wait for 10 seconds");
         }
@@ -44,12 +48,12 @@ public class ConnectivityMonitor {
                 Thread.currentThread().interrupt();
                 return;
             }
-            System.out.println("Trying to ping: " + nodeName + "; " + address);
+            logger.info("Trying to ping: " + nodeName + "; " + address);
             boolean success = pingNode(address);
             if (success) {
-                System.out.println("Success: Connection to " + nodeName + " successful.");
+                logger.info("Ping Success: pinged " + nodeName + " successful.");
             } else {
-                System.out.println("Failed to connect to " + nodeName + ".");
+                logger.warn("Failed to connect to " + nodeName + ".");
             }
         }, 0, 10, TimeUnit.SECONDS);  // Ping once every 10 seconds
     }
@@ -60,7 +64,7 @@ public class ConnectivityMonitor {
             // Attempt to ping the address with a timeout of 5000 milliseconds
             return inetAddress.isReachable(5000);
         } catch (Exception e) {
-            System.out.println("Error pinging node at " + address + ": " + e.getMessage());
+            logger.warn("Error pinging node at " + address + ": " + e.getMessage());
             return false;
         }
     }
@@ -75,7 +79,7 @@ public class ConnectivityMonitor {
                     executor.shutdownNow(); // Cancel currently executing tasks
                     // Wait a while for tasks to respond to being cancelled
                     if (!executor.awaitTermination(60, TimeUnit.SECONDS))
-                        System.err.println("Executor did not terminate");
+                        logger.warn("Executor did not terminate");
                 }
             } catch (InterruptedException ie) {
                 // (Re-)Cancel if current thread also interrupted
