@@ -212,6 +212,7 @@ public class Client {
                         if (monitor != null)
                             monitor.stop();
                         nodeState = eNodeState.DISCOVERY;
+                        discoveryRetries = 0;
                     }
                     if (multicastListener == null){
                         multicastListener = new MulticastListenerService(MULTICAST_ADDRESS, MULTICAST_PORT, LISTENER_BUFFER_SIZE);
