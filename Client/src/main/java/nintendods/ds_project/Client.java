@@ -206,9 +206,11 @@ public class Client {
                     try {
                         ConnectivityMonitor monitor = new ConnectivityMonitor(getPrevAddr(nsObject.getNSAddress(), node.getPrevNodeId()), node.getPrevNodeId(), getNextAddr(nsObject.getNSAddress(), node.getNextNodeId()), node.getNextNodeId(), nsObject.getNSAddress());
                         monitor.startMonitoring();
+                        monitor.stop();
                     } catch (Exception e) {
                         logger.info("No connection with nameserver at: " + nsObject.getNSAddress() + ". Going back to discovery");
-                        monitor.stop();
+                        if (monitor != null)
+                            monitor.stop();
                         nodeState = eNodeState.DISCOVERY;
                     }
                     if (multicastListener == null){
