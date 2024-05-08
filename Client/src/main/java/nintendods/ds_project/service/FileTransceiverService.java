@@ -3,6 +3,8 @@ package nintendods.ds_project.service;
 import nintendods.ds_project.config.ClientNodeConfig;
 import nintendods.ds_project.model.ANode;
 import nintendods.ds_project.model.file.AFile;
+import nintendods.ds_project.model.file.IFileConditionChecker;
+import nintendods.ds_project.model.file.log.eLog;
 import nintendods.ds_project.model.message.FileMessage;
 import nintendods.ds_project.utility.FileModifier;
 
@@ -131,6 +133,38 @@ public class FileTransceiverService {
         }
     }
 
+     /**
+     * Save a file based on a condition that is present in the incoming buffer.
+     * 
+     * @param node the issuer who saves the file.
+     * @param checker an interface to check if a file can be saved or not.
+     * @return null if the check has failed.
+     */
+    public AFile saveFileWithConditions(ANode node, IFileConditionChecker checker) {
+
+        if(checker.getFileCondition(this.peekFileMessage().getFileObject()))
+            return saveIncommingFile(node, "");
+
+        return null;
+    }
+
+     /**
+     * Save a file based on a condition that is present in the incoming buffer. If a file is present, we
+     * save it in the given directory.
+     * 
+     * @param node the issuer who saves the file
+     * @param directoryPath The new directory path to save the file in.
+     * @param checker an interface to check if a file can be saved or not.
+     * @return null if the check has failed.
+     */
+    public AFile saveFileWithConditions(ANode node, String directoryPath, IFileConditionChecker checker) {
+
+        if(checker.getFileCondition(this.peekFileMessage().getFileObject()))
+            return saveIncommingFile(node, directoryPath);
+
+        return null;
+    }
+
     /**
      * Save a file that is present in the incoming buffer.
      * 
@@ -159,7 +193,7 @@ public class FileTransceiverService {
                 // Set the new owner of the file
                 fileObject.setOwner(node);
 
-                File f = FileModifier.createFile(directoryPath, m.getFileObject().getName(), true);
+                File f = FileModifier.createFile(directoryPath, m.getFileObject().getName(), false);
 
                 // set file path and name
                 fileObject.setPath(f.getAbsolutePath());
@@ -177,5 +211,9 @@ public class FileTransceiverService {
 
     private FileMessage getFileMessage() {
         return receiveQueue.poll();
+    }
+
+    private FileMessage peekFileMessage() {
+        return receiveQueue.peek();
     }
 }

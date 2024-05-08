@@ -107,7 +107,7 @@ To ensure easy coding, we'll create a file transfer class that can be used by th
 
 This will be done in 3 phases.
 
-## starting (Ahmad)
+## starting (Robbe)
 All files that are stored on each node should be replicated to corresponding nodes in the ring topology. This way, a new node to which the file is replicated becomes the owner of the file.
 
 After bootstrap and discovery, the new node has to verify its local files (folder on
@@ -119,7 +119,7 @@ The naming server will respond to the original node where to transfer through. I
 
 Each file will have a full log available to track its replications and owners of the file.
 
-## Update
+## Update (Ahmad)
 If new files are added locally to certain node, or deleted from a node, this state has to be synchronized in the whole system. If a new file is added, then it has to be replicated. Otherwise, if deleted, it has to be deleted from the replicated files of the file owner as well.
 
 When we add a local file, this should be replicated immediately. We can startup a thread to check if the file three has changed, in a given interval (eg 2 seconds interval).
@@ -146,12 +146,30 @@ I'am confused by the given specifications, so this section has to be revised.
 
 ### Robbe
 
-- Create log class
-- Ensure that when a new file arrives, the log can be created of that file.
-- Create the File Transfer class.
-- Ensure that when transfering a file, the log of that file is automatically included.
-- Create File Controlling class for easy interaction with the files.
+- [x] Create log class
+- [x] Ensure that when a new file arrives, the log can be created of that file.
+- [x] Create the File Transfer class.
+- [x] Ensure that when transfering a file, the log of that file is automatically included.
+- [x] Create File Controlling class for easy interaction with the files.
+
 
 ### Berkay
+
+- [] shutdown
+
 ### Tom
+
+- [] Startup
+  - [] Extra state toevoegen
+  - [] Bekijkt bestand (in specifieke directory)
+  - [] Verwerkt bestanden en voegt toe aan database
+  - [] Stuurt data over bestanden naar NS
+  - [] NS zoekt naar de eerste id die boven de file id staat
+    - [] Als dit de originele verzend node is dan sturen naar prev node
+  - [] Indien kleiner, stuur naar NS voor correcte node IP
+  - [] Stuur naar juiste node via FileTranscieverService
+  - [] Aan ontvangende node bestand opslaan
+
 ### Ahmad
+
+- [] Update state File
