@@ -203,11 +203,12 @@ public class Client {
                 case LISTENING -> {
                     //System.out.println("Entering Listening");
                     //if (!Objects.equals(getPrevAddr(nsObject.getNSAddress(), node.getPrevNodeId()), String.valueOf(node.getAddress())))
-                    ConnectivityMonitor monitor = new ConnectivityMonitor(getPrevAddr(nsObject.getNSAddress(), node.getPrevNodeId()), getNextAddr(nsObject.getNSAddress(), node.getNextNodeId()), nsObject.getNSAddress());
                     try {
+                        ConnectivityMonitor monitor = new ConnectivityMonitor(getPrevAddr(nsObject.getNSAddress(), node.getPrevNodeId()), getNextAddr(nsObject.getNSAddress(), node.getNextNodeId()), nsObject.getNSAddress());
                         monitor.startMonitoring();
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
+                    } catch (Exception e) {
+                        logger.info("Something terrible went wrong with the connectivity to the nameserver");
+                        nodeState = eNodeState.ERROR;
                     }
                     if (multicastListener == null){
                         multicastListener = new MulticastListenerService(MULTICAST_ADDRESS, MULTICAST_PORT, LISTENER_BUFFER_SIZE);
