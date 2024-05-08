@@ -13,52 +13,45 @@ public class ConnectivityMonitor {
     private String nextNodeAddress;
     private String namingServerAddress;
 
-    public ConnectivityMonitor() {
-        this.previousNodeAddress = "0.0.0.0";
-        this.nextNodeAddress = "0.0.0.0";
-        this.namingServerAddress = "0.0.0.0";
+    public ConnectivityMonitor(String previousNodeAddress, String nextNodeAddress, String namingServerAddress) {
+        this.previousNodeAddress = previousNodeAddress.substring(1);
+        this.nextNodeAddress = nextNodeAddress.substring(1);
+        this.namingServerAddress = namingServerAddress;
     }
 
-    public void startMonitoring(String previousNodeAddress, String nextNodeAddress, String namingServerAddress) {
-        setNextNodeAddress(nextNodeAddress);
-        setPreviousNodeAddress(previousNodeAddress);
-        setNamingServerAddress(namingServerAddress);
-
+    public void startMonitoring() {
         ScheduledExecutorService executor = Executors.newScheduledThreadPool(3);
 
-        // Schedule ping to previous node
-        executor.scheduleWithFixedDelay(() -> {
-            if (!pingNode(previousNodeAddress)) {
-                throw new RuntimeException("Failed to connect to previous node.");
-            }
-        }, 0, 10, TimeUnit.SECONDS);
+        System.out.println("next:" + this.nextNodeAddress);
+        System.out.println("prev:" + this.previousNodeAddress);
+        System.out.println("nameserver:" + this.namingServerAddress);
 
-        // Schedule ping to next node
-        executor.scheduleWithFixedDelay(() -> {
-            if (!pingNode(nextNodeAddress)) {
-                throw new RuntimeException("Failed to connect to next node.");
-            }
-        }, 0, 10, TimeUnit.SECONDS);
-
-        // Schedule ping to naming server
-        executor.scheduleWithFixedDelay(() -> {
-            if (!pingNode(namingServerAddress)) {
-                throw new RuntimeException("Failed to connect to naming server.");
-            }
-        }, 0, 10, TimeUnit.SECONDS);
+        // Schedule ping to previous node, next node, and naming server
+        schedulePing(executor, this.previousNodeAddress, 8083, "previous node");
+        schedulePing(executor, this.nextNodeAddress, 8083, "next node");
+        schedulePing(executor, this.namingServerAddress, 8089, "naming server");
     }
 
-    private boolean pingNode(String address) {
-        try (Socket socket = new Socket(address, 2222); // Replace PORT with the actual port number
+    private void schedulePing(ScheduledExecutorService executor, String address, int port, String nodeName) {
+        executor.scheduleAtFixedRate(() -> {
+            boolean success = pingNode(address, port);
+            if (success) {
+                System.out.println("Success: Connection to " + nodeName + " successful.");
+            } else {
+                System.out.println("Failed to connect to " + nodeName + ".");
+                throw new RuntimeException("Failed to connect to " + nodeName + ".");
+            }
+        }, 0, 2, TimeUnit.SECONDS); // Ping twice every 5 seconds
+    }
+
+    private boolean pingNode(String address, int port) {
+        try (Socket socket = new Socket(address, port);
              PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
              BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
 
-            // Send a ping message
             out.println("PING");
-            // Wait for a response
             String response = in.readLine();
 
-            // Check if the response is as expected
             return "PONG".equals(response);
         } catch (Exception e) {
             System.out.println("Error pinging node at " + address + ": " + e.getMessage());
@@ -67,14 +60,14 @@ public class ConnectivityMonitor {
     }
 
     public void setNextNodeAddress(String address) {
-        this.nextNodeAddress = nextNodeAddress;
+        this.nextNodeAddress = address;
     }
 
     public void setPreviousNodeAddress(String address) {
-        this.previousNodeAddress = nextNodeAddress;
+        this.previousNodeAddress = address;
     }
 
     public void setNamingServerAddress(String address) {
-        this.namingServerAddress = namingServerAddress;
+        this.namingServerAddress = address;
     }
 }

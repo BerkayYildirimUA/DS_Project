@@ -35,6 +35,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.client.RestTemplate;
 
 import java.net.UnknownHostException;
+import java.util.Objects;
 import java.util.Scanner;
 
 import java.io.IOException;
@@ -76,7 +77,7 @@ public class Client {
     MulticastListenerService multicastListener = null;
     UnicastListenerService unicastListener = null;
 
-    ConnectivityMonitor monitor = new ConnectivityMonitor();
+    ConnectivityMonitor monitor = null;
 
     JsonConverter jsonConverter = new JsonConverter();
 
@@ -201,7 +202,9 @@ public class Client {
                 }
                 case LISTENING -> {
                     //System.out.println("Entering Listening");
-                    monitor.startMonitoring(getPrevAddr(nsObject.getNSAddress(), node.getPrevNodeId()), getNextAddr(nsObject.getNSAddress(), node.getNextNodeId()), nsObject.getNSAddress());
+                    //if (!Objects.equals(getPrevAddr(nsObject.getNSAddress(), node.getPrevNodeId()), String.valueOf(node.getAddress())))
+                    ConnectivityMonitor monitor = new ConnectivityMonitor(getPrevAddr(nsObject.getNSAddress(), node.getPrevNodeId()), getNextAddr(nsObject.getNSAddress(), node.getNextNodeId()), nsObject.getNSAddress());
+                    monitor.startMonitoring();
                     if (multicastListener == null){
                         multicastListener = new MulticastListenerService(MULTICAST_ADDRESS, MULTICAST_PORT, LISTENER_BUFFER_SIZE);
                         multicastListener.initialize_multicast();
