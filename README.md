@@ -151,11 +151,7 @@ I'am confused by the given specifications, so this section has to be revised.
 - [x] Create the File Transfer class.
 - [x] Ensure that when transfering a file, the log of that file is automatically included.
 - [x] Create File Controlling class for easy interaction with the files.
-
-
-### Berkay
-
-- [] shutdown
+- [x] Create File based on a condition interface (idea by Berkay).
 
 ### Tom
 
@@ -173,3 +169,7 @@ I'am confused by the given specifications, so this section has to be revised.
 ### Ahmad
 
 - [] Update state File
+
+### Berkay
+
+- [] shutdown
