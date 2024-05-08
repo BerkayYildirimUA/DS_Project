@@ -13,6 +13,7 @@ import nintendods.ds_project.service.DiscoveryService;
 import nintendods.ds_project.service.MulticastListenerService;
 import nintendods.ds_project.service.NSAPIService;
 import nintendods.ds_project.service.UnicastListenerService;
+import nintendods.ds_project.utility.ConnectivityMonitor;
 import nintendods.ds_project.utility.JsonConverter;
 import nintendods.ds_project.utility.Generator;
 import org.hibernate.annotations.Synchronize;
@@ -74,6 +75,8 @@ public class Client {
 
     MulticastListenerService multicastListener = null;
     UnicastListenerService unicastListener = null;
+
+    ConnectivityMonitor monitor = new ConnectivityMonitor();
 
     JsonConverter jsonConverter = new JsonConverter();
 
@@ -198,6 +201,7 @@ public class Client {
                 }
                 case LISTENING -> {
                     //System.out.println("Entering Listening");
+                    monitor.startMonitoring(getPrevAddr(nsObject.getNSAddress(), node.getPrevNodeId()), getNextAddr(nsObject.getNSAddress(), node.getNextNodeId()), nsObject.getNSAddress());
                     if (multicastListener == null){
                         multicastListener = new MulticastListenerService(MULTICAST_ADDRESS, MULTICAST_PORT, LISTENER_BUFFER_SIZE);
                         multicastListener.initialize_multicast();
@@ -325,6 +329,22 @@ public class Client {
         String urlDeleteNode = "http://" + nsObject.getNSAddress() + ":8089/nodes/" + node.getId();
         logger.info("DELETE from: " + urlDeleteNode);
         restTemplate.delete(urlDeleteNode);
+    }
+
+    private String getPrevAddr(String nameAddr, int prevID) {
+        RestTemplate restTemplate = new RestTemplate();
+        String urlGetPrevNodeIP = "http://" + nameAddr + ":8089/node/" + prevID;
+        logger.info("GET from: " + urlGetPrevNodeIP);
+        ResponseEntity<String> getPrevNodeIDResponse = restTemplate.getForEntity(urlGetPrevNodeIP, String.class);
+        return getPrevNodeIDResponse.getBody();
+    }
+
+    private String getNextAddr(String nameAddr, int nextID) {
+        RestTemplate restTemplate = new RestTemplate();
+        String urlGetNextNodeIP = "http://" + nsObject.getNSAddress() + ":8089/node/" + node.getNextNodeId();
+        logger.info("GET from: " + urlGetNextNodeIP);
+        ResponseEntity<String> getNextNodeIDResponse = restTemplate.getForEntity(urlGetNextNodeIP, String.class);
+        return getNextNodeIDResponse.getBody();
     }
 
 
