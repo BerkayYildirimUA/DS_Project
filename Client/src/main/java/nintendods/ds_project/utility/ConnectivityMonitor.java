@@ -1,7 +1,10 @@
 package nintendods.ds_project.utility;
 
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
+import nintendods.ds_project.Client;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
 import java.net.InetAddress;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -12,57 +15,43 @@ public class ConnectivityMonitor {
     private String nextNodeAddress;
     private String namingServerAddress;
 
+    private static final Logger logger = LoggerFactory.getLogger(ConnectivityMonitor.class);
+
     public ConnectivityMonitor(String previousNodeAddress, String nextNodeAddress, String namingServerAddress) {
         this.previousNodeAddress = previousNodeAddress.substring(1);
         this.nextNodeAddress = nextNodeAddress.substring(1);
         this.namingServerAddress = namingServerAddress;
     }
 
-    public void startMonitoring() {
+    public void startMonitoring() throws IOException {
         ScheduledExecutorService executor = Executors.newScheduledThreadPool(3);
 
         // Schedule ping to previous node, next node, and naming server
-        schedulePing(executor, this.previousNodeAddress, 8083, "previous node");
-        schedulePing(executor, this.nextNodeAddress, 8083, "next node");
-        schedulePing(executor, this.namingServerAddress, 8089, "naming server");
+        schedulePing(executor, this.previousNodeAddress, "previous node");
+        schedulePing(executor, this.nextNodeAddress, "next node");
+        schedulePing(executor, this.namingServerAddress, "naming server");
     }
 
-    private void schedulePing(ScheduledExecutorService executor, String address, int port, String nodeName) {
+    private void schedulePing(ScheduledExecutorService executor, String address, String nodeName) {
         executor.scheduleAtFixedRate(() -> {
-            boolean success = pingNode(address, port);
-            if (success) {
-                System.out.println("Success: Connection to " + nodeName + " successful.");
-            } else {
-                System.out.println("Failed to connect to " + nodeName + ".");
-                throw new RuntimeException("Failed to connect to " + nodeName + ".");
+            boolean success = pingNode(address);
+            if (!success) {
+                logger.info("Failed to connect to " + nodeName + ".");
             }
-        }, 0, 20, TimeUnit.SECONDS); // Ping twice every 5 seconds
+        }, 0, 10, TimeUnit.SECONDS);  // Ping once every 10 seconds
     }
 
-    private boolean pingNode(String address, int port) {
+    private boolean pingNode(String address) {
         try {
-            DatagramSocket socket = new DatagramSocket();
-            socket.setSoTimeout(10000); // 5 seconds timeout
             InetAddress inetAddress = InetAddress.getByName(address);
-
-            String message = "PING";
-            byte[] buf = message.getBytes();
-            DatagramPacket packet = new DatagramPacket(buf, buf.length, inetAddress, port);
-
-            // Send the ping
-            socket.send(packet);
-
-            // Prepare to receive the pong
-            byte[] buf2 = new byte[256];
-            DatagramPacket packet2 = new DatagramPacket(buf2, buf2.length);
-            socket.receive(packet2);
-            String received = new String(packet2.getData(), 0, packet2.getLength());
-
-            socket.close();
-            return "PONG".equals(received.trim());
+            // Attempt to ping the address with a timeout of 5000 milliseconds
+            return inetAddress.isReachable(5000);
         } catch (Exception e) {
-            System.out.println("Error pinging node at " + address + ": " + e.getMessage());
             return false;
         }
+    }
+
+    public void stop() {
+        // Include any cleanup or shutdown procedures if necessary
     }
 }

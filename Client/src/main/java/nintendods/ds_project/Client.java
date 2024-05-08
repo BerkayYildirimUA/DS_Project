@@ -204,7 +204,11 @@ public class Client {
                     //System.out.println("Entering Listening");
                     //if (!Objects.equals(getPrevAddr(nsObject.getNSAddress(), node.getPrevNodeId()), String.valueOf(node.getAddress())))
                     ConnectivityMonitor monitor = new ConnectivityMonitor(getPrevAddr(nsObject.getNSAddress(), node.getPrevNodeId()), getNextAddr(nsObject.getNSAddress(), node.getNextNodeId()), nsObject.getNSAddress());
-                    monitor.startMonitoring();
+                    try {
+                        monitor.startMonitoring();
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
                     if (multicastListener == null){
                         multicastListener = new MulticastListenerService(MULTICAST_ADDRESS, MULTICAST_PORT, LISTENER_BUFFER_SIZE);
                         multicastListener.initialize_multicast();
@@ -337,7 +341,7 @@ public class Client {
     private String getPrevAddr(String nameAddr, int prevID) {
         RestTemplate restTemplate = new RestTemplate();
         String urlGetPrevNodeIP = "http://" + nameAddr + ":8089/node/" + prevID;
-        logger.info("GET from: " + urlGetPrevNodeIP);
+        //logger.info("GET from: " + urlGetPrevNodeIP);
         ResponseEntity<String> getPrevNodeIDResponse = restTemplate.getForEntity(urlGetPrevNodeIP, String.class);
         return getPrevNodeIDResponse.getBody();
     }
@@ -345,7 +349,7 @@ public class Client {
     private String getNextAddr(String nameAddr, int nextID) {
         RestTemplate restTemplate = new RestTemplate();
         String urlGetNextNodeIP = "http://" + nsObject.getNSAddress() + ":8089/node/" + node.getNextNodeId();
-        logger.info("GET from: " + urlGetNextNodeIP);
+        //logger.info("GET from: " + urlGetNextNodeIP);
         ResponseEntity<String> getNextNodeIDResponse = restTemplate.getForEntity(urlGetNextNodeIP, String.class);
         return getNextNodeIDResponse.getBody();
     }
