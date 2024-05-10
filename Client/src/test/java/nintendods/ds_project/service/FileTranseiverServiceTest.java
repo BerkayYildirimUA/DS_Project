@@ -1,7 +1,10 @@
 package nintendods.ds_project.service;
 
+import nintendods.ds_project.exeption.DuplicateFileException;
 import nintendods.ds_project.model.ANetworkNode;
 import nintendods.ds_project.model.file.AFile;
+import nintendods.ds_project.model.file.IFileConditionChecker;
+
 import org.junit.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -50,6 +53,9 @@ public class FileTranseiverServiceTest {
             // the receive
             // thread from the aleady created FileTranseiverService object.
 
+            //Delete so we can simulate a new node.
+            testFile.delete();
+
             ANetworkNode nodeRec = new ANetworkNode(InetAddress.getLocalHost(), 21, "Robbe receive");
 
             boolean ok = false;
@@ -57,7 +63,7 @@ public class FileTranseiverServiceTest {
 
             // Wait for an incomming message.
             while (!ok) {
-                newFileObject = ftss.saveIncommingFile(nodeRec);
+                newFileObject = ftss.saveIncomingFile(nodeRec);
                 if (newFileObject != null) {
                     ok = true;
                 }
@@ -68,7 +74,7 @@ public class FileTranseiverServiceTest {
             // Delete the used files in the test
             testFile.delete();
             new File(newFileObject.getAbsolutePath()).delete();
-        } catch (IOException e) {
+        } catch (IOException | DuplicateFileException e) {
             e.printStackTrace();
             assertTrue(false);
         }
@@ -109,13 +115,16 @@ public class FileTranseiverServiceTest {
             // thread from the aleady created FileTranseiverService object.
             // FileTranseiverService ftssRes = new FileTranseiverService();
 
+            //Delete so we can simulate a new node.
+            testFile.delete();
+
             ANetworkNode nodeRec = new ANetworkNode(InetAddress.getLocalHost(), 21, "Robbe receive");
 
             boolean ok = false;
             AFile newFileObject = null;
 
             while (!ok) {
-                newFileObject = ftss.saveIncommingFile(nodeRec);
+                newFileObject = ftss.saveIncomingFile(nodeRec);
                 if (newFileObject != null) {
                     ok = true;
                 }
@@ -124,9 +133,8 @@ public class FileTranseiverServiceTest {
             assertTrue(new File(newFileObject.getAbsolutePath()).exists());
 
             System.out.println(newFileObject.getFormattedLogs());
-            testFile.delete();
             new File(newFileObject.getAbsolutePath()).delete();
-        } catch (IOException e) {
+        } catch (IOException | DuplicateFileException e) {
             assertTrue(false);
         }
     }
@@ -150,6 +158,10 @@ public class FileTranseiverServiceTest {
             // Send the file to itself. Can be any node received from the namingserver.
             ftss.sendFile(fileObj, nodeSend.getAddress().getHostAddress());
 
+            //Delete so we can simulate a new node.
+            testFile.delete();
+
+            //create new node
             ANetworkNode nodeRec = new ANetworkNode(InetAddress.getLocalHost(), 21, "Robbe receive");
 
             boolean ok = false;
@@ -161,8 +173,7 @@ public class FileTranseiverServiceTest {
 
             // Wait for an incomming message.
             while (!ok) {
-                // newFileObject = ftss.saveIncommingFile(nodeRec, "/home/robbe/Documents");
-                newFileObject = ftss.saveIncommingFile(nodeRec, newPath);
+                newFileObject = ftss.saveIncomingFile(nodeRec, newPath);
                 if (newFileObject != null) {
                     ok = true;
                 }
@@ -175,11 +186,175 @@ public class FileTranseiverServiceTest {
             System.out.println(newFileObject.getFormattedLogs());
 
             // Delete the used files in the test and the directory
-            testFile.delete();
             new File(newFileObject.getAbsolutePath()).delete();
             new File(newPath).delete();
-        } catch (IOException e) {
+        } catch (IOException | DuplicateFileException e) {
             assertTrue(false);
         }
     }
+
+
+    @Test
+    public void testFileTransferWithConditionSave() {
+        try {
+            // A file on the system is created
+            File testFile = new File("TestFile2.txt");
+            if (testFile.createNewFile()) {
+                FileWriter fw = new FileWriter(testFile);
+                fw.append("This is a text in the file!");
+                fw.close();
+            }
+
+            ANetworkNode nodeSend = new ANetworkNode(InetAddress.getLocalHost(), 21, "Robbe");
+            AFile fileObj = new AFile(testFile.getAbsolutePath(), testFile.getName(), nodeSend);
+
+            FileTransceiverService ftss = new FileTransceiverService(12347, 20);
+
+            // Send the file to itself. Can be any node received from the namingserver.
+            ftss.sendFile(fileObj, nodeSend.getAddress().getHostAddress());
+
+            //Delete so we can simulate a new node.
+            testFile.delete();
+
+            ANetworkNode nodeRec = new ANetworkNode(InetAddress.getLocalHost(), 21, "Robbe receive");
+
+            boolean ok = false;
+            AFile newFileObject = null;
+
+            // Wait for an incomming message.
+            while (!ok) {
+                newFileObject = ftss.saveFileWithConditions(nodeRec, new TestCondition(), true);
+                if (newFileObject != null) {
+                    ok = true;
+                }
+            }
+
+            // Check if file exists on the system
+            assertTrue(new File(newFileObject.getAbsolutePath()).exists());
+
+            // show logs of file
+            System.out.println(newFileObject.getFormattedLogs());
+
+            // Delete the used files in the test and the directory
+            
+            new File(newFileObject.getAbsolutePath()).delete();
+            new File(newFileObject.getAbsolutePath()).delete();
+            //new File(newPath).delete();
+        } catch (IOException | DuplicateFileException e) {
+            assertTrue(false);
+        }
+    }
+
+    @Test
+    public void testFileTransferWithConditionSaveCustomFolder() {
+        try {
+            // A file on the system is created
+            File testFile = new File("TestFile2.txt");
+            if (testFile.createNewFile()) {
+                FileWriter fw = new FileWriter(testFile);
+                fw.append("This is a text in the file!");
+                fw.close();
+            }
+
+            ANetworkNode nodeSend = new ANetworkNode(InetAddress.getLocalHost(), 21, "Robbe");
+            AFile fileObj = new AFile(testFile.getAbsolutePath(), testFile.getName(), nodeSend);
+
+            FileTransceiverService ftss = new FileTransceiverService(12347, 20);
+
+            // Send the file to itself. Can be any node received from the namingserver.
+            ftss.sendFile(fileObj, nodeSend.getAddress().getHostAddress());
+
+            //Delete so we can simulate a new node.
+            testFile.delete();
+
+            ANetworkNode nodeRec = new ANetworkNode(InetAddress.getLocalHost(), 21, "Robbe receive");
+
+            boolean ok = false;
+            AFile newFileObject = null;
+
+            // Create custom folder in the same project directory
+
+            String newPath = System.getProperty("user.dir") +  "/newDir";
+
+            // Wait for an incomming message.
+            while (!ok) {
+                newFileObject = ftss.saveFileWithConditions(nodeRec, newPath, new TestCondition(), true);
+                if (newFileObject != null) {
+                    ok = true;
+                }
+            }
+
+            // Check if file exists on the system
+            assertTrue(new File(newFileObject.getAbsolutePath()).exists());
+
+            // show logs of file
+            System.out.println(newFileObject.getFormattedLogs());
+
+            // Delete the used files in the test and the directory
+            
+            new File(newFileObject.getAbsolutePath()).delete();
+            new File(newPath).delete();
+        } catch (IOException | DuplicateFileException e) {
+            assertTrue(false);
+        }
+    }
+
+    @Test
+    public void testFileTransferThrowDuplicateFile() {
+        File testFile = null;
+        try {
+            // A file on the system is created
+            testFile = new File("TestFile2.txt");
+            if (testFile.createNewFile()) {
+                FileWriter fw = new FileWriter(testFile);
+                fw.append("This is a text in the file!");
+                fw.close();
+            }
+
+            ANetworkNode nodeSend = new ANetworkNode(InetAddress.getLocalHost(), 21, "Robbe");
+            AFile fileObj = new AFile(testFile.getAbsolutePath(), testFile.getName(), nodeSend);
+
+            FileTransceiverService ftss = new FileTransceiverService(12347, 20);
+
+            // Send the file to itself. Can be any node received from the namingserver.
+            ftss.sendFile(fileObj, nodeSend.getAddress().getHostAddress());
+
+            ANetworkNode nodeRec = new ANetworkNode(InetAddress.getLocalHost(), 21, "Robbe receive");
+
+            boolean ok = false;
+            AFile newFileObject = null;
+
+            // Wait for an incomming message.
+            while (!ok) {
+                newFileObject = ftss.saveIncomingFile(nodeRec);
+                if (newFileObject != null) {
+                    ok = true;
+                }
+            }
+
+        } catch (IOException | DuplicateFileException e) {
+
+            //We should enter the exception
+            if (e instanceof DuplicateFileException){
+                assertTrue(true);
+                //Delete so we can simulate a new node.
+                if(testFile != null)
+                    testFile.delete();
+            }
+            else
+                assertTrue(false);
+        }
+    }
+}
+
+// used in the test as save file condition
+final class TestCondition implements IFileConditionChecker{
+    @Override
+    public boolean getFileCondition(AFile file) {
+        if (file.getName().equals("TestFile2.txt")){
+            return true;
+        }
+        return false;
+    }
+
 }
