@@ -1,5 +1,6 @@
 package nintendods.ds_project.controller;
 import nintendods.ds_project.database.FileDB;
+import nintendods.ds_project.model.file.AFile;
 import nintendods.ds_project.service.FileDBService;
 import nintendods.ds_project.utility.JsonConverter;
 import org.slf4j.Logger;
@@ -8,14 +9,16 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Optional;
+
 /**
  * REST controller for managing file metadata in a distributed system.
  * Provides endpoints for adding, retrieving, and deleting file information.
  */
 @RestController
 @RequestMapping("/api/files")
-public class ClientAPI {
-    private static final Logger logger = LoggerFactory.getLogger(ClientAPI.class);
+public class ClientFileAPI {
+    private static final Logger logger = LoggerFactory.getLogger(ClientFileAPI.class);
     private final JsonConverter jsonConverter = new JsonConverter();
     private final FileDB fileDB = FileDBService.getFileDB();
 
@@ -23,10 +26,10 @@ public class ClientAPI {
     public ResponseEntity<String> getFileLocation(@PathVariable("fileName") String fileName) {
         logger.debug("Request to retrieve location for file: {}", fileName);
         try {
-            String fileLocation = fileDB.getFileLocation(fileName);
-            if (fileLocation != null) {
+            Optional<AFile> file = fileDB.getFile(fileName);
+            if (file.isPresent()) {
                 logger.info("File location retrieved successfully for file: {}", fileName);
-                return ResponseEntity.ok(jsonConverter.toJson(fileLocation));
+                return ResponseEntity.ok(jsonConverter.toJson(file.get().getAbsolutePath()));
             } else {
                 logger.warn("File location not found for file: {}", fileName);
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(jsonConverter.toJson("File not found."));
@@ -38,11 +41,11 @@ public class ClientAPI {
     }
 
     @PostMapping("/")
-    public ResponseEntity<String> addFile(@RequestParam("fileName") String fileName, @RequestParam("nodeIP") String nodeIP) {
-        logger.debug("Attempting to add/update file: {} at {}", fileName, nodeIP);
+    public ResponseEntity<String> addFile(@RequestBody AFile file) {
+        logger.debug("Attempting to add/update file: {}", file);
         try {
-            fileDB.addOrUpdateFile(fileName, nodeIP);
-            logger.info("File added/updated successfully: {}", fileName);
+            fileDB.addOrUpdateFile(file);
+            logger.info("File added/updated successfully: {}", file);
             return ResponseEntity.status(HttpStatus.CREATED).body(jsonConverter.toJson("File added/updated successfully."));
         } catch (IllegalArgumentException e) {
             logger.error("Error adding/updating file: {}", e.getMessage());
