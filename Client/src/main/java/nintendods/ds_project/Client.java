@@ -212,8 +212,8 @@ public class Client {
                     }
 
                     // Listen for file transfers
-                    fileTransceiver.saveIncommingFile(node, path + "/replicated");
-                    System.out.println("LISTENING:\t get files");
+                    AFile file = fileTransceiver.saveIncommingFile(node, path + "/replicated");
+                    System.out.println("LISTENING:\t get files\n" + file);
 
                     // Update if needed
                     try {
