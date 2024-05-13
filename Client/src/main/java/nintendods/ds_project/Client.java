@@ -15,6 +15,7 @@ import nintendods.ds_project.service.NSAPIService;
 import nintendods.ds_project.service.UnicastListenerService;
 import nintendods.ds_project.utility.JsonConverter;
 import nintendods.ds_project.utility.Generator;
+import nintendods.ds_project.utility.NameServerAPI;
 import org.hibernate.annotations.Synchronize;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -185,7 +186,7 @@ public class Client {
                     // //Discovery has succeeded so continue
                     // //get NSObject from discovery service
                     nsObject = ds.getNSObject(); //For later use
-
+                    NameServerAPI.setNsObject(nsObject);
                     // Configure the api object
                     API.setIp(nsObject.getNSAddress());
                     API.setPort(nsObject.getNSPort());
