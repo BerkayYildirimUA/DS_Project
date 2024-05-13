@@ -38,6 +38,7 @@ import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Spring Boot application for managing a distributed system node's lifecycle excluding database auto-configuration.
@@ -224,8 +225,14 @@ public class Client {
                         nodeState = eNodeState.ERROR; // Move to Error state on exception
                     }
                     if (    (node.getPrevNodeId() != -1 && node.getNextNodeId() != -1) &&
-                            (node.getPrevNodeId() != node.getId() && node.getNextNodeId() != node.getId()))
+                            (node.getPrevNodeId() != node.getId() && node.getNextNodeId() != node.getId())){
+                        try {
+                            TimeUnit.SECONDS.sleep(3);
+                        } catch (InterruptedException e) {
+                            throw new RuntimeException(e);
+                        }
                         nodeState = eNodeState.TRANSFER;
+                    }
                     /*
                     if (node.getId() < node.getPrevNodeId())    {  // ---> gaat altijd een error geven vanaf je netwerk meer dan 2 nodes heeft
                         System.out.println("LISTENING:\t Client sleep");
