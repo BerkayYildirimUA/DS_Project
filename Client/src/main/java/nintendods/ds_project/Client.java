@@ -5,6 +5,7 @@ import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import nintendods.ds_project.config.ClientNodeConfig;
 import nintendods.ds_project.database.FileDB;
+import nintendods.ds_project.exeption.DuplicateFileException;
 import nintendods.ds_project.exeption.DuplicateNodeException;
 import nintendods.ds_project.exeption.NotEnoughMessageException;
 import nintendods.ds_project.model.ClientNode;
@@ -213,8 +214,13 @@ public class Client {
                     }
 
                     // Listen for file transfers
-                    AFile file = fileTransceiver.saveIncommingFile(node, path + "/replicated");
-                    System.out.println("LISTENING:\t get files\n" + file);
+                    try {
+                        AFile file = null;
+                        file = fileTransceiver.saveIncomingFile(node, path + "/replicated");
+                        System.out.println("LISTENING:\t get files\n" + file);
+                    } catch (DuplicateFileException e) {
+                        throw new RuntimeException(e);
+                    }
 
                     // Update if needed
                     try {

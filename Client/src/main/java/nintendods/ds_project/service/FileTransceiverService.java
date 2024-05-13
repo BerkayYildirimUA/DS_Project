@@ -5,7 +5,6 @@ import nintendods.ds_project.exeption.DuplicateFileException;
 import nintendods.ds_project.model.ANode;
 import nintendods.ds_project.model.file.AFile;
 import nintendods.ds_project.model.file.IFileConditionChecker;
-import nintendods.ds_project.model.file.log.eLog;
 import nintendods.ds_project.model.message.FileMessage;
 import nintendods.ds_project.utility.FileModifier;
 
