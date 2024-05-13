@@ -20,9 +20,7 @@ public class FileDB {
     private static final Logger logger = LoggerFactory.getLogger(FileDB.class);
     private final List<AFile> fileDB = new ArrayList<>();
 
-    public FileDB() {
-
-    }
+    public FileDB() { }
 
     /**
      * Adds or updates a file in the database. If the file already exists, its node IP will be updated.

@@ -222,8 +222,8 @@ public class Client {
                         e.printStackTrace();
                         nodeState = eNodeState.ERROR; // Move to Error state on exception
                     }
+                    nodeState = eNodeState.TRANSFER;
                     /*
-
                     if (node.getId() < node.getPrevNodeId())    {  // ---> gaat altijd een error geven vanaf je netwerk meer dan 2 nodes heeft
                         System.out.println("LISTENING:\t Client sleep");
                         try {
@@ -232,7 +232,8 @@ public class Client {
                             throw new RuntimeException(e);
                         }
                         nodeState = eNodeState.ERROR;
-                    } else nodeState = eNodeState.TRANSFER; */
+                    } else nodeState = eNodeState.TRANSFER;
+                    */
                 }
                 case TRANSFER -> {
                     // TODO: Transfer data or handle other operations
