@@ -1,6 +1,5 @@
 package nintendods.ds_project.utility;
 
-import nintendods.ds_project.Client;
 import nintendods.ds_project.model.ClientNode;
 import nintendods.ds_project.model.message.UNAMObject;
 import org.slf4j.Logger;
@@ -8,23 +7,32 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.*;
 import org.springframework.web.client.RestTemplate;
 
-public class NameServerAPI {
+import java.util.Objects;
 
-    private static final Logger logger = LoggerFactory.getLogger(NameServerAPI.class);
-    private static final RestTemplate restTemplate = new RestTemplate();
-    private static UNAMObject nsObject;
-    private static String nameSeverAdress;
+public class UtilNameServerAPI {
+
+    protected static final Logger logger = LoggerFactory.getLogger(UtilNameServerAPI.class);
+    protected static final RestTemplate restTemplate = new RestTemplate();
+    protected static UNAMObject nsObject;
+    protected static String nameSeverAdress;
 
     public static UNAMObject getNsObject() {
         return nsObject;
     }
 
+    public static String removeLeadingSlash(String input) {
+        if (input.startsWith("/")) {
+            return input.substring(1);
+        }
+        return input;
+    }
+
     public static void setNsObject(UNAMObject nsObject) {
-        NameServerAPI.nsObject = nsObject;
+        UtilNameServerAPI.nsObject = nsObject;
         nameSeverAdress = "http://" + nsObject.getNSAddress() + ":8089/";
     }
 
-    private static void checkNsObjectIsNotNull(){
+    protected static void checkNsObjectIsNotNull(){
         if (nsObject == null){
             logger.warn("Name Server Object not found");
         }
@@ -45,7 +53,7 @@ public class NameServerAPI {
         String URL_NodeIPfromID = nameSeverAdress + "/node/" + id;
         logger.info("GET from: " + URL_NodeIPfromID);
         ResponseEntity<String> Response_NodeIPfromID = restTemplate.getForEntity(URL_NodeIPfromID, String.class);
-        return Response_NodeIPfromID.getBody();
+        return  removeLeadingSlash(Objects.requireNonNull(Response_NodeIPfromID.getBody()));
     }
 
     static String POST_Node(ClientNode newNode){
