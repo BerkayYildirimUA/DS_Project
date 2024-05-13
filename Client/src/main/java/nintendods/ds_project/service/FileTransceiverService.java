@@ -1,6 +1,7 @@
 package nintendods.ds_project.service;
 
 import nintendods.ds_project.config.ClientNodeConfig;
+import nintendods.ds_project.exeption.DuplicateFileException;
 import nintendods.ds_project.model.ANode;
 import nintendods.ds_project.model.file.AFile;
 import nintendods.ds_project.model.file.IFileConditionChecker;
@@ -35,7 +36,7 @@ public class FileTransceiverService {
     /**
      * Create a File tranceiver object that will automatically create a thread where
      * it wil listen for file receives.
-     * 
+     *
      * @param port   the receiving port to listen on
      * @param buffer the amount of files that can be buffered
      */
@@ -61,7 +62,7 @@ public class FileTransceiverService {
     /**
      * Sends a file with its file object to a given address. The port is the default
      * one eg. 12346
-     * 
+     *
      * @param fileObject      the object that contains the file information. Will be
      *                        used to retrieve the file itself.
      * @param receiverAddress the address of the receiver
@@ -90,8 +91,8 @@ public class FileTransceiverService {
             objectOutputStream.writeObject(message);
             socket.close();
 
-            //File is replicated towards another node
-            //fileObject.setReplicated(true);
+            // File is replicated towards another node
+            // fileObject.setReplicated(true);
         } catch (Exception ex) {
             return false;
         }
@@ -102,7 +103,7 @@ public class FileTransceiverService {
     /**
      * A receiving method that will loop to infinity and listens onto the given
      * port.
-     * 
+     *
      * @param port
      */
     private void receiveFile(int port) {
@@ -133,58 +134,68 @@ public class FileTransceiverService {
         }
     }
 
-     /**
+    /**
      * Save a file based on a condition that is present in the incoming buffer.
-     * 
-     * @param node the issuer who saves the file.
+     *
+     * @param node    the issuer who saves the file.
      * @param checker an interface to check if a file can be saved or not.
+     * @param delete  Delete the file if the condition is false or not.
      * @return null if the check has failed.
      */
-    public AFile saveFileWithConditions(ANode node, IFileConditionChecker checker) {
+    public AFile saveFileWithConditions(ANode node, IFileConditionChecker checker, boolean delete) throws DuplicateFileException {
 
-        if(checker.getFileCondition(this.peekFileMessage().getFileObject()))
-            return saveIncommingFile(node, "");
-
-        return null;
+        return saveFileWithConditions(node, "", checker, delete);
     }
 
-     /**
-     * Save a file based on a condition that is present in the incoming buffer. If a file is present, we
+    /**
+     * Save a file based on a condition that is present in the incoming buffer. If a
+     * file is present, we
      * save it in the given directory.
-     * 
-     * @param node the issuer who saves the file
+     *
+     * @param node          the issuer who saves the file
      * @param directoryPath The new directory path to save the file in.
-     * @param checker an interface to check if a file can be saved or not.
+     * @param checker       an interface to check if a file can be saved or not.
+     * @param delete        Delete the file if the condition is false or not.
      * @return null if the check has failed.
      */
-    public AFile saveFileWithConditions(ANode node, String directoryPath, IFileConditionChecker checker) {
+    public AFile saveFileWithConditions(ANode node, String directoryPath, IFileConditionChecker checker,  boolean delete) throws DuplicateFileException {
 
-        if(checker.getFileCondition(this.peekFileMessage().getFileObject()))
-            return saveIncommingFile(node, directoryPath);
+        FileMessage fm = this.peekFileMessage();
+
+        if(fm == null)
+        {
+            return null;
+        }
+
+        if (checker.getFileCondition(fm.getFileObject()))
+            return saveIncomingFile(node, directoryPath);
+
+        if (delete) {
+            this.getFileMessage();
+        }
 
         return null;
     }
 
     /**
      * Save a file that is present in the incoming buffer.
-     * 
+     *
      * @param node the issuer who saves the file
      * @return null if nothing has arrived and an object if something has arrived.
      */
-    public AFile saveIncommingFile(ANode node) {
-        return saveIncommingFile(node, "");
+    public AFile saveIncomingFile(ANode node) throws DuplicateFileException {
+        return saveIncomingFile(node, "");
     }
 
     /**
      * Save a file that is present in the incoming buffer. If a file is present, we
      * save it in the given directory.
-     * 
+     *
      * @param node          the issuer who saves the file
      * @param directoryPath The new directory path to save the file in
      * @return null if nothing has arrived and an object if something has arrived.
      */
-    public AFile saveIncommingFile(ANode node, String directoryPath) {
-        System.out.println("FileTransceiverService:\t path\n" + directoryPath);
+    public AFile saveIncomingFile(ANode node, String directoryPath) throws DuplicateFileException{
         if (available() && node != null) {
             FileMessage m = getFileMessage();
 
@@ -195,6 +206,10 @@ public class FileTransceiverService {
                 fileObject.setOwner(node);
 
                 File f = FileModifier.createFile(directoryPath, m.getFileObject().getName(), false);
+
+                if (f == null){
+                    throw new DuplicateFileException();
+                }
 
                 // set file path and name
                 fileObject.setPath(f.getAbsolutePath());
@@ -215,6 +230,10 @@ public class FileTransceiverService {
     }
 
     private FileMessage peekFileMessage() {
-        return receiveQueue.peek();
+        try {
+            return receiveQueue.peek();
+        } catch (Exception ex) {
+            return null;
+        }
     }
 }
