@@ -32,6 +32,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.File;
+import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.List;
 
@@ -127,7 +128,12 @@ public class Client {
 
     @EventListener(ApplicationReadyEvent.class)
     public void start() {
-        new Thread(this::runNodeLifecycle).start();
+        try {
+            new Thread(this::runNodeLifecycle).start();
+        }
+        catch (Exception ex){
+            //TODO handle exception
+        }
     }
 
     private void runNodeLifecycle() {
@@ -214,13 +220,13 @@ public class Client {
                     }
 
                     // Listen for file transfers
-                    try {
-                        AFile file = null;
-                        file = fileTransceiver.saveIncomingFile(node, path + "/replicated");
-                        System.out.println("LISTENING:\t get files\n" + file);
-                    } catch (DuplicateFileException e) {
-                        throw new RuntimeException(e);
-                    }
+//                    try {
+//                        AFile file = null;
+//                        file = fileTransceiver.saveIncomingFile(node, path + "/replicated");
+//                        System.out.println("LISTENING:\t get files\n" + file);
+//                    } catch (DuplicateFileException e) {
+//                        throw new RuntimeException(e);
+//                    }
 
                     // Update if needed
                     try {
@@ -269,25 +275,25 @@ public class Client {
                     ResponseEntity<String> response;
 
                     for (AFile file: fileDB.getFiles()) {
-                        // Get ip if the right node
-                        url = "http://" + nsObject.getNSAddress() + ":8089/files/" + file.getName();
-                        // logger.info("GET from: " + url);
-                        System.out.println("GET from: " + url);
-                        response = restTemplate.getForEntity(url, String.class);
-                        transferIp = response.getBody();
+                       // Get ip if the right node
+                       url = "http://" + nsObject.getNSAddress() + ":8089/files/" + file.getName();
+                       // logger.info("GET from: " + url);
+                       System.out.println("GET from: " + url);
+                       response = restTemplate.getForEntity(url, String.class);
+                       transferIp = response.getBody();
 
-                        System.out.println("TRANSFER:\t received=" + transferIp + "\n\t\t own=" + node.getAddress().getHostAddress());
-                        if (("/"+node.getAddress().getHostAddress()).equals(transferIp)) {
-                            // Node to send is self --> send to previous node
-                            url = "http://" + nsObject.getNSAddress() + ":8089/node/" + node.getPrevNodeId();
-                            // logger.info("GET from: " + url);
-                            System.out.println("GET from: " + url);
-                            response = restTemplate.getForEntity(url, String.class);
-                            transferIp = response.getBody();
-                        }
+                       System.out.println("TRANSFER:\t received=" + transferIp + "\n\t\t own=" + node.getAddress().getHostAddress());
+                       if (("/"+node.getAddress().getHostAddress()).equals(transferIp)) {
+                           // Node to send is self --> send to previous node
+                           url = "http://" + nsObject.getNSAddress() + ":8089/node/" + node.getPrevNodeId();
+                           // logger.info("GET from: " + url);
+                           System.out.println("GET from: " + url);
+                           response = restTemplate.getForEntity(url, String.class);
+                           transferIp = response.getBody();
+                       }
 
-                        // Send file to that node
-                        fileTransceiver.sendFile(file, transferIp);
+                       // Send file to that node
+                       fileTransceiver.sendFile(file, transferIp);
                     }
 
                     System.out.println("TRANSFER:\t files added \n" + fileDB.getFiles());

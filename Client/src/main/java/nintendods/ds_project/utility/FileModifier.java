@@ -1,13 +1,14 @@
 package nintendods.ds_project.utility;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 
 public class FileModifier {
 
     private static final int maxIterations = 500000;
 
-    public static File createFile(String directory, String fileName, boolean createNewNameIfNeeded) {
+    public static File createFile(String directory, String fileName,byte[] fileBytes, boolean createNewNameIfNeeded) {
         try {
             File file;
 
@@ -22,10 +23,21 @@ public class FileModifier {
                         file = new File(file.getParent(), Generator.renameText(file.getName(), 5));
                         countIterations++;
                     } while (!file.createNewFile() || countIterations >= maxIterations);
+
+                    //Write bytes to it
+                    FileOutputStream fos = new FileOutputStream(file);
+                    fos.write(fileBytes);
+
                 } else {
                     return null;
                 }
             }
+            else{
+                //Write bytes to it
+                FileOutputStream fos = new FileOutputStream(file);
+                fos.write(fileBytes);
+            }
+
             return file;
 
         } catch (IOException ex) {
@@ -33,8 +45,8 @@ public class FileModifier {
         }
     }
 
-    public static File createFile(String fileName, boolean createNewName) {
-        return FileModifier.createFile("", fileName, createNewName);
+    public static File createFile(String fileName,byte[] fileBytes, boolean createNewName) {
+        return FileModifier.createFile("", fileName, fileBytes, createNewName);
     }
 
     public static String createDirectory(String dirName){
