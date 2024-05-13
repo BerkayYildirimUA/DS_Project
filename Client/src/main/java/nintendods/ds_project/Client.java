@@ -213,6 +213,7 @@ public class Client {
 
                     // Listen for file transfers
                     fileTransceiver.saveIncommingFile(node, path + "/replicated");
+                    System.out.println("LISTENING:\t get files");
 
                     // Update if needed
                     try {
@@ -222,7 +223,9 @@ public class Client {
                         e.printStackTrace();
                         nodeState = eNodeState.ERROR; // Move to Error state on exception
                     }
-                    nodeState = eNodeState.TRANSFER;
+                    if (    (node.getPrevNodeId() != -1 && node.getNextNodeId() != -1) ||
+                            (node.getPrevNodeId() != node.getId() && node.getNextNodeId() != node.getId()))
+                        nodeState = eNodeState.TRANSFER;
                     /*
                     if (node.getId() < node.getPrevNodeId())    {  // ---> gaat altijd een error geven vanaf je netwerk meer dan 2 nodes heeft
                         System.out.println("LISTENING:\t Client sleep");
@@ -242,7 +245,8 @@ public class Client {
 
                     // Add files to DB
                     for (File file: files) fileDB.addOrUpdateFile(file, node);
-                    logger.info("TRANSFER: DB " + fileDB.getFiles());
+                    logger.info("TRANSFER:\t DB " + fileDB.getFiles());
+                    System.out.println("TRANSFER:\t files read \n" + fileDB.getFiles());
 
                     // Transfer files
                     String transferIp;
@@ -271,6 +275,7 @@ public class Client {
                         fileTransceiver.sendFile(file, transferIp);
                     }
 
+                    System.out.println("TRANSFER:\t files added \n" + fileDB.getFiles());
                     nodeState = eNodeState.LISTENING; // Loop back to Listening for simplicity
                 }
                 case SHUTDOWN -> {
