@@ -271,7 +271,7 @@ public class Client {
                         transferIp = response.getBody();
 
                         System.out.println("TRANSFER:\t received=" + transferIp + "\n\t\t own=" + node.getAddress().getHostAddress());
-                        if (Objects.equals(transferIp, node.getAddress().getHostAddress())) {
+                        if (("/"+node.getAddress().getHostAddress()).equals(transferIp)) {
                             // Node to send is self --> send to previous node
                             url = "http://" + nsObject.getNSAddress() + ":8089/node/" + node.getPrevNodeId();
                             // logger.info("GET from: " + url);
