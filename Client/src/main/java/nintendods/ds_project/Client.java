@@ -3,8 +3,6 @@ package nintendods.ds_project;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import nintendods.ds_project.config.ClientNodeConfig;
-import nintendods.ds_project.controller.ClientAPI;
-import nintendods.ds_project.controller.ClientManagementAPI;
 import nintendods.ds_project.exeption.DuplicateNodeException;
 import nintendods.ds_project.exeption.NotEnoughMessageException;
 import nintendods.ds_project.model.ClientNode;
@@ -15,7 +13,7 @@ import nintendods.ds_project.service.NSAPIService;
 import nintendods.ds_project.service.UnicastListenerService;
 import nintendods.ds_project.utility.JsonConverter;
 import nintendods.ds_project.utility.Generator;
-import org.hibernate.annotations.Synchronize;
+import nintendods.ds_project.utility.ApiUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,22 +23,15 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.client.RestTemplate;
 
 import java.net.UnknownHostException;
-import java.util.Scanner;
 
 import java.io.IOException;
-import java.net.InetAddress;
 import java.sql.Timestamp;
 import java.time.Instant;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Spring Boot application for managing a distributed system node's lifecycle excluding database auto-configuration.
@@ -185,7 +176,7 @@ public class Client {
                     // //Discovery has succeeded so continue
                     // //get NSObject from discovery service
                     nsObject = ds.getNSObject(); //For later use
-
+                    ApiUtil.setNsObject(nsObject);
                     // Configure the api object
                     API.setIp(nsObject.getNSAddress());
                     API.setPort(nsObject.getNSPort());
