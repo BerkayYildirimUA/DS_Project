@@ -13,7 +13,7 @@ import nintendods.ds_project.service.NSAPIService;
 import nintendods.ds_project.service.UnicastListenerService;
 import nintendods.ds_project.utility.JsonConverter;
 import nintendods.ds_project.utility.Generator;
-import nintendods.ds_project.utility.UtilNameServerAPI;
+import nintendods.ds_project.utility.ApiUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -176,7 +176,7 @@ public class Client {
                     // //Discovery has succeeded so continue
                     // //get NSObject from discovery service
                     nsObject = ds.getNSObject(); //For later use
-                    UtilNameServerAPI.setNsObject(nsObject);
+                    ApiUtil.setNsObject(nsObject);
                     // Configure the api object
                     API.setIp(nsObject.getNSAddress());
                     API.setPort(nsObject.getNSPort());
