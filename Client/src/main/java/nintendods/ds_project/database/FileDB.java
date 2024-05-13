@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -18,7 +19,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Repository
 public class FileDB {
     private static final Logger logger = LoggerFactory.getLogger(FileDB.class);
-    private final List<AFile> fileDB = new ArrayList<>();
+    private final List<AFile> fileDB = Collections.synchronizedList(new ArrayList<>()); //Berkay: synchronizedList to keep things thread safe
 
     public FileDB() { }
 
