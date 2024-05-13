@@ -242,6 +242,7 @@ public class Client {
 
                     // Add files to DB
                     for (File file: files) fileDB.addOrUpdateFile(file, node);
+                    logger.info("TRANSFER: DB " + fileDB.getFiles());
 
                     // Transfer files
                     String transferIp;
