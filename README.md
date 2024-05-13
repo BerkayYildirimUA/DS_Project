@@ -173,3 +173,10 @@ I'am confused by the given specifications, so this section has to be revised.
 ### Berkay
 
 - [] shutdown
+  - [] when terminated it should move it's replicated files to the prev node
+  - [] if a node receives a repliceted file it should check if they have the Originals
+    - [] if they do: send the file to the it's prev node
+    - [] if they don't: save file
+  - [] if a node with an Original file gets shut down:
+      - [] tell the node with the replicated file that it's the only one now --> becomes new local file, needs a new replication?
+      - []  
