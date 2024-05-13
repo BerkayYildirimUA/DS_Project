@@ -257,24 +257,25 @@ public class Client {
                     System.out.println("TRANSFER:\t files read \n" + fileDB.getFiles());
 
                     // Transfer files
-                    String transferIp;
+                    String transferIp, url;
                     HttpHeaders headers = new HttpHeaders();
                     headers.setContentType(MediaType.APPLICATION_JSON);
-                    Gson gson = new Gson();
-                    String url;
                     ResponseEntity<String> response;
 
                     for (AFile file: fileDB.getFiles()) {
                         // Get ip if the right node
                         url = "http://" + nsObject.getNSAddress() + ":8089/files/" + file.getName();
-                        logger.info("GET from: " + url);
+                        // logger.info("GET from: " + url);
+                        System.out.println("GET from: " + url);
                         response = restTemplate.getForEntity(url, String.class);
                         transferIp = response.getBody();
 
+                        System.out.println("TRANSFER:\t received=" + transferIp + "\n\t\t own=" + node.getAddress().getHostAddress());
                         if (Objects.equals(transferIp, node.getAddress().getHostAddress())) {
                             // Node to send is self --> send to previous node
                             url = "http://" + nsObject.getNSAddress() + ":8089/node/" + node.getPrevNodeId();
-                            logger.info("GET from: " + url);
+                            // logger.info("GET from: " + url);
+                            System.out.println("GET from: " + url);
                             response = restTemplate.getForEntity(url, String.class);
                             transferIp = response.getBody();
                         }
