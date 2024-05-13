@@ -223,7 +223,7 @@ public class Client {
                         e.printStackTrace();
                         nodeState = eNodeState.ERROR; // Move to Error state on exception
                     }
-                    if (    (node.getPrevNodeId() != -1 && node.getNextNodeId() != -1) ||
+                    if (    (node.getPrevNodeId() != -1 && node.getNextNodeId() != -1) &&
                             (node.getPrevNodeId() != node.getId() && node.getNextNodeId() != node.getId()))
                         nodeState = eNodeState.TRANSFER;
                     /*
@@ -245,7 +245,7 @@ public class Client {
 
                     // Add files to DB
                     for (File file: files) fileDB.addOrUpdateFile(file, node);
-                    logger.info("TRANSFER:\t DB " + fileDB.getFiles());
+                    // logger.info("TRANSFER:\t DB " + fileDB.getFiles());
                     System.out.println("TRANSFER:\t files read \n" + fileDB.getFiles());
 
                     // Transfer files
