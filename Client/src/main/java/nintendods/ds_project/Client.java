@@ -253,6 +253,7 @@ public class Client {
                     // Add files to DB
                     for (File file: files) fileDB.addOrUpdateFile(file, node);
                     // logger.info("TRANSFER:\t DB " + fileDB.getFiles());
+                    System.out.println("TRANSFER:\t node=" + node);
                     System.out.println("TRANSFER:\t files read \n" + fileDB.getFiles());
 
                     // Transfer files
