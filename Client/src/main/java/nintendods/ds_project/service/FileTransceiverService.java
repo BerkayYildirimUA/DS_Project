@@ -184,6 +184,7 @@ public class FileTransceiverService {
      * @return null if nothing has arrived and an object if something has arrived.
      */
     public AFile saveIncommingFile(ANode node, String directoryPath) {
+        System.out.println("FileTransceiverService:\t path\n" + directoryPath);
         if (available() && node != null) {
             FileMessage m = getFileMessage();
 
