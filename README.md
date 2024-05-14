@@ -5,7 +5,7 @@ This projects will create a ring topology with clients. A Naming server that wil
 # Naming Server part
 
 - Robbe:
-  - [x] Algorithm for file names convertion to hash value
+  - [x] Algorithm for file ngit ames convertion to hash value
   - [x] Save to JSON to a file
 
 - Tom:
@@ -180,3 +180,14 @@ I'am confused by the given specifications, so this section has to be revised.
   - [] if a node with an Original file gets shut down:
       - [] tell the node with the replicated file that it's the only one now --> becomes new local file, needs a new replication?
       - []  
+      
+      
+# Agents
+
+We have to create 2 type of agents. A synchronize agent and a failure agent. This to ensure that we have a fully synchronized distributed file access (by the sync agent) and a failure event where the failure agent will come in to make shure no files are lost during the steps of the shutdown.
+
+## sync agent
+
+The sync or synchronize agent will hold all the files that are currently in the topology. We'll transfer this agent through a REST call on the next node of the current node. We can say that the synchronization agent will be tossed in the ring and will run on each node to check the files on the node and update accordingly.
+
+

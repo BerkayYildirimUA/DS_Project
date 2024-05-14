@@ -4,6 +4,7 @@ import nintendods.ds_project.exeption.DuplicateFileException;
 import nintendods.ds_project.model.ANetworkNode;
 import nintendods.ds_project.model.file.AFile;
 import nintendods.ds_project.model.file.IFileConditionChecker;
+import nintendods.ds_project.utility.FileModifier;
 
 import org.apache.tomcat.util.http.fileupload.FileUtils;
 import org.junit.Test;
@@ -92,50 +93,14 @@ public class FileTranseiverServiceTest {
                 fw.close();
             }
 
-            // A node is created
-            ANetworkNode nodeSend = new ANetworkNode(InetAddress.getLocalHost(), 21, "Robbe");
+            File newFile = FileModifier.createFile(testFile.getName(), true);
 
-            // Node sees if a file is on his system and it will create an object of it.
-            AFile fileObj = new AFile(testFile.getAbsolutePath(), testFile.getName(), nodeSend);
-
-            // Lets say that the file needs to be transfered
-            // Create FileTranseiver object and transfer file
-            FileTransceiverService ftss = new FileTransceiverService(12346, 20);
-
-            // Send the file to itself. Can be any node received from the namingserver.
-            ftss.sendFile(fileObj, nodeSend.getAddress().getHostAddress());
-
-            // receiver side must create FileTranseiverService to receive incomming
-            // messages.
-            // Here a node has to be created ofcource and the create FileTranseiver object.
-
-            // I can not create the FileTranseiverService because it uses a specific TCP
-            // port to
-            // listen on. And on this test pc the port is already in use. therefore I use
-            // the receive
-            // thread from the aleady created FileTranseiverService object.
-            // FileTranseiverService ftssRes = new FileTranseiverService();
-
-            //Delete so we can simulate a new node.
+            assertTrue(testFile.exists() && newFile.exists());
+            System.out.println("Existing file name: " + testFile.getName());
+            System.out.println("new file name: " + newFile.getName());
             testFile.delete();
-
-            ANetworkNode nodeRec = new ANetworkNode(InetAddress.getLocalHost(), 21, "Robbe receive");
-
-            boolean ok = false;
-            AFile newFileObject = null;
-
-            while (!ok) {
-                newFileObject = ftss.saveIncomingFile(nodeRec);
-                if (newFileObject != null) {
-                    ok = true;
-                }
-            }
-
-            assertTrue(new File(newFileObject.getAbsolutePath()).exists());
-
-            System.out.println(newFileObject.getFormattedLogs());
-            new File(newFileObject.getAbsolutePath()).delete();
-        } catch (IOException | DuplicateFileException e) {
+            newFile.delete();
+        } catch (IOException e) {
             assertTrue(false);
         }
     }
