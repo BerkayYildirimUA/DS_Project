@@ -186,8 +186,22 @@ I'am confused by the given specifications, so this section has to be revised.
 
 We have to create 2 type of agents. A synchronize agent and a failure agent. This to ensure that we have a fully synchronized distributed file access (by the sync agent) and a failure event where the failure agent will come in to make shure no files are lost during the steps of the shutdown.
 
-## sync agent
+## sync agent (Robbe)
 
 The sync or synchronize agent will hold all the files that are currently in the topology. We'll transfer this agent through a REST call on the next node of the current node. We can say that the synchronization agent will be tossed in the ring and will run on each node to check the files on the node and update accordingly.
 
+This means that only 1 agent can be created inside the ring topology because it will be tossed arround like a hot potato. That's why we only activate the sync agent when there are more than 1 nodes in the network. This will be done by the node that joins the network and sees that he is the second node inside the network.
 
+The sync or synchronize agent will have a datastructure that holds the filename and the lock of that file. When visiting a node, we'll check the files of that node with the database and update accordingly if any changes have occured. This are only add changes and no delete changes.
+
+Each node will have 2 queues where it can request a file lock or unlock (only after a lock ofcource). These queues will be checked by the sync agent when it is at the node and after the file synchronization. If something is in the lock request queue, the agent can check this if the file is somewhere else already locked or not. if not, the file gets locked by this node and the sync agent updates its database. When a lock is not required anymore, the node can request an unlock and place this in the queue. The sync agent again will check if the file was locked and then unlock this.
+
+After these tasks, the sync agent will be transmitted to the next node over a REST call where the same steps happens again.
+
+For now we leave security out of the picture because we do not have the time to implement this. So for now we assume that we only request an unlock if we have locked the file in the first place (this could be a security leak).
+
+
+
+## failure agent
+
+...
