@@ -28,10 +28,10 @@ public class ClientNodeConfig {
     private int multicastPort; // Port for multicast communication
     @Value("${TESTING}")
     private int testing;
-    // @Value("${tcp.file.receive.port}")
-    // private int tcpFileReceivePort;
-    // @Value("${tcp.file.receive.buffer}")
-    // private int tcpFileReceiveBuffer;
+    @Value("${tcp.file.receive.port}")
+    private int tcpFileReceivePort;
+    @Value("${server.port}")
+    private int apiPort;
 
     public static int NODE_NAME_LENGTH; // Length of the random node name
     public static int NODE_GLOBAL_PORT; //Fixed port for node operations
@@ -43,6 +43,7 @@ public class ClientNodeConfig {
     // public static int TCP_FILE_RECEIVE_PORT;
     // public static int TCP_FILE_RECEIVE_BUFFER;
     public static int TESTING;
+    public static int API_PORT;
 
     @PostConstruct
     private void init() {
@@ -56,6 +57,7 @@ public class ClientNodeConfig {
         // TCP_FILE_RECEIVE_PORT = tcpFileReceivePort;
         // TCP_FILE_RECEIVE_BUFFER = tcpFileReceiveBuffer;
         TESTING = testing;
+        API_PORT = apiPort;
     }
 
     @Bean

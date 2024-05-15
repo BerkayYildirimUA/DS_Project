@@ -1,5 +1,6 @@
 package nintendods.ds_project.utility;
 
+import nintendods.ds_project.agent.sync.SyncAgent;
 import nintendods.ds_project.model.ClientNode;
 import nintendods.ds_project.model.message.UNAMObject;
 import org.slf4j.Logger;
@@ -7,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.*;
 import org.springframework.web.client.RestTemplate;
 
+import java.awt.List;
 import java.util.Objects;
 
 public class ApiUtil {
@@ -56,10 +58,10 @@ public class ApiUtil {
     }
 
     //TODO: write test, might not work
-    static String NameServer_GET_NodeIPfromID(String id) {
+    public static String NameServer_GET_NodeIPfromID(int id) {
         checkNsObjectIsNotNull();
 
-        String URL_NodeIPfromID = nameSeverAdress + "node/" + id;
+        String URL_NodeIPfromID = nameSeverAdress + "node/" + Integer.toString(id);
         logger.info("GET from: " + URL_NodeIPfromID);
         ResponseEntity<String> Response_NodeIPfromID = restTemplate.getForEntity(URL_NodeIPfromID, String.class);
         return removeLeadingSlash(Objects.requireNonNull(Response_NodeIPfromID.getBody()));
@@ -140,7 +142,7 @@ public class ApiUtil {
 // ------------------------------------------- CLIENT API ----------------------------------------------------------------
 
     //TODO: write test, might not work
-    static String Client_GET_getFileLocation(String filename, String nodeID) {
+    static String Client_GET_getFileLocation(String filename, int nodeID) {
         checkNsObjectIsNotNull();
 
         String addres = ApiUtil.NameServer_GET_NodeIPfromID(nodeID);
@@ -167,7 +169,7 @@ public class ApiUtil {
      */
 
     //TODO: write test, might not work
-    static String Client_DELETE_file(String filename, String nodeID) {
+    static String Client_DELETE_file(String filename, int nodeID) {
         checkNsObjectIsNotNull();
 
         String addres = ApiUtil.NameServer_GET_NodeIPfromID(nodeID);
@@ -181,7 +183,7 @@ public class ApiUtil {
     //TODO: write test, might not work
     static boolean Client_PUT_changeMyNextNodesNeighbor(int prevNodeID, int prevNodePort, int nextNodeID) {
         checkNsObjectIsNotNull();
-        String prevNodeIP = ApiUtil.NameServer_GET_NodeIPfromID(String.valueOf(prevNodeID));
+        String prevNodeIP = ApiUtil.NameServer_GET_NodeIPfromID(prevNodeID);
 
         String UrlForPrevNode = "http://" + prevNodeIP + ":" + prevNodePort + "/api/Management/nextNodeID/?ID=" + nextNodeID;
         logger.info("PUT to: " + UrlForPrevNode);
@@ -198,7 +200,7 @@ public class ApiUtil {
     static boolean Client_PUT_changeMyPrevNodesNeighbor(int nextNodeID, int nextNodePort, int prevNodeID) {
         ApiUtil.checkNsObjectIsNotNull();
 
-        String nextNodeIP = ApiUtil.NameServer_GET_NodeIPfromID(String.valueOf(nextNodeID));
+        String nextNodeIP = ApiUtil.NameServer_GET_NodeIPfromID(nextNodeID);
         String urlForNextNode = "http://" + nextNodeIP + ":" + nextNodePort + "/api/Management/prevNodeID/?ID=" + prevNodeID;
         logger.info("PUT to: " + urlForNextNode);
         try {
@@ -210,4 +212,26 @@ public class ApiUtil {
         }
     }
 
+    public static String clientGetAllFiles(String address, int port) {
+        String url = "http://" + address + ":" + Integer.toString(port) + "/api/files/all";
+        logger.info("GET from: " + url);
+        ResponseEntity<String> files = restTemplate.getForEntity(url, String.class);
+        return files.getBody();
+
+        //Beter to use WebClient? RestTemplate wil be deprecated .
+    }
+
+    public static void sendSyncAgent(String address, int port, SyncAgent agent) {
+        String url = "http://" + address + ":" + Integer.toString(port) + "/api/agent/sync";
+        logger.info("POST to: " + url);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        HttpEntity<String> request = new HttpEntity<String>(new JsonConverter().toJson(agent.getFiles()), headers);
+      
+        ResponseEntity<Boolean> responseEntityStr = restTemplate.postForEntity(url, request, Boolean.class);
+
+        //Beter to use WebClient? RestTemplate wil be deprecated .
+    }
 }

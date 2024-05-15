@@ -3,6 +3,10 @@ import nintendods.ds_project.database.FileDB;
 import nintendods.ds_project.model.file.AFile;
 import nintendods.ds_project.service.FileDBService;
 import nintendods.ds_project.utility.JsonConverter;
+
+import java.util.List;
+import java.util.Optional;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -21,6 +25,24 @@ public class ClientFileAPI {
     private static final Logger logger = LoggerFactory.getLogger(ClientFileAPI.class);
     private final JsonConverter jsonConverter = new JsonConverter();
     private final FileDB fileDB = FileDBService.getFileDB();
+
+    @GetMapping("")
+    public ResponseEntity<String> getAllFiles() {
+        logger.debug("Request of all files on local system");
+        try {
+            List<AFile> files = fileDB.getFiles();
+            if (!files.isEmpty()) {
+                logger.info("Transfering files to requester");
+                return ResponseEntity.ok(jsonConverter.toJson(files));
+            } else {
+                logger.warn("No files present");
+                return ResponseEntity.status(HttpStatus.NO_CONTENT).body("");
+            }
+        } catch (IllegalArgumentException e) {
+            logger.error("Error request of all files");
+            return ResponseEntity.badRequest().body("");
+        }
+    }
 
     @GetMapping("/{fileName}")
     public ResponseEntity<String> getFileLocation(@PathVariable("fileName") String fileName) {
@@ -52,7 +74,7 @@ public class ClientFileAPI {
             return ResponseEntity.badRequest().body(jsonConverter.toJson(e.getMessage()));
         }
     }
-
+    
     @DeleteMapping("/{fileName}")
     public ResponseEntity<String> deleteFile(@PathVariable("fileName") String fileName) {
         logger.debug("Request to delete file: {}", fileName);
