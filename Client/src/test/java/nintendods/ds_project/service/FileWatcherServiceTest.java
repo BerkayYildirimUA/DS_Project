@@ -1,5 +1,4 @@
 package nintendods.ds_project.service;
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -7,34 +6,25 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.nio.file.*;
 import java.util.Comparator;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
-
 public class FileWatcherServiceTest {
 
     private static final String DIRECTORY_TO_WATCH = "testDir";
     private Path testDir;
     private FileWatcherService fileWatcherService;
-    private ExecutorService executorService;
 
     @BeforeEach
     public void setUp() throws IOException {
         testDir = Files.createTempDirectory(DIRECTORY_TO_WATCH);
         fileWatcherService = new FileWatcherService(testDir.toString());
-        executorService = Executors.newSingleThreadExecutor();
-
-        // Run the watcher service in a separate thread
-        executorService.submit(() -> {
-            fileWatcherService.startWatching();
-        });
+        fileWatcherService.init();
     }
 
     @AfterEach
     public void tearDown() throws IOException {
-        executorService.shutdownNow();
+        fileWatcherService.stopWatching();
 
         try (var paths = Files.walk(testDir)) {
             paths.sorted(Comparator.reverseOrder())

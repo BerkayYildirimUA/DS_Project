@@ -9,10 +9,7 @@ import nintendods.ds_project.exeption.DuplicateNodeException;
 import nintendods.ds_project.exeption.NotEnoughMessageException;
 import nintendods.ds_project.model.ClientNode;
 import nintendods.ds_project.model.message.UNAMObject;
-import nintendods.ds_project.service.DiscoveryService;
-import nintendods.ds_project.service.MulticastListenerService;
-import nintendods.ds_project.service.NSAPIService;
-import nintendods.ds_project.service.UnicastListenerService;
+import nintendods.ds_project.service.*;
 import nintendods.ds_project.utility.JsonConverter;
 import nintendods.ds_project.utility.Generator;
 import org.hibernate.annotations.Synchronize;
@@ -51,6 +48,8 @@ public class Client {
     @Autowired
     ClientNode node; // Ahmad_merge: this or node = new ClientNode(InetAddress.getLocalHost(), NODE_GLOBAL_PORT, generateRandomString(NODE_NAME_LENGTH));
 
+    @Autowired
+    FileWatcherService fileWatcherService;
     public ClientNode getNode() {
         return node;
     }
@@ -137,10 +136,10 @@ public class Client {
         nodeState = eNodeState.DISCOVERY; // Initial state of the node
         boolean isRunning = true; // Controls the main loop
         int discoveryRetries = 0; // Counter for discovery attempts
+        fileWatcherService.init();
 
 
         while (isRunning) {
-
             // Finite state machine with eNodeState states
             switch (nodeState) {
                 case DISCOVERY -> {
@@ -276,6 +275,7 @@ public class Client {
 
 
     private void shutdown() {
+        fileWatcherService.stopWatching();
         RestTemplate restTemplate = new RestTemplate();
 
         //if you are alone in the network then skip
