@@ -1,16 +1,18 @@
 package nintendods.ds_project;
 
+import com.google.gson.Gson;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import nintendods.ds_project.config.ClientNodeConfig;
+import nintendods.ds_project.database.FileDB;
+import nintendods.ds_project.exeption.DuplicateFileException;
 import nintendods.ds_project.exeption.DuplicateNodeException;
 import nintendods.ds_project.exeption.NotEnoughMessageException;
 import nintendods.ds_project.model.ClientNode;
+import nintendods.ds_project.model.file.AFile;
 import nintendods.ds_project.model.message.UNAMObject;
-import nintendods.ds_project.service.DiscoveryService;
-import nintendods.ds_project.service.MulticastListenerService;
-import nintendods.ds_project.service.NSAPIService;
-import nintendods.ds_project.service.UnicastListenerService;
+import nintendods.ds_project.service.*;
+import nintendods.ds_project.utility.FileReader;
 import nintendods.ds_project.utility.JsonConverter;
 import nintendods.ds_project.utility.Generator;
 import nintendods.ds_project.utility.ApiUtil;
@@ -24,14 +26,28 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.event.EventListener;
+
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.File;
+import java.net.InetAddress;
 import java.net.UnknownHostException;
+
+import java.util.List;
+
 
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.Instant;
+
+import java.util.Objects;
+import java.util.concurrent.TimeUnit;
+
 
 /**
  * Spring Boot application for managing a distributed system node's lifecycle excluding database auto-configuration.
@@ -71,6 +87,11 @@ public class Client {
     @Value("${server.port}")
     private int apiPort;
 
+    // File reader variables
+    private final String path = System.getProperty("user.dir") + "/assets";
+    private final FileDB fileDB = FileDBService.getFileDB();
+    private final RestTemplate restTemplate = new RestTemplate();
+    private final FileTransceiverService fileTransceiver = new FileTransceiverService();
 
 
     //vars needed for testing
@@ -114,7 +135,12 @@ public class Client {
 
     @EventListener(ApplicationReadyEvent.class)
     public void start() {
-        new Thread(this::runNodeLifecycle).start();
+        try {
+            new Thread(this::runNodeLifecycle).start();
+        }
+        catch (Exception ex){
+            //TODO handle exception
+        }
     }
 
     private void runNodeLifecycle() {
@@ -189,15 +215,27 @@ public class Client {
                 }
                 case LISTENING -> {
                     //System.out.println("Entering Listening");
+                    // Listen for multicast
                     if (multicastListener == null){
                         multicastListener = new MulticastListenerService(MULTICAST_ADDRESS, MULTICAST_PORT, LISTENER_BUFFER_SIZE);
                         multicastListener.initialize_multicast();
                     }
 
+                    // Listen for unicast
                     if (unicastListener == null) {
                         unicastListener = new UnicastListenerService(3780);
                     }
 
+                    // Listen for file transfers
+//                    try {
+//                        AFile file = null;
+//                        file = fileTransceiver.saveIncomingFile(node, path + "/replicated");
+//                        System.out.println("LISTENING:\t get files\n" + file);
+//                    } catch (DuplicateFileException e) {
+//                        throw new RuntimeException(e);
+//                    }
+
+                    // Update if needed
                     try {
                         multicastListener.listenAndUpdate(node);
                         unicastListener.listenAndUpdate(node);
@@ -205,8 +243,16 @@ public class Client {
                         e.printStackTrace();
                         nodeState = eNodeState.ERROR; // Move to Error state on exception
                     }
+                    if (    (node.getPrevNodeId() != -1 && node.getNextNodeId() != -1) &&
+                            (node.getPrevNodeId() != node.getId() && node.getNextNodeId() != node.getId())){
+                        try {
+                            TimeUnit.SECONDS.sleep(3);
+                        } catch (InterruptedException e) {
+                            throw new RuntimeException(e);
+                        }
+                        nodeState = eNodeState.TRANSFER;
+                    }
                     /*
-
                     if (node.getId() < node.getPrevNodeId())    {  // ---> gaat altijd een error geven vanaf je netwerk meer dan 2 nodes heeft
                         System.out.println("LISTENING:\t Client sleep");
                         try {
@@ -215,10 +261,49 @@ public class Client {
                             throw new RuntimeException(e);
                         }
                         nodeState = eNodeState.ERROR;
-                    } else nodeState = eNodeState.TRANSFER; */
+                    } else nodeState = eNodeState.TRANSFER;
+                    */
                 }
                 case TRANSFER -> {
                     // TODO: Transfer data or handle other operations
+                    List<File> files = FileReader.getFiles(path);
+                    // System.out.println(files + "\n");
+
+                    // Add files to DB
+                    for (File file: files) fileDB.addOrUpdateFile(file, node);
+                    // logger.info("TRANSFER:\t DB " + fileDB.getFiles());
+                    System.out.println("TRANSFER:\t node=" + node);
+                    System.out.println("TRANSFER:\t files read \n" + fileDB.getFiles());
+
+                    // Transfer files
+                    String transferIp, url;
+                    HttpHeaders headers = new HttpHeaders();
+                    headers.setContentType(MediaType.APPLICATION_JSON);
+                    ResponseEntity<String> response;
+
+                    for (AFile file: fileDB.getFiles()) {
+                       // Get ip if the right node
+                       url = "http://" + nsObject.getNSAddress() + ":8089/files/" + file.getName();
+                       // logger.info("GET from: " + url);
+                       System.out.println("GET from: " + url);
+                       response = restTemplate.getForEntity(url, String.class);
+                       transferIp = response.getBody();
+
+                       System.out.println("TRANSFER:\t received=" + transferIp + "\n\t\t own=" + node.getAddress().getHostAddress());
+                       if (("/"+node.getAddress().getHostAddress()).equals(transferIp)) {
+                           // Node to send is self --> send to previous node
+                           url = "http://" + nsObject.getNSAddress() + ":8089/node/" + node.getPrevNodeId();
+                           // logger.info("GET from: " + url);
+                           System.out.println("GET from: " + url);
+                           response = restTemplate.getForEntity(url, String.class);
+                           transferIp = response.getBody();
+                       }
+
+                       // Send file to that node
+                       fileTransceiver.sendFile(file, transferIp);
+                    }
+
+                    System.out.println("TRANSFER:\t files added \n" + fileDB.getFiles());
                     nodeState = eNodeState.LISTENING; // Loop back to Listening for simplicity
                 }
                 case SHUTDOWN -> {
@@ -267,8 +352,6 @@ public class Client {
 
 
     private void shutdown() {
-        RestTemplate restTemplate = new RestTemplate();
-
         //if you are alone in the network then skip
         if (node.getId() != node.getPrevNodeId()) {
             int nextNodePort;

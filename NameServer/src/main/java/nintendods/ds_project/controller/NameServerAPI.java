@@ -5,16 +5,15 @@ import nintendods.ds_project.database.NodeDB;
 import nintendods.ds_project.model.ClientNode;
 import nintendods.ds_project.model.message.ResponseObject;
 import nintendods.ds_project.service.NodeDBService;
-import nintendods.ds_project.service.TCPClient;
 import nintendods.ds_project.service.TCPService;
 import nintendods.ds_project.utility.JsonConverter;
+import nintendods.ds_project.utility.NameToHash;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.IOException;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -26,22 +25,31 @@ public class NameServerAPI {
     TCPService tcpService = TCPService.getTcpService();
 
     private void printAndLog(String message) {
-        logger.info(message);
+        // logger.info(message);
         System.out.println(message);
     }
 
     @GetMapping("/files/{file_name}")
     public ResponseEntity<String> getFileAddressByName(@PathVariable("file_name") String name) {
-        printAndLog("GET: File by ID");
-        String ip = nodeDB.getClosestIpFromName(name);
+        printAndLog("GET:\t IP by file ID");
+        int closestId = nodeDB.getClosestIdFromName(name);
+        int id = NameToHash.convert(name);
+        if (closestId > id) {
+            // If closestId is higher, than it is the id of the next node
+            closestId = nodeDB.getPreviousId(closestId);
+        }
+        String ip = nodeDB.getIpFromId(closestId);
+        printAndLog("GET:\t IP=" + ip);
 
         if (ip != null) return ResponseEntity.status(HttpStatus.OK).body(ip);
         else            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
     }
 
     @GetMapping("/node/{id}")
-    public ResponseEntity<String> getNodeIPfromID(@PathVariable("id") int id) {
-        String ip = nodeDB.getIPfromID(id);
+    public ResponseEntity<String> getNodeIpFromId(@PathVariable("id") int id) {
+        printAndLog("GET:\t IP by ID");
+        String ip = nodeDB.getIpFromId(id);
+        printAndLog("GET:\t IP=" + ip);
 
         if (ip != null && !ip.isEmpty()) return ResponseEntity.status(HttpStatus.OK).body(ip);
         else            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);

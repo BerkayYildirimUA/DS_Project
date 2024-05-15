@@ -9,6 +9,7 @@ public class FileModifier {
     private static final int maxIterations = 500000;
 
     public static File createFile(String directory, String fileName, byte[] fileBytes, boolean createNewNameIfNeeded) {
+
         try {
             File file;
 
