@@ -15,6 +15,7 @@ import nintendods.ds_project.service.*;
 import nintendods.ds_project.utility.FileReader;
 import nintendods.ds_project.utility.JsonConverter;
 import nintendods.ds_project.utility.Generator;
+import nintendods.ds_project.utility.ApiUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,22 +26,28 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.event.EventListener;
+
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.File;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+
 import java.util.List;
+
 
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.Instant;
+
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
+
 
 /**
  * Spring Boot application for managing a distributed system node's lifecycle excluding database auto-configuration.
@@ -195,7 +202,7 @@ public class Client {
                     // //Discovery has succeeded so continue
                     // //get NSObject from discovery service
                     nsObject = ds.getNSObject(); //For later use
-
+                    ApiUtil.setNsObject(nsObject);
                     // Configure the api object
                     API.setIp(nsObject.getNSAddress());
                     API.setPort(nsObject.getNSPort());

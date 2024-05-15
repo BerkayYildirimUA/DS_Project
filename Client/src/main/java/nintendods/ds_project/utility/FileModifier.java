@@ -8,7 +8,8 @@ public class FileModifier {
 
     private static final int maxIterations = 500000;
 
-    public static File createFile(String directory, String fileName,byte[] fileBytes, boolean createNewNameIfNeeded) {
+    public static File createFile(String directory, String fileName, byte[] fileBytes, boolean createNewNameIfNeeded) {
+
         try {
             File file;
 
@@ -27,7 +28,6 @@ public class FileModifier {
                     //Write bytes to it
                     FileOutputStream fos = new FileOutputStream(file);
                     fos.write(fileBytes);
-
                 } else {
                     return null;
                 }
@@ -37,7 +37,6 @@ public class FileModifier {
                 FileOutputStream fos = new FileOutputStream(file);
                 fos.write(fileBytes);
             }
-
             return file;
 
         } catch (IOException ex) {
@@ -45,7 +44,7 @@ public class FileModifier {
         }
     }
 
-    public static File createFile(String fileName,byte[] fileBytes, boolean createNewName) {
+    public static File createFile(String fileName, byte[] fileBytes, boolean createNewName) {
         return FileModifier.createFile("", fileName, fileBytes, createNewName);
     }
 
