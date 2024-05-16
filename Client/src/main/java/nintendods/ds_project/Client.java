@@ -2,6 +2,7 @@ package nintendods.ds_project;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
+import nintendods.ds_project.agent.sync.SyncAgent;
 import nintendods.ds_project.config.ClientNodeConfig;
 import nintendods.ds_project.database.FileDB;
 import nintendods.ds_project.exeption.DuplicateFileException;
@@ -15,6 +16,8 @@ import nintendods.ds_project.utility.FileReader;
 import nintendods.ds_project.utility.JsonConverter;
 import nintendods.ds_project.utility.Generator;
 import nintendods.ds_project.utility.ApiUtil;
+
+import org.aspectj.weaver.loadtime.Agent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +32,7 @@ import org.springframework.context.event.EventListener;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.File;
@@ -45,6 +49,7 @@ import java.util.concurrent.TimeUnit;
  * Spring Boot application for managing a distributed system node's lifecycle excluding database auto-configuration.
  */
 @SpringBootApplication(exclude = { DataSourceAutoConfiguration.class })
+@EnableScheduling
 public class Client {
 
     @Autowired
@@ -70,6 +75,13 @@ public class Client {
     private int MULTICAST_PORT;      // Port for multicast communication
     private UNAMObject nsObject;
     private boolean isRunning = true;
+
+
+    private SyncAgent syncAgent = null;
+
+    public SyncAgent getSyncAgent(){
+        return syncAgent;
+    }
 
     MulticastListenerService multicastListener = null;
     UnicastListenerService unicastListener = null;
@@ -198,7 +210,6 @@ public class Client {
                     API.setIp(nsObject.getNSAddress());
                     API.setPort(nsObject.getNSPort());
 
-
                     logger.info(node.toString());
                     logger.info("Successfully reply in " + discoveryRetries + " discoveries.");
                     nodeState = eNodeState.LISTENING; // Move to Listening state after successful discovery
@@ -300,6 +311,12 @@ public class Client {
 
                     System.out.println("TRANSFER:\t files added \n" + fileDB.getFiles());
                     nodeState = eNodeState.LISTENING; // Loop back to Listening for simplicity
+
+
+                    //At the end of the transfer, we launch the sync agent towards the next node
+                    if (syncAgent == null){
+                        syncAgent = new SyncAgent();
+                    }
                 }
                 case SHUTDOWN -> {
                     System.out.println("SHUTDOWN:\t Start:" + Timestamp.from(Instant.now()));

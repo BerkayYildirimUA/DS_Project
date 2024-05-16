@@ -221,16 +221,12 @@ public class ApiUtil {
         //Beter to use WebClient? RestTemplate wil be deprecated .
     }
 
-    public static void sendSyncAgent(String address, int port, SyncAgent agent) {
+    public static String getSyncAgentFiles(String address, int port) {
         String url = "http://" + address + ":" + Integer.toString(port) + "/api/agent/sync";
-        logger.info("POST to: " + url);
+        logger.info("get from: " + url);
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-
-        HttpEntity<String> request = new HttpEntity<String>(new JsonConverter().toJson(agent.getFiles()), headers);
-      
-        ResponseEntity<Boolean> responseEntityStr = restTemplate.postForEntity(url, request, Boolean.class);
+        ResponseEntity<String> responseEntityStr = restTemplate.getForEntity(url, String.class);
+        return responseEntityStr.getBody();
 
         //Beter to use WebClient? RestTemplate wil be deprecated .
     }

@@ -187,7 +187,6 @@ public class DiscoveryService {
         listener.close();
     }
 
-    //later use
     public UNAMObject getNSObject(){
         return nsObject;
     }
