@@ -5,7 +5,6 @@ import nintendods.ds_project.exeption.DuplicateFileException;
 import nintendods.ds_project.model.ANode;
 import nintendods.ds_project.model.file.AFile;
 import nintendods.ds_project.model.file.IFileConditionChecker;
-import nintendods.ds_project.model.file.log.eLog;
 import nintendods.ds_project.model.message.FileMessage;
 import nintendods.ds_project.utility.FileModifier;
 
@@ -30,7 +29,7 @@ public class FileTransceiverService {
      * The default TCP port is 12346 and the file capacity is 50.
      */
     public FileTransceiverService() {
-        this(ClientNodeConfig.TCP_FILE_RECEIVE_PORT, 50);
+        this(12346, 50);
     }
 
     /**
@@ -47,16 +46,9 @@ public class FileTransceiverService {
         // running = true;
         this.port = port;
 
-        receiveQueue = new LinkedBlockingQueue<>(buffer);
-        this.receiverThread = new Thread(() -> receiveFile(port));
-        this.receiverThread.start();
-
-        // Let the thread startup
-        try {
-            // Delay for 500 milliseconds
-            Thread.sleep(500);
-        } catch (InterruptedException e) {
-        }
+       receiveQueue = new LinkedBlockingQueue<>(buffer);
+       this.receiverThread = new Thread(() -> receiveFile(port));
+       this.receiverThread.start();
     }
 
     /**
@@ -205,7 +197,7 @@ public class FileTransceiverService {
                 // Set the new owner of the file
                 fileObject.setOwner(node);
 
-                File f = FileModifier.createFile(directoryPath, m.getFileObject().getName(), false);
+                File f = FileModifier.createFile(directoryPath, m.getFileObject().getName(), m.getFileInByte(), false);
 
                 if (f == null){
                     throw new DuplicateFileException();
