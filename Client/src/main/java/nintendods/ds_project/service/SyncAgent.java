@@ -123,7 +123,7 @@ public class SyncAgent implements Runnable, Serializable {
             // There is a lock request present
 
             // Check if the lock is present on the global files.
-            if (!this.files.getOrDefault(fileNameLockRequest, true)) {
+            if (this.files.getOrDefault(fileNameLockRequest, true)) {
                 // Lock is present so add back to queue
                 Data.requestLock(fileNameLockRequest);
             } else {
