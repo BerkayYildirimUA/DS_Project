@@ -1,4 +1,4 @@
-package nintendods.ds_project.agent.sync;
+package nintendods.ds_project.service;
 
 import java.io.Serializable;
 import java.lang.reflect.Type;
@@ -17,6 +17,7 @@ import com.google.gson.reflect.TypeToken;
 import nintendods.ds_project.Client;
 import nintendods.ds_project.config.ClientNodeConfig;
 import nintendods.ds_project.model.file.AFile;
+import nintendods.ds_project.model.syncAgent.Data;
 import nintendods.ds_project.utility.ApiUtil;
 import nintendods.ds_project.utility.JsonConverter;
 

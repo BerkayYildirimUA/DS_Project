@@ -1,4 +1,4 @@
-package nintendods.ds_project.agent.sync;
+package nintendods.ds_project.model.syncAgent;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;

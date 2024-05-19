@@ -13,8 +13,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.google.gson.reflect.TypeToken;
 import nintendods.ds_project.Client;
-import nintendods.ds_project.agent.sync.SyncAgent;
 import nintendods.ds_project.config.ClientNodeConfig;
+import nintendods.ds_project.service.SyncAgent;
 import nintendods.ds_project.utility.ApiUtil;
 import nintendods.ds_project.utility.JsonConverter;
 
@@ -36,13 +36,10 @@ public class ClientAgentAPI {
     public ResponseEntity<String> requestSyncAgent() {
         logger.debug("Recieve a sync agent file list call");
 
+
         Client client = context.getBean(Client.class);
-        SyncAgent syncAgent = client.getSyncAgent();
-
+        nintendods.ds_project.service.SyncAgent syncAgent = client.getSyncAgent();
         if (syncAgent != null) {
-
-            //processSyncAgent(syncAgentFiles); //Async so will continue
-
             return ResponseEntity.ok().body(jsonConv.toJson(syncAgent.getFiles()));
         }
         return ResponseEntity.ok().body("");

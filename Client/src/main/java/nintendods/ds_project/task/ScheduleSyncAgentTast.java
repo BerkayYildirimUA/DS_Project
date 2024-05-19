@@ -1,4 +1,4 @@
-package nintendods.ds_project.agent.sync;
+package nintendods.ds_project.task;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -11,6 +11,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import nintendods.ds_project.Client;
+import nintendods.ds_project.service.SyncAgent;
 
 @Component
 

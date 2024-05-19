@@ -1,8 +1,9 @@
 package nintendods.ds_project.utility;
 
-import nintendods.ds_project.agent.sync.SyncAgent;
 import nintendods.ds_project.model.ClientNode;
 import nintendods.ds_project.model.message.UNAMObject;
+import nintendods.ds_project.service.SyncAgent;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.*;
@@ -222,6 +223,7 @@ public class ApiUtil {
     }
 
     public static String getSyncAgentFiles(String address, int port) {
+
         String url = "http://" + address + ":" + Integer.toString(port) + "/api/agent/sync";
         logger.info("get from: " + url);
 
