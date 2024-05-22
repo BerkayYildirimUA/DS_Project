@@ -223,7 +223,7 @@ public class ApiUtil {
     }
 
     public static List<AFile> clientGetAllFiles(String address, int port) {
-        String url = "http://" + address + ":" + Integer.toString(port) + "/api/files/all";
+        String url = "http://" + address + ":" + Integer.toString(port) + "/api/files";
         logger.info("GET from: " + url);
         ResponseEntity<String> files = restTemplate.getForEntity(url, String.class);
         Type localFileListType = new TypeToken<ArrayList<AFile>>() {}.getType();

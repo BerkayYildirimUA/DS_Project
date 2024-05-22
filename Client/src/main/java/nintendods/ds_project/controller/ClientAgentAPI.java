@@ -28,7 +28,6 @@ public class ClientAgentAPI {
     public ResponseEntity<String> requestSyncAgent() {
         logger.debug("Recieve a sync agent file list call");
 
-
         Client client = context.getBean(Client.class);
         nintendods.ds_project.service.SyncAgent syncAgent = client.getSyncAgent();
         if (syncAgent != null) {

@@ -47,8 +47,8 @@ import java.util.concurrent.TimeUnit;
 /**
  * Spring Boot application for managing a distributed system node's lifecycle excluding database auto-configuration.
  */
-@SpringBootApplication(exclude = { DataSourceAutoConfiguration.class })
 @EnableScheduling
+@SpringBootApplication(exclude = { DataSourceAutoConfiguration.class })
 public class Client {
 
     @Autowired
@@ -74,7 +74,6 @@ public class Client {
     private int MULTICAST_PORT;      // Port for multicast communication
     private UNAMObject nsObject;
     private boolean isRunning = true;
-
 
     private SyncAgent syncAgent = null;
 
@@ -102,11 +101,9 @@ public class Client {
     public int t_nextNodePort;
     public int t_prevNodePort;
 
-
     public static void main(String[] args) throws UnknownHostException, IOException {
         SpringApplication.run(Client.class, args);
     }
-
 
     @PostConstruct
     private void init() throws UnknownHostException {
@@ -158,6 +155,12 @@ public class Client {
         boolean isRunning = true; // Controls the main loop
         int discoveryRetries = 0; // Counter for discovery attempts
 
+        //TODO: remove before push with master
+        final FileDB fileDB = FileDBService.getFileDB();
+        fileDB.addOrUpdateFile(new AFile("test1", "File1", this.node));
+        fileDB.addOrUpdateFile(new AFile("test1", "File2", this.node));
+        fileDB.addOrUpdateFile(new AFile("test1", "File3", this.node));
+        //TODO: remove before push with master
 
         while (isRunning) {
 
@@ -241,6 +244,8 @@ public class Client {
                     try {
                         multicastListener.listenAndUpdate(node);
                         unicastListener.listenAndUpdate(node);
+                        nodeState = eNodeState.TRANSFER;
+
                     } catch (Exception e) {
                         e.printStackTrace();
                         nodeState = eNodeState.ERROR; // Move to Error state on exception
@@ -311,11 +316,12 @@ public class Client {
                     System.out.println("TRANSFER:\t files added \n" + fileDB.getFiles());
                     nodeState = eNodeState.LISTENING; // Loop back to Listening for simplicity
 
-
                     //At the end of the transfer, we launch the sync agent towards the next node
                     if (syncAgent == null){
-                        syncAgent = new SyncAgent();
+                        syncAgent = new SyncAgent(this.context);
                     }
+
+                    nodeState = eNodeState.LISTENING;
                 }
                 case SHUTDOWN -> {
                     System.out.println("SHUTDOWN:\t Start:" + Timestamp.from(Instant.now()));

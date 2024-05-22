@@ -12,7 +12,10 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import com.google.gson.reflect.TypeToken;
 
@@ -23,22 +26,22 @@ import nintendods.ds_project.model.syncAgent.Data;
 import nintendods.ds_project.utility.ApiUtil;
 import nintendods.ds_project.utility.JsonConverter;
 
+
 public class SyncAgent implements Runnable, Serializable {
 
-    @Autowired
-    ConfigurableApplicationContext context;
+    ApplicationContext context;
 
     protected static final Logger logger = LoggerFactory.getLogger(SyncAgent.class);
 
     private Map<String, Boolean> files = new HashMap<String, Boolean>() {
     }; // Map of all files in the system and the possible lock on it.
 
-    public SyncAgent() {
-        this.files = new HashMap<String, Boolean>() {
-        };
+    public SyncAgent(ApplicationContext context2) {
+        this.context = context2;
+        this.files = new HashMap<String, Boolean>() {};
     }
 
-    public SyncAgent(Map<String, Boolean> files) {
+    public SyncAgent(Map<String, Boolean> files, ApplicationContext context2) {
         this.files = files;
     }
 
