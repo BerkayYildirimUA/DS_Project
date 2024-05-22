@@ -1,5 +1,6 @@
 package nintendods.ds_project.model.file;
 
+import nintendods.ds_project.model.ANetworkNode;
 import nintendods.ds_project.model.ANode;
 import nintendods.ds_project.model.file.log.ALog;
 import nintendods.ds_project.model.file.log.eLog;
@@ -20,7 +21,7 @@ public class AFile implements Serializable {
     int id = -1; // the hashed id of the filename
     List<ALog> logs; // All the logs that happend with the file
     ANode owner = null; // The owner of the file where the file is hosted.
-    boolean isReplicated; // If the file has been replicated from the creating node
+    boolean isBeenBackedUp; // If the file has been replicated from the creating node
 
     /**
      * Create a new file object that creates a log with the provided ABaseNode. It
@@ -38,11 +39,11 @@ public class AFile implements Serializable {
         this.name = name;
         setId(name);
         this.path = path;
-        this.owner = creator;
         //setReplicated(false);
 
         // Set a new log of initial creation with the owner of the file
         logs.add(new ALog(getOwner(), eLog.fileCreation, "initial creation of the file"));
+        logs.add(new ALog(getOwner(), eLog.downloadLocation, "Initial Download location is Node with ID: " + NameToHash.convert(creator.getName())));
     }
 
     /**
@@ -165,14 +166,18 @@ public class AFile implements Serializable {
 
     public void setReplicated(boolean isReplicated, String toNodeIp) {
 
-        if (isReplicated() == false) {
+        if (isBeenBackedUp() == false) {
             logs.add(new ALog(getOwner(), eLog.fileReplicated,
                     "The file is replicated from node: " + getOwner().getName() + " to node with IP: " + toNodeIp));
         }
-        this.isReplicated = isReplicated;
+        this.isBeenBackedUp = isReplicated;
     }
 
-    public boolean isReplicated() {
-        return this.isReplicated;
+    public void setDownloadLocation(String ID){
+        logs.add(new ALog(getOwner(), eLog.downloadLocation, "Download location changed to Node with ID:" + ID));
+    }
+
+    public boolean isBeenBackedUp() {
+        return this.isBeenBackedUp;
     }
 }

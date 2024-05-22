@@ -1,6 +1,7 @@
 package nintendods.ds_project.service;
 
 import nintendods.ds_project.config.ClientNodeConfig;
+import nintendods.ds_project.database.FileDB;
 import nintendods.ds_project.exeption.DuplicateFileException;
 import nintendods.ds_project.model.ANode;
 import nintendods.ds_project.model.file.AFile;
@@ -11,6 +12,7 @@ import nintendods.ds_project.utility.FileModifier;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -120,6 +122,7 @@ public class FileTransceiverService {
                     error = true;
                 }
             }
+
             ss.close();
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -134,6 +137,7 @@ public class FileTransceiverService {
      * @param delete  Delete the file if the condition is false or not.
      * @return null if the check has failed.
      */
+    @Deprecated
     public AFile saveFileWithConditions(ANode node, IFileConditionChecker checker, boolean delete) throws DuplicateFileException {
 
         return saveFileWithConditions(node, "", checker, delete);
@@ -150,6 +154,7 @@ public class FileTransceiverService {
      * @param delete        Delete the file if the condition is false or not.
      * @return null if the check has failed.
      */
+    @Deprecated
     public AFile saveFileWithConditions(ANode node, String directoryPath, IFileConditionChecker checker,  boolean delete) throws DuplicateFileException {
 
         FileMessage fm = this.peekFileMessage();
@@ -194,6 +199,9 @@ public class FileTransceiverService {
             if (m != null) {
                 AFile fileObject = m.getFileObject();
 
+                if(!fileChecker(fileObject)) {return null;};
+
+
                 // Set the new owner of the file
                 fileObject.setOwner(node);
 
@@ -206,11 +214,24 @@ public class FileTransceiverService {
                 // set file path and name
                 fileObject.setPath(f.getAbsolutePath());
                 fileObject.setName(f.getName());
+                FileDBService.getFileDB().addOrUpdateFile(f,node);
 
                 return fileObject;
             }
         }
         return null;
+    }
+
+    private boolean fileChecker(AFile incomingFile){
+        if (incomingFile.isBeenBackedUp()){ //If Original file
+            // contact backup
+
+            return true;
+        } else {
+            FileDB db = FileDBService.getFileDB();
+
+            return db.getFiles().stream().anyMatch(file -> file.getAbsolutePath().equals(incomingFile.getAbsolutePath()));
+        }
     }
 
     private boolean available() {

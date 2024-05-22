@@ -1,13 +1,12 @@
 package nintendods.ds_project.service;
 
-import nintendods.ds_project.Client;
 import nintendods.ds_project.database.FileDB;
 import nintendods.ds_project.model.ClientNode;
 import nintendods.ds_project.model.file.AFile;
 import nintendods.ds_project.model.message.UNAMObject;
+import nintendods.ds_project.utility.ApiUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
@@ -17,49 +16,40 @@ import java.util.List;
 public class ShutdownService {
 
     private static final Logger logger = LoggerFactory.getLogger(ShutdownService.class);
+    public int t_nextNodePort = 0;
+    public int t_prevNodePort = 0;
     ClientNode node;
     UNAMObject nsObject;
-
     @Value("${server.port}")
     private int apiPort;
 
 
-    public int t_nextNodePort = 0;
-    public int t_prevNodePort = 0;
-
-
-    public ShutdownService(ClientNode node, UNAMObject nsObject, int t_nextNodePort, int t_prevNodePort){
+    public ShutdownService(ClientNode node, UNAMObject nsObject, int t_nextNodePort, int t_prevNodePort) {
         this.node = node;
         this.nsObject = nsObject;
         this.t_nextNodePort = t_nextNodePort;
         this.t_prevNodePort = t_prevNodePort;
     }
 
-    public ShutdownService(ClientNode node, UNAMObject nsObject){
+    public ShutdownService(ClientNode node, UNAMObject nsObject) {
         this.node = node;
         this.nsObject = nsObject;
     }
 
-    public void emptyFileDatabase(){
+    public void emptyFileDatabase() {
         FileDB fileDB = FileDBService.getFileDB();
 
         List<AFile> files = fileDB.getFiles();
 
-        for (AFile file : files){
-            if (file.isReplicated()){
-                FileTransceiverService fileTransceiverService = new FileTransceiverService();
-
-                fileTransceiverService.sendFile()
-            }
-
-
+        for (AFile file : files) {
+            FileTransceiverService fileTransceiverService = new FileTransceiverService();
+            String prevNodeIP = ApiUtil.NameServer_GET_NodeIPfromID(Integer.toString(node.getPrevNodeId()));
+            fileTransceiverService.sendFile(file, prevNodeIP);
         }
-
-
     }
 
 
-    public void updateNodesInSystem(){
+    public void updateNodesInSystem() {
         RestTemplate restTemplate = new RestTemplate();
 
         //if you are alone in the network then skip

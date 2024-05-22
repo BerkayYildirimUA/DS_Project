@@ -106,14 +106,14 @@ public class Client {
 
     @PostConstruct
     private void init() throws UnknownHostException {
-        NODE_NAME_LENGTH = ClientNodeConfig.NODE_NAME_LENGTH;
-        NODE_GLOBAL_PORT = ClientNodeConfig.NODE_GLOBAL_PORT;
-        DISCOVERY_RETRIES = ClientNodeConfig.DISCOVERY_RETRIES;
-        DISCOVERY_ADDITION_TIMEOUT = ClientNodeConfig.DISCOVERY_ADDITION_TIMEOUT;
-        LISTENER_BUFFER_SIZE = ClientNodeConfig.LISTENER_BUFFER_SIZE;
-        MULTICAST_ADDRESS = ClientNodeConfig.MULTICAST_ADDRESS;
-        MULTICAST_PORT = ClientNodeConfig.MULTICAST_PORT;
-        testing = ClientNodeConfig.TESTING;
+        NODE_NAME_LENGTH = ClientNodeConfig.getNodeNameLength();
+        NODE_GLOBAL_PORT = ClientNodeConfig.getNodeGlobalPort();
+        DISCOVERY_RETRIES = ClientNodeConfig.getDiscoveryRetries();
+        DISCOVERY_ADDITION_TIMEOUT = ClientNodeConfig.getDiscoveryAdditionTimeout();
+        LISTENER_BUFFER_SIZE = ClientNodeConfig.getListenerBufferSize();
+        MULTICAST_ADDRESS = ClientNodeConfig.getMulticastAddress();
+        MULTICAST_PORT = ClientNodeConfig.getMulticastPort();
+        testing = ClientNodeConfig.getTESTING();
 
         if (testing == 1){
             t_prevNodePort = 0;
@@ -233,13 +233,14 @@ public class Client {
                     }
 
                     // Listen for file transfers
-//                    try {
-//                        AFile file = null;
-//                        file = fileTransceiver.saveIncomingFile(node, path + "/replicated");
-//                        System.out.println("LISTENING:\t get files\n" + file);
-//                    } catch (DuplicateFileException e) {
-//                        throw new RuntimeException(e);
-//                    }
+                    try {
+                        AFile file = null;
+
+                        file = fileTransceiver.saveFileWithConditions(node, path + "/replicated");
+                        System.out.println("LISTENING:\t get files\n" + file);
+                    } catch (DuplicateFileException e) {
+                        throw new RuntimeException(e);
+                    }
 
                     // Update if needed
                     try {

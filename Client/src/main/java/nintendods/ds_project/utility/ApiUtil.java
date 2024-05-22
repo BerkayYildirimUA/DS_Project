@@ -1,6 +1,9 @@
 package nintendods.ds_project.utility;
 
+import nintendods.ds_project.config.ClientNodeConfig;
+import nintendods.ds_project.model.ANode;
 import nintendods.ds_project.model.ClientNode;
+import nintendods.ds_project.model.file.AFile;
 import nintendods.ds_project.model.message.UNAMObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,14 +32,14 @@ public class ApiUtil {
         restTemplate = mockRestTemplate;
     }
 
-    public static String removeLeadingSlash(String input) {
+    private static String removeLeadingSlash(String input) {
         if (input.startsWith("/")) {
             return input.substring(1);
         }
         return input;
     }
 
-    protected static void checkNsObjectIsNotNull() {
+    private static void checkNsObjectIsNotNull() {
         if (nsObject == null) {
             logger.warn("Name Server Object not found");
         }
@@ -46,7 +49,7 @@ public class ApiUtil {
 // ------------------------------------------- NameServer API ----------------------------------------------------------------
 
     //TODO: write test, might not work
-    static String NameServer_GET_FileAddressByName(String filename) {
+    public static String NameServer_GET_FileAddressByName(String filename) {
         checkNsObjectIsNotNull();
 
         String URL_FileAddressByName = nameSeverAdress + "/files/" + filename;
@@ -56,7 +59,7 @@ public class ApiUtil {
     }
 
     //TODO: write test, might not work
-    static String NameServer_GET_NodeIPfromID(String id) {
+    public static String NameServer_GET_NodeIPfromID(String id) {
         checkNsObjectIsNotNull();
 
         String URL_NodeIPfromID = nameSeverAdress + "node/" + id;
@@ -65,8 +68,12 @@ public class ApiUtil {
         return removeLeadingSlash(Objects.requireNonNull(Response_NodeIPfromID.getBody()));
     }
 
+    public static String NameServer_GET_NodeIPfromID(int id) {
+        return NameServer_GET_NodeIPfromID(Integer.toString(id));
+    }
+
     //TODO: write test, might not work
-    static String NameServer_POST_Node(ClientNode newNode) {
+    public static String NameServer_POST_Node(ClientNode newNode) {
         checkNsObjectIsNotNull();
 
         JsonConverter jsonConverter = new JsonConverter("test");
@@ -85,7 +92,7 @@ public class ApiUtil {
     }
 
     //TODO: write test, might not work
-    static String NameServer_PATCH_endError(String id) {
+    public static String NameServer_PATCH_endError(String id) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<String> request = new HttpEntity<>(headers);
@@ -98,8 +105,12 @@ public class ApiUtil {
         return response.getBody();
     }
 
+    public static String NameServer_PATCH_endError(int id) {
+        return NameServer_PATCH_endError(Integer.toString(id));
+    }
+
     //TODO: write test, might not work
-    static String NameServer_DELETE_FileById(String id) {
+    public static String NameServer_DELETE_FileById(String id) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<String> request = new HttpEntity<>(headers);
@@ -111,8 +122,12 @@ public class ApiUtil {
         return response.getBody();
     }
 
+    public static String NameServer_DELETE_FileById(int id) {
+        return NameServer_DELETE_FileById(Integer.toString(id));
+    }
+
     //TODO: write test, might not work
-    static String NameServer_DELETE_DueToError(String id) {
+    public static String NameServer_DELETE_DueToError(String id) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<String> request = new HttpEntity<>(headers);
@@ -124,8 +139,13 @@ public class ApiUtil {
         return response.getBody();
     }
 
+    public static String NameServer_DELETE_DueToError(int id) {
+        return NameServer_DELETE_DueToError(Integer.toString(id));
+    }
+
+
     //TODO: write test, might not work
-    static String NameServer_DELETE_DueToShutdown(String id) {
+    public static String NameServer_DELETE_DueToShutdown(String id) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<String> request = new HttpEntity<>(headers);
@@ -137,10 +157,15 @@ public class ApiUtil {
         return response.getBody();
     }
 
+    public static String NameServer_DELETE_DueToShutdown(int id) {
+        return NameServer_DELETE_DueToShutdown(Integer.toString(id));
+    }
+
+
 // ------------------------------------------- CLIENT API ----------------------------------------------------------------
 
     //TODO: write test, might not work
-    static String Client_GET_getFileLocation(String filename, String nodeID) {
+    public static String Client_GET_getFileLocation(String filename, String nodeID) {
         checkNsObjectIsNotNull();
 
         String addres = ApiUtil.NameServer_GET_NodeIPfromID(nodeID);
@@ -149,6 +174,10 @@ public class ApiUtil {
         logger.info("GET from: " + url);
         ResponseEntity<String> Response_FileAddressByName = restTemplate.getForEntity(url, String.class);
         return Response_FileAddressByName.getBody();
+    }
+
+    public static String Client_GET_getFileLocation(String filename, int nodeID){
+        return Client_GET_getFileLocation(filename, Integer.toString(nodeID));
     }
 
     /*
@@ -166,8 +195,12 @@ public class ApiUtil {
 
      */
 
+    public static String Client_DELETE_file(String filename, int nodeID){
+        return Client_DELETE_file(filename, Integer.toString(nodeID));
+    }
+
     //TODO: write test, might not work
-    static String Client_DELETE_file(String filename, String nodeID) {
+    public static String Client_DELETE_file(String filename, String nodeID) {
         checkNsObjectIsNotNull();
 
         String addres = ApiUtil.NameServer_GET_NodeIPfromID(nodeID);
@@ -179,7 +212,7 @@ public class ApiUtil {
     }
 
     //TODO: write test, might not work
-    static boolean Client_PUT_changeMyNextNodesNeighbor(int prevNodeID, int prevNodePort, int nextNodeID) {
+    public static boolean Client_PUT_changeMyNextNodesNeighbor(int prevNodeID, int prevNodePort, int nextNodeID) {
         checkNsObjectIsNotNull();
         String prevNodeIP = ApiUtil.NameServer_GET_NodeIPfromID(String.valueOf(prevNodeID));
 
@@ -195,7 +228,7 @@ public class ApiUtil {
         }
     }
 
-    static boolean Client_PUT_changeMyPrevNodesNeighbor(int nextNodeID, int nextNodePort, int prevNodeID) {
+    public static boolean Client_PUT_changeMyPrevNodesNeighbor(int nextNodeID, int nextNodePort, int prevNodeID) {
         ApiUtil.checkNsObjectIsNotNull();
 
         String nextNodeIP = ApiUtil.NameServer_GET_NodeIPfromID(String.valueOf(nextNodeID));
@@ -208,6 +241,36 @@ public class ApiUtil {
             System.out.println(e.getMessage());
             return false;
         }
+    }
+
+    public static boolean Client_Put_changeFileOwnerWithID(int ID, AFile file, ANode node){
+        String nodeIP = NameServer_GET_NodeIPfromID(ID);
+        return Client_Put_changeFileOwner(nodeIP, file, node);
+    }
+
+    public static boolean Client_Put_changeFileOwner(String ip, AFile file, ANode node){
+
+        String url = "Http://" + ip + ":" + ClientNodeConfig.getApiPort() + "/api/files/" + file.getName() + "/downloadLocation";
+
+        HttpHeaders headers = new HttpHeaders();
+
+        headers.set("Content-Type", "application/json");
+
+        HttpEntity<ANode> requestEntity = new HttpEntity<>(node, headers);
+
+        ResponseEntity<String> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.PUT,
+                    requestEntity,
+                    String.class
+            );
+        if (response.getStatusCode().is2xxSuccessful()){
+            return true;
+        } else {
+            return false;
+        }
+
+
     }
 
 }

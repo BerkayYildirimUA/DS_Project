@@ -75,6 +75,21 @@ public class FileDB {
         return fileDB.stream().filter(file -> file.getName().equals(fileName)).findFirst();
     }
 
+    /**
+     * Retrieves the IP address of the node storing the specified file.
+     * @param fileName The name of the file.
+     * @return The IP address of the node or null if the file is not found.
+     */
+    public Optional<AFile> getFileByAbsolutePath(String abssolutePath) {
+
+        if (abssolutePath == null || abssolutePath.isEmpty()) {
+            logger.error("Invalid file name provided for getFile.");
+            throw new IllegalArgumentException("File name cannot be null or empty.");
+        }
+
+        return fileDB.stream().filter(file -> file.getAbsolutePath().equals(abssolutePath)).findFirst();
+    }
+
 
     public List<AFile> getFiles() {
         return this.fileDB;
