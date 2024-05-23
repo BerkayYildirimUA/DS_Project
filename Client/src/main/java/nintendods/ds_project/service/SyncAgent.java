@@ -11,6 +11,8 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -26,11 +28,9 @@ import nintendods.ds_project.model.syncAgent.Data;
 import nintendods.ds_project.utility.ApiUtil;
 import nintendods.ds_project.utility.JsonConverter;
 
-
 public class SyncAgent implements Runnable, Serializable {
 
     ApplicationContext context;
-
     protected static final Logger logger = LoggerFactory.getLogger(SyncAgent.class);
 
     private Map<String, Boolean> files = new HashMap<String, Boolean>() {
@@ -38,7 +38,8 @@ public class SyncAgent implements Runnable, Serializable {
 
     public SyncAgent(ApplicationContext context2) {
         this.context = context2;
-        this.files = new HashMap<String, Boolean>() {};
+        this.files = new HashMap<String, Boolean>() {
+        };
     }
 
     public SyncAgent(Map<String, Boolean> files, ApplicationContext context2) {
@@ -82,17 +83,21 @@ public class SyncAgent implements Runnable, Serializable {
                 if (!this.files.containsKey(nextNodeFileName)) {
                     // the file is not present in the local files so add to the local file with the lock of the next node
                     this.files.put(nextNodeFileName, nextNodeAllFiles.get(nextNodeFileName));
+                    logger.info(String.format("File %s is not present in local sync db. Add"));
                 } else {
                     // File is present so check the lock value and update accordingly
                     // this.files.put(nextNodeFileName, nextNodeAllFiles.get(nextNodeAllFiles));
 
                     boolean nextNodeLock = nextNodeAllFiles.get(nextNodeFileName);
                     if (nextNodeLock == true && this.files.get(nextNodeFileName)) { // If both are locked, do nothing
-                        logger.info("both files are locked, do nothing");
+                        logger.info(String.format("Both files (%s) are locked, do nothing", nextNodeFileName));
                     } else if (nextNodeLock == false && this.files.get(nextNodeFileName)) {
-                        logger.info("local file is locked and next node file not, keep lock file");
-                    } else {
-                        logger.info("local file lock is updated with next node file lock");
+                        logger.info(String.format("Local file is locked and next node file (%s) not, do nothing", nextNodeFileName));
+                    } else if (nextNodeLock == false && !this.files.get(nextNodeFileName)){
+                        logger.info(String.format("both files (%s) are unlocked, do nothing", nextNodeFileName));
+                    }
+                    else{
+                        logger.info(String.format("Local file lock is updated with next node file (%s) lock", nextNodeFileName));
                         this.files.put(nextNodeFileName, nextNodeAllFiles.get(nextNodeFileName));
                     }
                 }
@@ -128,8 +133,10 @@ public class SyncAgent implements Runnable, Serializable {
                 Data.requestLock(fileNameLockRequest);
             } else {
                 // No Lock is present so set lock
-                if (Data.addAcceptedLock(fileNameLockRequest))
+                if (Data.addAcceptedLock(fileNameLockRequest)){
                     this.files.replace(fileNameLockRequest, false, true);
+                    logger.info(String.format("Lock request accepted for file %s",fileNameLockRequest));
+                }
                 else {
                     // Failed to put the data on queue
                     // Set back on queue

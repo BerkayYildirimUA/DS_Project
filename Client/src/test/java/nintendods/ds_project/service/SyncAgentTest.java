@@ -87,7 +87,7 @@ public class SyncAgentTest {
         ResponseEntity<String> mockResponseEntity = new ResponseEntity<>(expectedResponse, HttpStatus.OK);
         when(mockRestTemplate.getForEntity(expectedUrl, String.class)).thenReturn(mockResponseEntity);
 
-        syncAgent = new SyncAgent(files);
+        syncAgent = new SyncAgent(files, context);
     }
 
     @Test

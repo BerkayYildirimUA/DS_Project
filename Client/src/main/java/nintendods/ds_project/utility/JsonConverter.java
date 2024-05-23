@@ -43,6 +43,22 @@ public class JsonConverter {
     }
 
     /***
+     * Creates a json string format of a given Object
+     * @param ob the object to be converted to a json string
+     * @return the json string created from the given object
+     */
+    public String toJson(Object ob, Type type){
+        try {
+            Gson gson = new Gson();
+            return gson.toJson(ob, type);
+        }
+        catch (Exception ex){
+            System.out.println(ex);
+        }
+        return "";
+    }
+
+    /***
      * Converts a json string to a given object skeleton
      * @param jsonString The json string
      * @param ob the object structure as Object.class

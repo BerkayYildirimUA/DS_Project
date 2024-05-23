@@ -235,7 +235,7 @@ public class ApiUtil {
     public static Map<String, Boolean> getSyncAgentFiles(String address, int port) {
 
         String url = "http://" + address + ":" + Integer.toString(port) + "/api/agent/sync";
-        logger.info("get from: " + url);
+        logger.info("GET from: " + url);
 
         ResponseEntity<String> responseEntityStr = restTemplate.getForEntity(url, String.class);
         Type syncAgentFileListType = new TypeToken<HashMap<String, Boolean>>() {}.getType();

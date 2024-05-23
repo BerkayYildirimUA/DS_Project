@@ -160,6 +160,9 @@ public class Client {
         fileDB.addOrUpdateFile(new AFile("test1", "File1", this.node));
         fileDB.addOrUpdateFile(new AFile("test1", "File2", this.node));
         fileDB.addOrUpdateFile(new AFile("test1", "File3", this.node));
+
+        //Simulate a lock request on the first file
+        Data.requestLock(fileDB.getFile("File1").get().getName());
         //TODO: remove before push with master
 
         while (isRunning) {
@@ -320,6 +323,13 @@ public class Client {
                     if (syncAgent == null){
                         syncAgent = new SyncAgent(this.context);
                     }
+
+                        //TODO: remove before push with master
+                        if(Data.checkAcceptedLock(fileDB.getFile("File1").get().getName())){
+                            Data.requestUnlockQueue((fileDB.getFile("File1").get().getName()));
+                            System.out.println("request unlock");
+                        }
+                        //TODO: remove before push with master
 
                     nodeState = eNodeState.LISTENING;
                 }
