@@ -79,8 +79,8 @@ public class FileTransceiverService {
             }
 
             FileMessage message = new FileMessage(fileObject);
-            System.out.println(String.format("before create socket to %s - %d",receiverAddress, this.port));
-            socket = new Socket(receiverAddress, this.port); // We assume that the receiver side uses the same port.
+            System.out.println(String.format("before create socket to %s - %d",receiverAddress.replace("/", ""), this.port));
+            socket = new Socket(receiverAddress.replace("/", ""), this.port); // We assume that the receiver side uses the same port.
             System.out.println("socker OK");
             OutputStream outputStream = socket.getOutputStream(); // get the output stream from the socket.
             // create an object output stream from the output stream so we can send an
