@@ -220,7 +220,9 @@ public class Client {
                     try {
                         AFile file = null;
                         file = fileTransceiver.saveIncomingFile(node, path + "/replicated");
-                        //System.out.println("LISTENING:\t get files\n" + file);
+                        if(file != null){
+                            System.out.println("LISTENING:\t get files\n" + file);
+                        }
                     } catch (DuplicateFileException e) {
                         throw new RuntimeException(e);
                     }
