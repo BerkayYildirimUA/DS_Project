@@ -1,6 +1,5 @@
 package nintendods.ds_project;
 
-import com.google.gson.Gson;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import nintendods.ds_project.config.ClientNodeConfig;
@@ -15,6 +14,7 @@ import nintendods.ds_project.service.*;
 import nintendods.ds_project.utility.FileReader;
 import nintendods.ds_project.utility.JsonConverter;
 import nintendods.ds_project.utility.Generator;
+import nintendods.ds_project.utility.ApiUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +25,7 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.event.EventListener;
-import org.springframework.http.HttpEntity;
+
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -38,8 +38,8 @@ import java.util.List;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.Instant;
-import java.util.Objects;
 import java.util.concurrent.TimeUnit;
+
 
 /**
  * Spring Boot application for managing a distributed system node's lifecycle excluding database auto-configuration.
@@ -127,7 +127,12 @@ public class Client {
 
     @EventListener(ApplicationReadyEvent.class)
     public void start() {
-        new Thread(this::runNodeLifecycle).start();
+        try {
+            new Thread(this::runNodeLifecycle).start();
+        }
+        catch (Exception ex){
+            //TODO handle exception
+        }
     }
 
     private void runNodeLifecycle() {
@@ -189,7 +194,7 @@ public class Client {
                     // //Discovery has succeeded so continue
                     // //get NSObject from discovery service
                     nsObject = ds.getNSObject(); //For later use
-
+                    ApiUtil.setNsObject(nsObject);
                     // Configure the api object
                     API.setIp(nsObject.getNSAddress());
                     API.setPort(nsObject.getNSPort());
@@ -269,26 +274,28 @@ public class Client {
                     ResponseEntity<String> response;
 
                     for (AFile file: fileDB.getFiles()) {
-                        // Get ip if the right node
-                        url = "http://" + nsObject.getNSAddress() + ":8089/files/" + file.getName();
-                        // logger.info("GET from: " + url);
-                        System.out.println("GET from: " + url);
-                        response = restTemplate.getForEntity(url, String.class);
-                        transferIp = response.getBody();
+
+                       // Get ip if the right node
+                       url = "http://" + nsObject.getNSAddress() + ":8089/files/" + file.getName();
+                       // logger.info("GET from: " + url);
+                       System.out.println("GET from: " + url);
+                       response = restTemplate.getForEntity(url, String.class);
+                       transferIp = response.getBody();
                         System.out.println("Send file to " + transferIp);
 
-                        System.out.println("TRANSFER:\t received=" + transferIp + "\n\t\t own=" + node.getAddress().getHostAddress());
-                        if (("/"+node.getAddress().getHostAddress()).equals(transferIp)) {
-                            // Node to send is self --> send to previous node
-                            url = "http://" + nsObject.getNSAddress() + ":8089/node/" + node.getPrevNodeId();
-                            // logger.info("GET from: " + url);
-                            response = restTemplate.getForEntity(url, String.class);
-                            transferIp = response.getBody();
-                            System.out.println("Can't send to self, redirect to " + transferIp);
-                        }
+                       System.out.println("TRANSFER:\t received=" + transferIp + "\n\t\t own=" + node.getAddress().getHostAddress());
+                       if (("/"+node.getAddress().getHostAddress()).equals(transferIp)) {
+                           // Node to send is self --> send to previous node
+                           url = "http://" + nsObject.getNSAddress() + ":8089/node/" + node.getPrevNodeId();
+                           // logger.info("GET from: " + url);
+                           System.out.println("GET from: " + url);
+                           response = restTemplate.getForEntity(url, String.class);
+                           transferIp = response.getBody();
+                           System.out.println("Can't send to self, redirect to " + transferIp);
+                       }
 
-                        // Send file to that node
-                        fileTransceiver.sendFile(file, transferIp);
+                       // Send file to that node
+                       fileTransceiver.sendFile(file, transferIp);
                     }
 
                     System.out.println("TRANSFER:\t files added \n" + fileDB.getFiles());

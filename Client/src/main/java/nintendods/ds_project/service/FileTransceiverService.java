@@ -1,6 +1,5 @@
 package nintendods.ds_project.service;
 
-import nintendods.ds_project.config.ClientNodeConfig;
 import nintendods.ds_project.exeption.DuplicateFileException;
 import nintendods.ds_project.model.ANode;
 import nintendods.ds_project.model.file.AFile;
@@ -29,7 +28,7 @@ public class FileTransceiverService {
      * The default TCP port is 12346 and the file capacity is 50.
      */
     public FileTransceiverService() {
-        this(ClientNodeConfig.TCP_FILE_RECEIVE_PORT, 50);
+        this(12346, 50);
     }
 
     /**
@@ -46,16 +45,9 @@ public class FileTransceiverService {
         // running = true;
         this.port = port;
 
-        receiveQueue = new LinkedBlockingQueue<>(buffer);
-        this.receiverThread = new Thread(() -> receiveFile(port));
-        this.receiverThread.start();
-
-        // Let the thread startup
-        try {
-            // Delay for 500 milliseconds
-            Thread.sleep(500);
-        } catch (InterruptedException e) {
-        }
+       receiveQueue = new LinkedBlockingQueue<>(buffer);
+       this.receiverThread = new Thread(() -> receiveFile(port));
+       this.receiverThread.start();
     }
 
     /**
@@ -135,7 +127,11 @@ public class FileTransceiverService {
 
     /**
      * Save a file based on a condition that is present in the incoming buffer.
+<<<<<<< HEAD
      *
+=======
+     * 
+>>>>>>> fa3be73dbed172f88820e880e90493a63a1cf9ef
      * @param node    the issuer who saves the file.
      * @param checker an interface to check if a file can be saved or not.
      * @param delete  Delete the file if the condition is false or not.
@@ -150,7 +146,11 @@ public class FileTransceiverService {
      * Save a file based on a condition that is present in the incoming buffer. If a
      * file is present, we
      * save it in the given directory.
+<<<<<<< HEAD
      *
+=======
+     * 
+>>>>>>> fa3be73dbed172f88820e880e90493a63a1cf9ef
      * @param node          the issuer who saves the file
      * @param directoryPath The new directory path to save the file in.
      * @param checker       an interface to check if a file can be saved or not.
@@ -204,7 +204,11 @@ public class FileTransceiverService {
                 // Set the new owner of the file
                 fileObject.setOwner(node);
 
-                File f = FileModifier.createFile(directoryPath, m.getFileObject().getName(), false);
+                File f = FileModifier.createFile(directoryPath, m.getFileObject().getName(), m.getFileInByte(), false);
+
+                if (f == null){
+                    throw new DuplicateFileException();
+                }
 
                 if (f == null){
                     throw new DuplicateFileException();
