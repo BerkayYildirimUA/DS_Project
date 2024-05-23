@@ -22,7 +22,6 @@ import org.springframework.stereotype.Service;
 /**
  * Transfer/ receive a file to/from another node.
  */
-@Service
 public class FileTransceiverService {
 
     private int port;
