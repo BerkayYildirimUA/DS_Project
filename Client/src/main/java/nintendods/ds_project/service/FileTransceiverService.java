@@ -92,6 +92,7 @@ public class FileTransceiverService {
             // File is replicated towards another node
             // fileObject.setReplicated(true);
         } catch (Exception ex) {
+            System.out.println(ex);
             return false;
         }
 
