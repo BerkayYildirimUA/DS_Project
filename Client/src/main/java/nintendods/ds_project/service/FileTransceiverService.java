@@ -13,6 +13,9 @@ import java.net.Socket;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Transfer/ receive a file to/from another node.
  */
@@ -22,6 +25,9 @@ public class FileTransceiverService {
     private static BlockingQueue<FileMessage> receiveQueue;
     private Thread receiverThread;
 
+        private static final Logger logger = LoggerFactory.getLogger(FileTransceiverService.class);
+
+
     /**
      * Create a File tranceiver object that will automatically create a thread where
      * it wil listen for file receives.
@@ -29,6 +35,7 @@ public class FileTransceiverService {
      */
     public FileTransceiverService() {
         this(12346, 50);
+        logger.info(String.format("Initialize FileTransceiverService with port %d and buffer size %d", 12346, 50));
     }
 
     /**
@@ -99,28 +106,34 @@ public class FileTransceiverService {
      */
     private void receiveFile(int port) {
         try {
+            logger.info(String.format("Starting receive thread on port %d",port));
             ServerSocket ss = new ServerSocket(port);
             Socket socket;
             InputStream inputStream;
             ObjectInputStream objectInputStream;
             boolean error = false;
+            logger.info("Done initializing");
 
             while (!error) {
                 try {
+                    logger.info("Wait for file message");
                     socket = ss.accept(); // blocking call, this will wait until a connection is attempted on this port.
-
+                    logger.info("file message recieved");
                     inputStream = socket.getInputStream();
                     objectInputStream = new ObjectInputStream(inputStream);
 
                     // read the list of messages from the socket and cast to FileMessage object
                     FileMessage receiveMessage = (FileMessage) objectInputStream.readObject();
                     receiveQueue.add(receiveMessage);
+                    logger.info("message saved");
                 } catch (Exception ex) {
+                    System.out.println(ex);
                     error = true;
                 }
             }
             ss.close();
         } catch (IOException e) {
+            System.out.println(e);
             throw new RuntimeException(e);
         }
     }

@@ -156,8 +156,7 @@ public class Client {
                     // Set Discovery on
                     if (discoveryRetries == DISCOVERY_RETRIES) {
                         // Max retries reached
-                        System.out.println("DISCOVERY:\t Max discovery retries reached");
-                        logger.warn("Max discovery retries reached");
+                        logger.error("Max discovery retries reached");
                         nodeState = eNodeState.ERROR;
                         break;
                     }
@@ -201,7 +200,6 @@ public class Client {
 
 
                     logger.info(node.toString());
-                    System.out.println("DISCOVERY:\t Successfully reply in " + discoveryRetries + " discoveries.");
                     logger.info("Successfully reply in " + discoveryRetries + " discoveries.");
                     nodeState = eNodeState.LISTENING; // Move to Listening state after successful discovery
                 }
@@ -222,7 +220,7 @@ public class Client {
                     try {
                         AFile file = null;
                         file = fileTransceiver.saveIncomingFile(node, path + "/replicated");
-                        System.out.println("LISTENING:\t get files\n" + file);
+                        //System.out.println("LISTENING:\t get files\n" + file);
                     } catch (DuplicateFileException e) {
                         throw new RuntimeException(e);
                     }
