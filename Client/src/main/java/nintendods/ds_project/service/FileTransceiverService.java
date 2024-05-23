@@ -1,5 +1,6 @@
 package nintendods.ds_project.service;
 
+import nintendods.ds_project.config.ClientNodeConfig;
 import nintendods.ds_project.exeption.DuplicateFileException;
 import nintendods.ds_project.model.ANode;
 import nintendods.ds_project.model.file.AFile;
@@ -13,7 +14,6 @@ import java.net.Socket;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import org.apache.tomcat.util.digester.SystemPropertySource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,8 +26,7 @@ public class FileTransceiverService {
     private static BlockingQueue<FileMessage> receiveQueue;
     private Thread receiverThread;
 
-        private static final Logger logger = LoggerFactory.getLogger(FileTransceiverService.class);
-
+    private static final Logger logger = LoggerFactory.getLogger(FileTransceiverService.class);
 
     /**
      * Create a File tranceiver object that will automatically create a thread where
@@ -35,8 +34,8 @@ public class FileTransceiverService {
      * The default TCP port is 12346 and the file capacity is 50.
      */
     public FileTransceiverService() {
-        this(12346, 50);
-        logger.info(String.format("Initialize FileTransceiverService with port %d and buffer size %d", 12346, 50));
+        this(ClientNodeConfig.TCP_FILE_RECEIVE_PORT, 50);
+        logger.info(String.format("Initialize FileTransceiverService with port %d and buffer size %d", ClientNodeConfig.TCP_FILE_RECEIVE_PORT, ClientNodeConfig.TCP_FILE_RECEIVE_BUFFER));
     }
 
     /**
@@ -53,9 +52,9 @@ public class FileTransceiverService {
         // running = true;
         this.port = port;
 
-       receiveQueue = new LinkedBlockingQueue<>(buffer);
-       this.receiverThread = new Thread(() -> receiveFile(port));
-       this.receiverThread.start();
+        receiveQueue = new LinkedBlockingQueue<>(buffer);
+        this.receiverThread = new Thread(() -> receiveFile(port));
+        this.receiverThread.start();
     }
 
     /**
@@ -79,9 +78,10 @@ public class FileTransceiverService {
             }
 
             FileMessage message = new FileMessage(fileObject);
-            System.out.println(String.format("before create socket to %s - %d",receiverAddress.replace("/", ""), this.port));
+            
+            logger.info(String.format("before create socket to %s - %d",receiverAddress.replace("/", ""), this.port));
             socket = new Socket(receiverAddress.replace("/", ""), this.port); // We assume that the receiver side uses the same port.
-            System.out.println("socker OK");
+            logger.info("socker OK");
             OutputStream outputStream = socket.getOutputStream(); // get the output stream from the socket.
             // create an object output stream from the output stream so we can send an
             // object through it
@@ -222,7 +222,6 @@ public class FileTransceiverService {
                 fileObject.setPath(f.getAbsolutePath());
                 fileObject.setName(f.getName());
                 FileDBService.getFileDB().addOrUpdateFile(f, node);
-                System.out.println("File received:\n" + f);
 
                 return fileObject;
             }

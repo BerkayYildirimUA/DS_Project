@@ -1,6 +1,8 @@
 package nintendods.ds_project.service;
 
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.io.DataOutputStream;
@@ -10,6 +12,8 @@ import java.net.Socket;
 
 @SpringBootTest
 public class TCPClientTest {
+
+    private static final Logger logger = LoggerFactory.getLogger(TCPClientTest.class);
 
     @Test
     public void TCPCommunication() { //werkt allen als ik Intelij als admin run --Berkay
@@ -45,7 +49,7 @@ public class TCPClientTest {
 
         public void connect(String ip, String message) throws IOException {
             socket = new Socket(ip, 3780);
-            System.out.println("TCPClient:\t Connection Successful!");
+            logger.info("Connection Successful!");
 
             dataOut = new DataOutputStream(socket.getOutputStream());
 
