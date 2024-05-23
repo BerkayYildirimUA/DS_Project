@@ -1,6 +1,5 @@
 package nintendods.ds_project;
 
-import com.google.gson.Gson;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import nintendods.ds_project.config.ClientNodeConfig;
@@ -27,25 +26,18 @@ import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.event.EventListener;
 
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.File;
-import java.net.InetAddress;
 import java.net.UnknownHostException;
-
 import java.util.List;
-
 
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.Instant;
-
-import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 
@@ -227,13 +219,13 @@ public class Client {
                     }
 
                     // Listen for file transfers
-//                    try {
-//                        AFile file = null;
-//                        file = fileTransceiver.saveIncomingFile(node, path + "/replicated");
-//                        System.out.println("LISTENING:\t get files\n" + file);
-//                    } catch (DuplicateFileException e) {
-//                        throw new RuntimeException(e);
-//                    }
+                    try {
+                        AFile file = null;
+                        file = fileTransceiver.saveIncomingFile(node, path + "/replicated");
+                        System.out.println("LISTENING:\t get files\n" + file);
+                    } catch (DuplicateFileException e) {
+                        throw new RuntimeException(e);
+                    }
 
                     // Update if needed
                     try {
@@ -282,12 +274,14 @@ public class Client {
                     ResponseEntity<String> response;
 
                     for (AFile file: fileDB.getFiles()) {
+
                        // Get ip if the right node
                        url = "http://" + nsObject.getNSAddress() + ":8089/files/" + file.getName();
                        // logger.info("GET from: " + url);
                        System.out.println("GET from: " + url);
                        response = restTemplate.getForEntity(url, String.class);
                        transferIp = response.getBody();
+                        System.out.println("Send file to " + transferIp);
 
                        System.out.println("TRANSFER:\t received=" + transferIp + "\n\t\t own=" + node.getAddress().getHostAddress());
                        if (("/"+node.getAddress().getHostAddress()).equals(transferIp)) {
@@ -297,6 +291,7 @@ public class Client {
                            System.out.println("GET from: " + url);
                            response = restTemplate.getForEntity(url, String.class);
                            transferIp = response.getBody();
+                           System.out.println("Can't send to self, redirect to " + transferIp);
                        }
 
                        // Send file to that node

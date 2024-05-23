@@ -1,6 +1,5 @@
 package nintendods.ds_project.service;
 
-import nintendods.ds_project.config.ClientNodeConfig;
 import nintendods.ds_project.exeption.DuplicateFileException;
 import nintendods.ds_project.model.ANode;
 import nintendods.ds_project.model.file.AFile;
@@ -35,7 +34,7 @@ public class FileTransceiverService {
     /**
      * Create a File tranceiver object that will automatically create a thread where
      * it wil listen for file receives.
-     * 
+     *
      * @param port   the receiving port to listen on
      * @param buffer the amount of files that can be buffered
      */
@@ -54,7 +53,7 @@ public class FileTransceiverService {
     /**
      * Sends a file with its file object to a given address. The port is the default
      * one eg. 12346
-     * 
+     *
      * @param fileObject      the object that contains the file information. Will be
      *                        used to retrieve the file itself.
      * @param receiverAddress the address of the receiver
@@ -95,7 +94,7 @@ public class FileTransceiverService {
     /**
      * A receiving method that will loop to infinity and listens onto the given
      * port.
-     * 
+     *
      * @param port
      */
     private void receiveFile(int port) {
@@ -128,7 +127,11 @@ public class FileTransceiverService {
 
     /**
      * Save a file based on a condition that is present in the incoming buffer.
+<<<<<<< HEAD
+     *
+=======
      * 
+>>>>>>> fa3be73dbed172f88820e880e90493a63a1cf9ef
      * @param node    the issuer who saves the file.
      * @param checker an interface to check if a file can be saved or not.
      * @param delete  Delete the file if the condition is false or not.
@@ -143,7 +146,11 @@ public class FileTransceiverService {
      * Save a file based on a condition that is present in the incoming buffer. If a
      * file is present, we
      * save it in the given directory.
+<<<<<<< HEAD
+     *
+=======
      * 
+>>>>>>> fa3be73dbed172f88820e880e90493a63a1cf9ef
      * @param node          the issuer who saves the file
      * @param directoryPath The new directory path to save the file in.
      * @param checker       an interface to check if a file can be saved or not.
@@ -171,7 +178,7 @@ public class FileTransceiverService {
 
     /**
      * Save a file that is present in the incoming buffer.
-     * 
+     *
      * @param node the issuer who saves the file
      * @return null if nothing has arrived and an object if something has arrived.
      */
@@ -182,7 +189,7 @@ public class FileTransceiverService {
     /**
      * Save a file that is present in the incoming buffer. If a file is present, we
      * save it in the given directory.
-     * 
+     *
      * @param node          the issuer who saves the file
      * @param directoryPath The new directory path to save the file in
      * @return null if nothing has arrived and an object if something has arrived.
@@ -203,9 +210,15 @@ public class FileTransceiverService {
                     throw new DuplicateFileException();
                 }
 
+                if (f == null){
+                    throw new DuplicateFileException();
+                }
+
                 // set file path and name
                 fileObject.setPath(f.getAbsolutePath());
                 fileObject.setName(f.getName());
+                FileDBService.getFileDB().addOrUpdateFile(f, node);
+                System.out.println("File received:\n" + f);
 
                 return fileObject;
             }
