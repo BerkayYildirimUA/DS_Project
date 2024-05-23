@@ -295,7 +295,7 @@ public class Client {
                        }
 
                        // Send file to that node
-                       fileTransceiver.sendFile(file, transferIp);
+                       logger.info(String.format("return of send %b ",fileTransceiver.sendFile(file, transferIp)));
                     }
 
                     System.out.println("TRANSFER:\t files added \n" + fileDB.getFiles());
