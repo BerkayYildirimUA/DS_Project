@@ -275,15 +275,16 @@ public class Client {
                         System.out.println("GET from: " + url);
                         response = restTemplate.getForEntity(url, String.class);
                         transferIp = response.getBody();
+                        System.out.println("Send file to " + transferIp);
 
                         System.out.println("TRANSFER:\t received=" + transferIp + "\n\t\t own=" + node.getAddress().getHostAddress());
                         if (("/"+node.getAddress().getHostAddress()).equals(transferIp)) {
                             // Node to send is self --> send to previous node
                             url = "http://" + nsObject.getNSAddress() + ":8089/node/" + node.getPrevNodeId();
                             // logger.info("GET from: " + url);
-                            System.out.println("GET from: " + url);
                             response = restTemplate.getForEntity(url, String.class);
                             transferIp = response.getBody();
+                            System.out.println("Can't send to self, redirect to " + transferIp);
                         }
 
                         // Send file to that node

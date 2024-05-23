@@ -213,6 +213,8 @@ public class FileTransceiverService {
                 // set file path and name
                 fileObject.setPath(f.getAbsolutePath());
                 fileObject.setName(f.getName());
+                FileDBService.getFileDB().addOrUpdateFile(f, node);
+                System.out.println("File received:\n" + f);
 
                 return fileObject;
             }
