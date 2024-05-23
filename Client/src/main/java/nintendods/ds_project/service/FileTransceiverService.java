@@ -16,10 +16,13 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 /**
  * Transfer/ receive a file to/from another node.
  */
+@Service
 public class FileTransceiverService {
 
     private int port;
@@ -34,8 +37,8 @@ public class FileTransceiverService {
      * The default TCP port is 12346 and the file capacity is 50.
      */
     public FileTransceiverService() {
-        this(ClientNodeConfig.TCP_FILE_RECEIVE_PORT, 50);
-        logger.info(String.format("Initialize FileTransceiverService with port %d and buffer size %d", ClientNodeConfig.TCP_FILE_RECEIVE_PORT, ClientNodeConfig.TCP_FILE_RECEIVE_BUFFER));
+        this(12346, 50);
+        logger.info(String.format("Initialize FileTransceiverService with port %d and buffer size %d", 12346, 50));
     }
 
     /**
