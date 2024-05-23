@@ -13,6 +13,7 @@ import java.net.Socket;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import org.apache.tomcat.util.digester.SystemPropertySource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -78,8 +79,9 @@ public class FileTransceiverService {
             }
 
             FileMessage message = new FileMessage(fileObject);
-
+            System.out.println(String.format("before create socket to %s - %d",receiverAddress, this.port));
             socket = new Socket(receiverAddress, this.port); // We assume that the receiver side uses the same port.
+            System.out.println("socker OK");
             OutputStream outputStream = socket.getOutputStream(); // get the output stream from the socket.
             // create an object output stream from the output stream so we can send an
             // object through it
