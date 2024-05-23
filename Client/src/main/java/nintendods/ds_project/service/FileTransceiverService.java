@@ -37,8 +37,8 @@ public class FileTransceiverService {
      * The default TCP port is 12346 and the file capacity is 50.
      */
     public FileTransceiverService() {
-        this(12346, 50);
-        logger.info(String.format("Initialize FileTransceiverService with port %d and buffer size %d", 12346, 50));
+        this(12347, 50);
+        logger.info(String.format("Initialize FileTransceiverService with port %d and buffer size %d", 12347, 50));
     }
 
     /**
