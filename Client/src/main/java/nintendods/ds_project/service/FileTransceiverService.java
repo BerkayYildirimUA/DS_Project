@@ -127,11 +127,7 @@ public class FileTransceiverService {
 
     /**
      * Save a file based on a condition that is present in the incoming buffer.
-<<<<<<< HEAD
-     *
-=======
      * 
->>>>>>> fa3be73dbed172f88820e880e90493a63a1cf9ef
      * @param node    the issuer who saves the file.
      * @param checker an interface to check if a file can be saved or not.
      * @param delete  Delete the file if the condition is false or not.
@@ -146,11 +142,7 @@ public class FileTransceiverService {
      * Save a file based on a condition that is present in the incoming buffer. If a
      * file is present, we
      * save it in the given directory.
-<<<<<<< HEAD
-     *
-=======
      * 
->>>>>>> fa3be73dbed172f88820e880e90493a63a1cf9ef
      * @param node          the issuer who saves the file
      * @param directoryPath The new directory path to save the file in.
      * @param checker       an interface to check if a file can be saved or not.
