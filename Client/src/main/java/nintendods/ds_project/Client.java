@@ -130,6 +130,7 @@ public class Client {
     @PreDestroy
     public void prepareForShutdown() throws InterruptedException {
         if (nodeState != eNodeState.DISCOVERY) {
+            fileWatcherService.stopWatching();
             System.out.println("Preparing for shutdown...");
             shutdown();
             System.out.println("Nodes prepared.");
