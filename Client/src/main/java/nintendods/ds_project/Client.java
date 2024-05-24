@@ -156,6 +156,7 @@ public class Client {
         int discoveryRetries = 0; // Counter for discovery attempts
 
         //TODO: remove before push with master
+        
         final FileDB fileDB = FileDBService.getFileDB();
         fileDB.addOrUpdateFile(new AFile("test1", "File1", this.node));
         fileDB.addOrUpdateFile(new AFile("test1", "File2", this.node));
