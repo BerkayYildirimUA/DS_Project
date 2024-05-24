@@ -9,6 +9,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ConfigurableApplicationContext;
 
@@ -25,6 +27,8 @@ public class SyncAgent implements Runnable, Serializable {
 
     @Autowired
     ConfigurableApplicationContext context;
+
+    protected static final Logger logger = LoggerFactory.getLogger(SyncAgent.class);
 
     private Map<String, Boolean> files = new HashMap<String, Boolean>() {
     }; // Map of all files in the system and the possible lock on it.
@@ -49,13 +53,10 @@ public class SyncAgent implements Runnable, Serializable {
     private void syncFiles() {
         try {
             JsonConverter jsonConverter = new JsonConverter();
-            Type localFileListType = new TypeToken<ArrayList<AFile>>() {}.getType();
             Type syncAgentFileListType = new TypeToken<HashMap<String, Boolean>>() {}.getType();
 
             // Load all files of the local node
-            List<AFile> allFiles = (List<AFile>) jsonConverter.toObject(
-                    ApiUtil.clientGetAllFiles(InetAddress.getLocalHost().getHostAddress(), ClientNodeConfig.API_PORT),
-                    localFileListType);
+            List<AFile> allFiles = ApiUtil.clientGetAllFiles(InetAddress.getLocalHost().getHostAddress(), ClientNodeConfig.API_PORT);
 
             // Only keep the one that are not replicated (so owned by the node itself).
             List<AFile> ownedFiles = allFiles.stream().filter(f -> f.isReplicated() == false).toList();
@@ -69,11 +70,7 @@ public class SyncAgent implements Runnable, Serializable {
             String nextNodeIP = ApiUtil.NameServer_GET_NodeIPfromID(nextNodeId);
 
             //get the files from the next nodes of that sync agent
-            String nextNodeFileString = ApiUtil.getSyncAgentFiles(nextNodeIP, ClientNodeConfig.API_PORT);
-
-            // convert to a map
-            Map<String, Boolean> nextNodeAllFiles = (Map<String, Boolean>) jsonConverter.toObject(nextNodeFileString,
-                    syncAgentFileListType);
+            Map<String, Boolean> nextNodeAllFiles = ApiUtil.getSyncAgentFiles(nextNodeIP, ClientNodeConfig.API_PORT);
 
             // Check if we have new files on the next node that are not present on the
             // current node.
@@ -88,11 +85,11 @@ public class SyncAgent implements Runnable, Serializable {
 
                     boolean nextNodeLock = nextNodeAllFiles.get(nextNodeFileName);
                     if (nextNodeLock == true && this.files.get(nextNodeFileName)) { // If both are locked, do nothing
-                        System.out.print("SyncAgent - both files are locked, do nothing");
+                        logger.info("both files are locked, do nothing");
                     } else if (nextNodeLock == false && this.files.get(nextNodeFileName)) {
-                        System.out.print("SyncAgent - local file is locked and next node file not, keep lock file");
+                        logger.info("local file is locked and next node file not, keep lock file");
                     } else {
-                        System.out.print("SyncAgent - local file lock is updated with next node file lock");
+                        logger.info("local file lock is updated with next node file lock");
                         this.files.put(nextNodeFileName, nextNodeAllFiles.get(nextNodeFileName));
                     }
                 }

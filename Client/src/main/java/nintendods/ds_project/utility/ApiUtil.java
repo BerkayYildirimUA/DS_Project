@@ -1,6 +1,7 @@
 package nintendods.ds_project.utility;
 
 import nintendods.ds_project.model.ClientNode;
+import nintendods.ds_project.model.file.AFile;
 import nintendods.ds_project.model.message.UNAMObject;
 import nintendods.ds_project.service.SyncAgent;
 
@@ -9,7 +10,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.*;
 import org.springframework.web.client.RestTemplate;
 
-import java.awt.List;
+import com.google.gson.reflect.TypeToken;
+
+
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 public class ApiUtil {
@@ -18,6 +26,7 @@ public class ApiUtil {
     protected static RestTemplate restTemplate = new RestTemplate();
     protected static UNAMObject nsObject;
     protected static String nameSeverAdress;
+    protected static JsonConverter jsonConverter = new JsonConverter();
 
     public static UNAMObject getNsObject() {
         return nsObject;
@@ -213,22 +222,24 @@ public class ApiUtil {
         }
     }
 
-    public static String clientGetAllFiles(String address, int port) {
+    public static List<AFile> clientGetAllFiles(String address, int port) {
         String url = "http://" + address + ":" + Integer.toString(port) + "/api/files/all";
         logger.info("GET from: " + url);
         ResponseEntity<String> files = restTemplate.getForEntity(url, String.class);
-        return files.getBody();
+        Type localFileListType = new TypeToken<ArrayList<AFile>>() {}.getType();
+        return (List<AFile>) jsonConverter.toObject(files.getBody(), localFileListType);
 
         //Beter to use WebClient? RestTemplate wil be deprecated .
     }
 
-    public static String getSyncAgentFiles(String address, int port) {
+    public static Map<String, Boolean> getSyncAgentFiles(String address, int port) {
 
         String url = "http://" + address + ":" + Integer.toString(port) + "/api/agent/sync";
         logger.info("get from: " + url);
 
         ResponseEntity<String> responseEntityStr = restTemplate.getForEntity(url, String.class);
-        return responseEntityStr.getBody();
+        Type syncAgentFileListType = new TypeToken<HashMap<String, Boolean>>() {}.getType();
+        return (Map<String, Boolean>) jsonConverter.toObject(responseEntityStr.getBody(),syncAgentFileListType);
 
         //Beter to use WebClient? RestTemplate wil be deprecated .
     }
