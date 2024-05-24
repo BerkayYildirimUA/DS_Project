@@ -1,5 +1,6 @@
 package nintendods.ds_project.service;
 
+import nintendods.ds_project.config.ClientNodeConfig;
 import nintendods.ds_project.exeption.DuplicateFileException;
 import nintendods.ds_project.model.ANode;
 import nintendods.ds_project.model.file.AFile;
@@ -13,6 +14,11 @@ import java.net.Socket;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 /**
  * Transfer/ receive a file to/from another node.
  */
@@ -22,13 +28,16 @@ public class FileTransceiverService {
     private static BlockingQueue<FileMessage> receiveQueue;
     private Thread receiverThread;
 
+    private static final Logger logger = LoggerFactory.getLogger(FileTransceiverService.class);
+
     /**
      * Create a File tranceiver object that will automatically create a thread where
      * it wil listen for file receives.
      * The default TCP port is 12346 and the file capacity is 50.
      */
     public FileTransceiverService() {
-        this(12346, 50);
+        this(12347, 50);
+        logger.info(String.format("Initialize FileTransceiverService with port %d and buffer size %d", 12347, 50));
     }
 
     /**
@@ -45,9 +54,9 @@ public class FileTransceiverService {
         // running = true;
         this.port = port;
 
-       receiveQueue = new LinkedBlockingQueue<>(buffer);
-       this.receiverThread = new Thread(() -> receiveFile(port));
-       this.receiverThread.start();
+        receiveQueue = new LinkedBlockingQueue<>(buffer);
+        this.receiverThread = new Thread(() -> receiveFile(port));
+        this.receiverThread.start();
     }
 
     /**
@@ -71,8 +80,10 @@ public class FileTransceiverService {
             }
 
             FileMessage message = new FileMessage(fileObject);
-
-            socket = new Socket(receiverAddress, this.port); // We assume that the receiver side uses the same port.
+            
+            logger.info(String.format("before create socket to %s - %d",receiverAddress.replace("/", ""), this.port));
+            socket = new Socket(receiverAddress.replace("/", ""), this.port); // We assume that the receiver side uses the same port.
+            logger.info("socker OK");
             OutputStream outputStream = socket.getOutputStream(); // get the output stream from the socket.
             // create an object output stream from the output stream so we can send an
             // object through it
@@ -85,6 +96,7 @@ public class FileTransceiverService {
             // File is replicated towards another node
             // fileObject.setReplicated(true);
         } catch (Exception ex) {
+            System.out.println(ex);
             return false;
         }
 
@@ -99,28 +111,34 @@ public class FileTransceiverService {
      */
     private void receiveFile(int port) {
         try {
+            logger.info(String.format("Starting receive thread on port %d",port));
             ServerSocket ss = new ServerSocket(port);
             Socket socket;
             InputStream inputStream;
             ObjectInputStream objectInputStream;
             boolean error = false;
+            logger.info("Done initializing");
 
             while (!error) {
                 try {
+                    logger.info("Wait for file message");
                     socket = ss.accept(); // blocking call, this will wait until a connection is attempted on this port.
-
+                    logger.info("file message recieved");
                     inputStream = socket.getInputStream();
                     objectInputStream = new ObjectInputStream(inputStream);
 
                     // read the list of messages from the socket and cast to FileMessage object
                     FileMessage receiveMessage = (FileMessage) objectInputStream.readObject();
                     receiveQueue.add(receiveMessage);
+                    logger.info("message saved");
                 } catch (Exception ex) {
+                    System.out.println(ex);
                     error = true;
                 }
             }
             ss.close();
         } catch (IOException e) {
+            System.out.println(e);
             throw new RuntimeException(e);
         }
     }
@@ -199,18 +217,13 @@ public class FileTransceiverService {
                 File f = FileModifier.createFile(directoryPath, m.getFileObject().getName(), m.getFileInByte(), false);
 
                 if (f == null){
-                    throw new DuplicateFileException();
-                }
-
-                if (f == null){
-                    throw new DuplicateFileException();
+                    throw new DuplicateFileException("file " + fileObject.getName() + " on location " +fileObject.getAbsolutePath() + " is already present on the system!");
                 }
 
                 // set file path and name
                 fileObject.setPath(f.getAbsolutePath());
                 fileObject.setName(f.getName());
                 FileDBService.getFileDB().addOrUpdateFile(f, node);
-                System.out.println("File received:\n" + f);
 
                 return fileObject;
             }

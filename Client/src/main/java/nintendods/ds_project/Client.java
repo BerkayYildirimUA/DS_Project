@@ -156,8 +156,7 @@ public class Client {
                     // Set Discovery on
                     if (discoveryRetries == DISCOVERY_RETRIES) {
                         // Max retries reached
-                        System.out.println("DISCOVERY:\t Max discovery retries reached");
-                        logger.warn("Max discovery retries reached");
+                        logger.error("Max discovery retries reached");
                         nodeState = eNodeState.ERROR;
                         break;
                     }
@@ -201,7 +200,6 @@ public class Client {
 
 
                     logger.info(node.toString());
-                    System.out.println("DISCOVERY:\t Successfully reply in " + discoveryRetries + " discoveries.");
                     logger.info("Successfully reply in " + discoveryRetries + " discoveries.");
                     nodeState = eNodeState.LISTENING; // Move to Listening state after successful discovery
                 }
@@ -222,7 +220,9 @@ public class Client {
                     try {
                         AFile file = null;
                         file = fileTransceiver.saveIncomingFile(node, path + "/replicated");
-                        System.out.println("LISTENING:\t get files\n" + file);
+                        if(file != null){
+                            System.out.println("LISTENING:\t get files\n" + file);
+                        }
                     } catch (DuplicateFileException e) {
                         throw new RuntimeException(e);
                     }
@@ -275,27 +275,27 @@ public class Client {
 
                     for (AFile file: fileDB.getFiles()) {
 
-                       // Get ip if the right node
-                       url = "http://" + nsObject.getNSAddress() + ":8089/files/" + file.getName();
-                       // logger.info("GET from: " + url);
-                       System.out.println("GET from: " + url);
-                       response = restTemplate.getForEntity(url, String.class);
-                       transferIp = response.getBody();
-                        System.out.println("Send file to " + transferIp);
-
-                       System.out.println("TRANSFER:\t received=" + transferIp + "\n\t\t own=" + node.getAddress().getHostAddress());
-                       if (("/"+node.getAddress().getHostAddress()).equals(transferIp)) {
-                           // Node to send is self --> send to previous node
-                           url = "http://" + nsObject.getNSAddress() + ":8089/node/" + node.getPrevNodeId();
-                           // logger.info("GET from: " + url);
-                           System.out.println("GET from: " + url);
-                           response = restTemplate.getForEntity(url, String.class);
-                           transferIp = response.getBody();
-                           System.out.println("Can't send to self, redirect to " + transferIp);
-                       }
+                        // Get ip if the right node
+                        url = "http://" + nsObject.getNSAddress() + ":8089/files/" + file.getName();
+                        // logger.info("GET from: " + url);
+                        System.out.println("GET from: " + url);
+                        response = restTemplate.getForEntity(url, String.class);
+                        transferIp = response.getBody();
+                         System.out.println("Send file to " + transferIp);
+                        
+                        System.out.println("TRANSFER:\t received=" + transferIp + "\n\t\t own=" + node.getAddress().getHostAddress());
+                        if (("/"+node.getAddress().getHostAddress()).equals(transferIp)) {
+                            // Node to send is self --> send to previous node
+                            url = "http://" + nsObject.getNSAddress() + ":8089/node/" + node.getPrevNodeId();
+                            // logger.info("GET from: " + url);
+                            System.out.println("GET from: " + url);
+                            response = restTemplate.getForEntity(url, String.class);
+                            transferIp = response.getBody();
+                            System.out.println("Can't send to self, redirect to " + transferIp);
+                        }
 
                        // Send file to that node
-                       fileTransceiver.sendFile(file, transferIp);
+                       logger.info(String.format("return of send %b ",fileTransceiver.sendFile(file, transferIp)));
                     }
 
                     System.out.println("TRANSFER:\t files added \n" + fileDB.getFiles());
