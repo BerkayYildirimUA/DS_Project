@@ -3,6 +3,7 @@ package nintendods.ds_project;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import nintendods.ds_project.config.ClientNodeConfig;
+import nintendods.ds_project.database.FileControl;
 import nintendods.ds_project.database.FileDB;
 import nintendods.ds_project.exeption.DuplicateFileException;
 import nintendods.ds_project.exeption.DuplicateNodeException;
@@ -16,7 +17,6 @@ import nintendods.ds_project.utility.JsonConverter;
 import nintendods.ds_project.utility.Generator;
 import nintendods.ds_project.utility.ApiUtil;
 
-import org.aspectj.weaver.loadtime.Agent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -163,7 +163,7 @@ public class Client {
         fileDB.addOrUpdateFile(new AFile("test1", "File3", this.node));
 
         //Simulate a lock request on the first file
-        Data.requestLock(fileDB.getFile("File1").get().getName());
+        FileControl.requestLock(fileDB.getFile("File1").get().getName());
         //TODO: remove before push with master
 
         while (isRunning) {
@@ -326,8 +326,8 @@ public class Client {
                     }
 
                         //TODO: remove before push with master
-                        if(Data.checkAcceptedLock(fileDB.getFile("File1").get().getName())){
-                            Data.requestUnlockQueue((fileDB.getFile("File1").get().getName()));
+                        if(FileControl.checkAcceptedLock(fileDB.getFile("File1").get().getName())){
+                            FileControl.requestUnlockQueue((fileDB.getFile("File1").get().getName()));
                             System.out.println("request unlock");
                         }
                         //TODO: remove before push with master
@@ -350,9 +350,7 @@ public class Client {
                 }
                 case ERROR -> {
                     System.out.println("ERROR:\t Start:" + Timestamp.from(Instant.now()));
-                    // TODO: Handle error state, possibly attempt to recover or shutdown gracefully
-                    // Hard, only transmit to naming server and the naming server needs to deal with
-                    // it.
+
                     if (unicastListener != null)
                         unicastListener.stopListening();
                     if (multicastListener != null)

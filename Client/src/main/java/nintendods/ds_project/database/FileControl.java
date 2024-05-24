@@ -1,4 +1,4 @@
-package nintendods.ds_project.model.syncAgent;
+package nintendods.ds_project.database;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -6,15 +6,13 @@ import java.util.concurrent.LinkedBlockingQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import nintendods.ds_project.service.SyncAgent;
-
-public class Data {
+public class FileControl {
     
     private static BlockingQueue<String> requestLockQueue = new LinkedBlockingQueue<String>(20);
     private static BlockingQueue<String> acceptedLockQueue = new LinkedBlockingQueue<String>(20);
     private static BlockingQueue<String> requestUnlockQueue = new LinkedBlockingQueue<String>(20);
 
-    protected static final Logger logger = LoggerFactory.getLogger(Data.class);
+    protected static final Logger logger = LoggerFactory.getLogger(FileControl.class);
 
     /**
      * Request a fileLock on a specific file.

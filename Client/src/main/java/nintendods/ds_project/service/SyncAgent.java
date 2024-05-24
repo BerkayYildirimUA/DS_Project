@@ -11,20 +11,14 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 
 import com.google.gson.reflect.TypeToken;
 
 import nintendods.ds_project.Client;
 import nintendods.ds_project.config.ClientNodeConfig;
+import nintendods.ds_project.database.FileControl;
 import nintendods.ds_project.model.file.AFile;
-import nintendods.ds_project.model.syncAgent.Data;
 import nintendods.ds_project.utility.ApiUtil;
 import nintendods.ds_project.utility.JsonConverter;
 
@@ -123,24 +117,24 @@ public class SyncAgent implements Runnable, Serializable {
 
     private void processLockRequest() {
         // Check the requests of a lock
-        String fileNameLockRequest = Data.getFirstLockRequest();
+        String fileNameLockRequest = FileControl.getFirstLockRequest();
         if (fileNameLockRequest != null) {
             // There is a lock request present
 
             // Check if the lock is present on the global files.
             if (this.files.getOrDefault(fileNameLockRequest, true)) {
                 // Lock is present so add back to queue
-                Data.requestLock(fileNameLockRequest);
+                FileControl.requestLock(fileNameLockRequest);
             } else {
                 // No Lock is present so set lock
-                if (Data.addAcceptedLock(fileNameLockRequest)){
+                if (FileControl.addAcceptedLock(fileNameLockRequest)){
                     this.files.replace(fileNameLockRequest, false, true);
                     logger.info(String.format("Lock request accepted for file %s",fileNameLockRequest));
                 }
                 else {
                     // Failed to put the data on queue
                     // Set back on queue
-                    Data.requestLock(fileNameLockRequest);
+                    FileControl.requestLock(fileNameLockRequest);
                 }
             }
         }
@@ -148,7 +142,7 @@ public class SyncAgent implements Runnable, Serializable {
 
     private void processUnlockRequest() {
         // Check the requests of an unlock
-        String fileNameUnlockRequest = Data.getFirstUnlockRequest();
+        String fileNameUnlockRequest = FileControl.getFirstUnlockRequest();
         if (fileNameUnlockRequest != null) {
             // There is a lock request present
 

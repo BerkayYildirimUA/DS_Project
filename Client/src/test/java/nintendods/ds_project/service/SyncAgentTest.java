@@ -35,10 +35,10 @@ import org.mockito.MockedStatic;
 
 import nintendods.ds_project.Client;
 import nintendods.ds_project.config.ClientNodeConfig;
+import nintendods.ds_project.database.FileControl;
 import nintendods.ds_project.model.ClientNode;
 import nintendods.ds_project.model.file.AFile;
 import nintendods.ds_project.model.message.UNAMObject;
-import nintendods.ds_project.model.syncAgent.Data;
 import nintendods.ds_project.utility.ApiUtil;
 import nintendods.ds_project.utility.Generator;
 import nintendods.ds_project.utility.JsonConverter;
@@ -151,9 +151,9 @@ public class SyncAgentTest {
             apiUtilMockedStatic.when(() -> ApiUtil.clientGetAllFiles(anyString(), eq(ClientNodeConfig.API_PORT)))
                     .thenReturn("[{\"name\":\"file1\", \"isReplicated\":false}, {\"name\":\"file3\", \"isReplicated\":false}]");
 
-            try (MockedStatic<Data> dataMockedStatic = mockStatic(Data.class)) {
-                dataMockedStatic.when(Data::getFirstLockRequest).thenReturn("file1");
-                dataMockedStatic.when(() -> Data.addAcceptedLock(anyString())).thenReturn(true);
+            try (MockedStatic<FileControl> dataMockedStatic = mockStatic(FileControl.class)) {
+                dataMockedStatic.when(FileControl::getFirstLockRequest).thenReturn("file1");
+                dataMockedStatic.when(() -> FileControl.addAcceptedLock(anyString())).thenReturn(true);
     
                 syncAgent.run();
     
@@ -172,7 +172,7 @@ public class SyncAgentTest {
         try (MockedStatic<InetAddress> inetAddressMockedStatic = mockStatic(InetAddress.class);
              MockedStatic<ApiUtil> apiUtilMockedStatic = mockStatic(ApiUtil.class);
              MockedStatic<JsonConverter> jsonConverterMockedStatic = mockStatic(JsonConverter.class);
-             MockedStatic<Data> dataMockedStatic = mockStatic(Data.class)) {
+             MockedStatic<FileControl> dataMockedStatic = mockStatic(FileControl.class)) {
 
             InetAddress mockInetAddress = mock(InetAddress.class);
             inetAddressMockedStatic.when(InetAddress::getLocalHost).thenReturn(mockInetAddress);
@@ -191,7 +191,7 @@ public class SyncAgentTest {
             apiUtilMockedStatic.when(() -> ApiUtil.clientGetAllFiles(anyString(), eq(ClientNodeConfig.API_PORT)))
                     .thenReturn("[{\"name\":\"file1\", \"isReplicated\":false}, {\"name\":\"file3\", \"isReplicated\":false}]");
 
-            dataMockedStatic.when(Data::getFirstUnlockRequest).thenReturn("file2");
+            dataMockedStatic.when(FileControl::getFirstUnlockRequest).thenReturn("file2");
         
             syncAgent.run();
             

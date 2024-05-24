@@ -43,29 +43,4 @@ public class ClientAgentAPI {
         }
         return ResponseEntity.ok().body("");
     }
-
-    // @Async
-    // private void processSyncAgent(String syncAgentFiles) {
-    //     try {
-    //         if (syncAgentFiles != null) {
-    //             SyncAgent agent = new SyncAgent((Map<String, Boolean>) new JsonConverter().toObject(syncAgentFiles, new TypeToken<Map<String, Boolean>>() {}.getType()));
-    //             Thread t = new Thread(agent);
-    //             t.start();
-
-    //             t.join();
-
-    //             logger.debug("Start async tossing agent");
-    //             // Find the next node IP.
-    //             Client client = context.getBean(Client.class);
-    //             int nextNodeId = client.getNode().getNextNodeId();
-    //             String ipNextNode = ApiUtil.NameServer_GET_NodeIPfromID(nextNodeId);
-
-    //             // Send
-    //             ApiUtil.sendSyncAgent(ipNextNode, ClientNodeConfig.API_PORT, agent); // Will return if next node is finished.
-    //         }
-    //     } catch (InterruptedException e) {
-    //         // TODO Auto-generated catch block
-    //         e.printStackTrace();
-    //     }
-    // }
 }
