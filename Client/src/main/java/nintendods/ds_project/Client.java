@@ -35,6 +35,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.io.File;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.List;
 
 import java.io.IOException;
@@ -55,6 +56,8 @@ public class Client {
 
     @Autowired
     FileWatcherService fileWatcherService;
+
+    private List<File> filesToTransfer = new ArrayList<>();
     public ClientNode getNode() {
         return node;
     }
@@ -266,7 +269,9 @@ public class Client {
                 }
                 case TRANSFER -> {
                     // TODO: Transfer data or handle other operations
-                    List<File> files = FileReader.getFiles(path);
+                    //List<File> files = FileReader.getFiles(path);
+                    List<File> files = filesToTransfer;
+                    filesToTransfer.clear();
                     // System.out.println(files + "\n");
 
                     // Add files to DB
@@ -405,6 +410,16 @@ public class Client {
         String urlDeleteNode = "http://" + nsObject.getNSAddress() + ":8089/nodes/" + node.getId();
         logger.info("DELETE from: " + urlDeleteNode);
         restTemplate.delete(urlDeleteNode);
+    }
+
+    public void onFileChanged(File file) {
+        // Assuming AFile has a constructor that takes File as an argument
+        //AFile aFile = new AFile(file);
+        filesToTransfer.add(file);
+
+        // Assuming you have a method to change the state
+        this.nodeState = eNodeState.TRANSFER;
+        // Ahmad: clear filesToTransfer after sending
     }
 
 
