@@ -56,6 +56,8 @@ public class SyncAgent implements Runnable, Serializable {
             // Load all files of the local node
             List<AFile> allFiles = ApiUtil.clientGetAllFiles(InetAddress.getLocalHost().getHostAddress(), ClientNodeConfig.API_PORT);
 
+            if(allFiles == null) return;
+
             // Only keep the one that are not replicated (so owned by the node itself).
             List<AFile> ownedFiles = allFiles.stream().filter(f -> f.isReplicated() == false).toList();
 

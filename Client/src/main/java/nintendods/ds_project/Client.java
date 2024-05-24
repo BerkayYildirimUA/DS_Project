@@ -155,17 +155,6 @@ public class Client {
         boolean isRunning = true; // Controls the main loop
         int discoveryRetries = 0; // Counter for discovery attempts
 
-        //TODO: remove before push with master
-        
-        final FileDB fileDB = FileDBService.getFileDB();
-        fileDB.addOrUpdateFile(new AFile("test1", "File1", this.node));
-        fileDB.addOrUpdateFile(new AFile("test1", "File2", this.node));
-        fileDB.addOrUpdateFile(new AFile("test1", "File3", this.node));
-
-        //Simulate a lock request on the first file
-        FileControl.requestLock(fileDB.getFile("File1").get().getName());
-        //TODO: remove before push with master
-
         while (isRunning) {
 
             // Finite state machine with eNodeState states
@@ -254,6 +243,7 @@ public class Client {
                         e.printStackTrace();
                         nodeState = eNodeState.ERROR; // Move to Error state on exception
                     }
+                    
                     if (    (node.getPrevNodeId() != -1 && node.getNextNodeId() != -1) &&
                             (node.getPrevNodeId() != node.getId() && node.getNextNodeId() != node.getId())){
                         try {
@@ -324,13 +314,6 @@ public class Client {
                     if (syncAgent == null){
                         syncAgent = new SyncAgent(this.context);
                     }
-
-                        //TODO: remove before push with master
-                        if(FileControl.checkAcceptedLock(fileDB.getFile("File1").get().getName())){
-                            FileControl.requestUnlockQueue((fileDB.getFile("File1").get().getName()));
-                            System.out.println("request unlock");
-                        }
-                        //TODO: remove before push with master
 
                     nodeState = eNodeState.LISTENING;
                 }

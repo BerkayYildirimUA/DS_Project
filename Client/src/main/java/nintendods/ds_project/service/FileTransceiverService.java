@@ -216,7 +216,9 @@ public class FileTransceiverService {
                 File f = FileModifier.createFile(directoryPath, m.getFileObject().getName(), m.getFileInByte(), false);
 
                 if (f == null){
-                    throw new DuplicateFileException("file " + fileObject.getName() + " on location " +fileObject.getAbsolutePath() + " is already present on the system!");
+                    logger.error("file " + fileObject.getName() + " on location " +fileObject.getAbsolutePath() + " is already present on the system!");
+                    logger.error("Dropping file" + fileObject.getName());
+                    return null;
                 }
 
                 // set file path and name
