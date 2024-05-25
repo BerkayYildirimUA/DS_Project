@@ -160,7 +160,7 @@ public class FileTranseiverServiceTest {
             ftss.sendFile(fileObj, nodeSend.getAddress().getHostAddress());
 
             //Delete so we can simulate a new node.
-            testFile.delete();
+            boolean fileWasDeleted = testFile.delete();
 
             //create new node
             ANetworkNode nodeRec = new ANetworkNode(InetAddress.getLocalHost(), 21, "Robbe receive");
@@ -181,18 +181,21 @@ public class FileTranseiverServiceTest {
             }
 
             // Check if file exists on the system
-            assertTrue(new File(newFileObject.getAbsolutePath()).exists());
+            File file = new File(newFileObject.getAbsolutePath());
+            assertTrue(file.exists());
 
             // show logs of file
             System.out.println(newFileObject.getFormattedLogs());
 
             // Delete the used files in the test and the directory
-            new File(newFileObject.getAbsolutePath()).delete();
+            file.delete();
             new File(newPath).delete();
+
         } catch (IOException | DuplicateFileException e) {
             assertTrue(false);
         }
     }
+
 
 
     @Test
@@ -294,7 +297,7 @@ public class FileTranseiverServiceTest {
             // Delete the used files in the test and the directory
             new File(newFileObject.getAbsolutePath()).delete();
             new File(newFileObject.getAbsolutePath()).delete();
-            FileUtils.cleanDirectory(new File(newFileObject.getDirPath())); 
+            FileUtils.cleanDirectory(new File(newFileObject.getDirPath()));
             new File(newPath).delete();
         } catch (IOException | DuplicateFileException e) {
             assertTrue(false);

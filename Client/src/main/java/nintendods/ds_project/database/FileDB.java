@@ -1,4 +1,5 @@
 package nintendods.ds_project.database;
+
 import nintendods.ds_project.model.ANode;
 import nintendods.ds_project.model.file.AFile;
 import org.slf4j.Logger;
@@ -7,9 +8,9 @@ import org.springframework.stereotype.Repository;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Repository class for storing and managing file information in the distributed system.
@@ -18,7 +19,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Repository
 public class FileDB {
     private static final Logger logger = LoggerFactory.getLogger(FileDB.class);
-    private final List<AFile> fileDB = new ArrayList<>();
+    private final List<AFile> fileDB = Collections.synchronizedList(new ArrayList<>()); //Berkay: synchronizedList to keep things thread safe
 
     public FileDB() { }
 
@@ -72,6 +73,21 @@ public class FileDB {
         }
 
         return fileDB.stream().filter(file -> file.getName().equals(fileName)).findFirst();
+    }
+
+    /**
+     * Retrieves the IP address of the node storing the specified file.
+     * @param fileName The name of the file.
+     * @return The IP address of the node or null if the file is not found.
+     */
+    public Optional<AFile> getFileByAbsolutePath(String abssolutePath) {
+
+        if (abssolutePath == null || abssolutePath.isEmpty()) {
+            logger.error("Invalid file name provided for getFile.");
+            throw new IllegalArgumentException("File name cannot be null or empty.");
+        }
+
+        return fileDB.stream().filter(file -> file.getAbsolutePath().equals(abssolutePath)).findFirst();
     }
 
 

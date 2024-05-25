@@ -17,8 +17,8 @@ import java.util.List;
 @Component("Dis1")
 public class DiscoveryService {
     private List<String> receivedMessages;
-    private String multicastAddress = ClientNodeConfig.MULTICAST_ADDRESS;
-    private int multicastPort = ClientNodeConfig.MULTICAST_PORT;
+    private String multicastAddress = ClientNodeConfig.getMulticastAddress();
+    private int multicastPort = ClientNodeConfig.getMulticastPort();
     private int waitTimeDiscovery = 20000;
     private UDPServer listener;
     private ServerSocket socket;

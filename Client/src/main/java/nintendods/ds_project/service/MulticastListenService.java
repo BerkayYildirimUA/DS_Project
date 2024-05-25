@@ -1,6 +1,5 @@
 package nintendods.ds_project.service;
 
-import nintendods.ds_project.Client;
 import nintendods.ds_project.model.ANetworkNode;
 import nintendods.ds_project.model.message.MNObject;
 import nintendods.ds_project.model.message.UNAMNObject;

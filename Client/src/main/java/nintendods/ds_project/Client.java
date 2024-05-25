@@ -11,10 +11,10 @@ import nintendods.ds_project.model.ClientNode;
 import nintendods.ds_project.model.file.AFile;
 import nintendods.ds_project.model.message.UNAMObject;
 import nintendods.ds_project.service.*;
-import nintendods.ds_project.utility.FileReader;
-import nintendods.ds_project.utility.JsonConverter;
-import nintendods.ds_project.utility.Generator;
 import nintendods.ds_project.utility.ApiUtil;
+import nintendods.ds_project.utility.FileReader;
+import nintendods.ds_project.utility.Generator;
+import nintendods.ds_project.utility.JsonConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +24,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.event.EventListener;
 
 import org.springframework.http.HttpHeaders;
@@ -32,12 +33,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.List;
 
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 
@@ -45,6 +48,7 @@ import java.util.concurrent.TimeUnit;
  * Spring Boot application for managing a distributed system node's lifecycle excluding database auto-configuration.
  */
 @SpringBootApplication(exclude = { DataSourceAutoConfiguration.class })
+@Import(ClientNodeConfig.class)
 public class Client {
 
     @Autowired
@@ -83,8 +87,16 @@ public class Client {
     private final String path = System.getProperty("user.dir") + "/assets";
     private final FileDB fileDB = FileDBService.getFileDB();
     private final RestTemplate restTemplate = new RestTemplate();
-    private final FileTransceiverService fileTransceiver = new FileTransceiverService();
+    private FileTransceiverService fileTransceiver = new FileTransceiverService();
 
+
+    public FileTransceiverService getFileTransceiver() {
+        return fileTransceiver;
+    }
+
+    public void setFileTransceiver(FileTransceiverService fileTransceiver) {
+        this.fileTransceiver = fileTransceiver;
+    }
 
     //vars needed for testing
     private int testing;
@@ -96,17 +108,20 @@ public class Client {
         SpringApplication.run(Client.class, args);
     }
 
+    public void setNsObject(UNAMObject nsObject) {
+        this.nsObject = nsObject;
+    }
 
     @PostConstruct
     private void init() throws UnknownHostException {
-        NODE_NAME_LENGTH = ClientNodeConfig.NODE_NAME_LENGTH;
-        NODE_GLOBAL_PORT = ClientNodeConfig.NODE_GLOBAL_PORT;
-        DISCOVERY_RETRIES = ClientNodeConfig.DISCOVERY_RETRIES;
-        DISCOVERY_ADDITION_TIMEOUT = ClientNodeConfig.DISCOVERY_ADDITION_TIMEOUT;
-        LISTENER_BUFFER_SIZE = ClientNodeConfig.LISTENER_BUFFER_SIZE;
-        MULTICAST_ADDRESS = ClientNodeConfig.MULTICAST_ADDRESS;
-        MULTICAST_PORT = ClientNodeConfig.MULTICAST_PORT;
-        testing = ClientNodeConfig.TESTING;
+        NODE_NAME_LENGTH = ClientNodeConfig.getNodeNameLength();
+        NODE_GLOBAL_PORT = ClientNodeConfig.getNodeGlobalPort();
+        DISCOVERY_RETRIES = ClientNodeConfig.getDiscoveryRetries();
+        DISCOVERY_ADDITION_TIMEOUT = ClientNodeConfig.getDiscoveryAdditionTimeout();
+        LISTENER_BUFFER_SIZE = ClientNodeConfig.getListenerBufferSize();
+        MULTICAST_ADDRESS = ClientNodeConfig.getMulticastAddress();
+        MULTICAST_PORT = ClientNodeConfig.getMulticastPort();
+        testing = ClientNodeConfig.getTESTING();
 
         if (testing == 1){
             t_prevNodePort = 0;
@@ -116,9 +131,18 @@ public class Client {
 
     @PreDestroy
     public void prepareForShutdown() throws InterruptedException {
-        if (nodeState != eNodeState.DISCOVERY) {
+        if ((nodeState != eNodeState.DISCOVERY) || (testing == 1)) {
             System.out.println("Preparing for shutdown...");
-            shutdown();
+            ShutdownService shutdownService;
+
+            if (testing == 1){
+                shutdownService = new ShutdownService(node, nsObject, t_nextNodePort, t_prevNodePort);
+            } else {
+                shutdownService = new ShutdownService(node, nsObject);
+            }
+
+            shutdownService.emptyFileDatabase(fileTransceiver);
+            shutdownService.updateNodesInSystem();
             System.out.println("Nodes prepared.");
             isRunning = false;
             System.out.println("PreDestroy done");
@@ -282,7 +306,7 @@ public class Client {
                         response = restTemplate.getForEntity(url, String.class);
                         transferIp = response.getBody();
                          System.out.println("Send file to " + transferIp);
-                        
+
                         System.out.println("TRANSFER:\t received=" + transferIp + "\n\t\t own=" + node.getAddress().getHostAddress());
                         if (("/"+node.getAddress().getHostAddress()).equals(transferIp)) {
                             // Node to send is self --> send to previous node
@@ -344,57 +368,4 @@ public class Client {
 
         System.out.println("Main Done");
     }
-
-
-    private void shutdown() {
-        //if you are alone in the network then skip
-        if (node.getId() != node.getPrevNodeId()) {
-            int nextNodePort;
-            int prevNodePort;
-
-            String prevNodeIP;
-            String nextNodeIP;
-
-            //multiple springboot appliactions can't be run on the same port on the same machine. So this is made, so I can change the Port numbers dynamicly during testing.
-            if (testing == 1) {
-                nextNodePort = t_nextNodePort;
-                prevNodePort = t_prevNodePort;
-
-                prevNodeIP = "/127.0.0.1";
-                nextNodeIP = "/127.0.0.1";
-            } else {
-                nextNodePort = apiPort;
-                prevNodePort = apiPort;
-
-
-                String urlGetNextNodeIP = "http://" + nsObject.getNSAddress() + ":8089/node/" + node.getNextNodeId();
-                logger.info("GET from: " + urlGetNextNodeIP);
-                ResponseEntity<String> getNextNodeIDResponse = restTemplate.getForEntity(urlGetNextNodeIP, String.class);
-                nextNodeIP = getNextNodeIDResponse.getBody();
-
-                String urlGetPrevNodeIP = "http://" + nsObject.getNSAddress() + ":8089/node/" + node.getPrevNodeId();
-                logger.info("GET from: " + urlGetPrevNodeIP);
-                ResponseEntity<String> getPrevNodeIDResponse = restTemplate.getForEntity(urlGetPrevNodeIP, String.class);
-                prevNodeIP = getPrevNodeIDResponse.getBody();
-
-            }
-
-            // in PREV node I need to change their NEXT node to my NEXT node
-            // http heeft 1 '/' in de plaats van 2 want the IP's strings starten met '/' en ik will dit niet uit filtreren.
-            String UrlForPrevNode = "http:/" + prevNodeIP + ":" + prevNodePort + "/api/Management/nextNodeID/?ID=" + node.getNextNodeId();
-            logger.info("PUT to: " + UrlForPrevNode);
-            restTemplate.put(UrlForPrevNode, String.class);
-
-            // in NEXT node I need to change their PREV node to my PREV node
-            String urlForNextNode = "http:/" + nextNodeIP + ":" + nextNodePort + "/api/Management/prevNodeID/?ID=" + node.getPrevNodeId();
-            logger.info("PUT to: " + urlForNextNode);
-            restTemplate.put(urlForNextNode, String.class);
-        }
-        //delete yourself from nameserver
-        String urlDeleteNode = "http://" + nsObject.getNSAddress() + ":8089/nodes/" + node.getId();
-        logger.info("DELETE from: " + urlDeleteNode);
-        restTemplate.delete(urlDeleteNode);
-    }
-
-
 }
