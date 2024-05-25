@@ -271,9 +271,12 @@ public class Client {
                 }
                 case TRANSFER -> {
                     // TODO: Transfer data or handle other operations
-                    //List<File> files = FileReader.getFiles(path);
+                    List<File> files = FileReader.getFiles(path);
                     System.out.println("Entered TransferState");
-                    List<File> files = filesToTransfer;
+                    for (File file: filesToTransfer){
+                        System.out.println(file.getName());
+                    }
+                    //List<File> files = filesToTransfer;
                     filesToTransfer.clear();
                     // System.out.println(files + "\n");
 
