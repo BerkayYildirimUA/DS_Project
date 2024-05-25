@@ -28,8 +28,10 @@ public class ClientNodeConfig {
     private int multicastPort; // Port for multicast communication
     @Value("${TESTING}")
     private int testing;
-    @Value("${tcp.file.receive.port}")
-    private int tcpFileReceivePort;
+    // @Value("${tcp.file.receive.port}")
+    // private int tcpFileReceivePort;
+    // @Value("${tcp.file.receive.buffer}")
+    // private int tcpFileReceiveBuffer;
 
     public static int NODE_NAME_LENGTH; // Length of the random node name
     public static int NODE_GLOBAL_PORT; //Fixed port for node operations
@@ -38,7 +40,8 @@ public class ClientNodeConfig {
     public static int LISTENER_BUFFER_SIZE; // Buffer size for the listener service
     public static String MULTICAST_ADDRESS; // Multicast address for network communication
     public static int MULTICAST_PORT; // Port for multicast communication
-    public static int TCP_FILE_RECEIVE_PORT;
+    // public static int TCP_FILE_RECEIVE_PORT;
+    // public static int TCP_FILE_RECEIVE_BUFFER;
     public static int TESTING;
 
     @PostConstruct
@@ -50,7 +53,8 @@ public class ClientNodeConfig {
         LISTENER_BUFFER_SIZE = listenerBufferSize;
         MULTICAST_ADDRESS = multicastAddress;
         MULTICAST_PORT = multicastPort;
-        TCP_FILE_RECEIVE_PORT = tcpFileReceivePort;
+        // TCP_FILE_RECEIVE_PORT = tcpFileReceivePort;
+        // TCP_FILE_RECEIVE_BUFFER = tcpFileReceiveBuffer;
         TESTING = testing;
     }
 
@@ -58,5 +62,4 @@ public class ClientNodeConfig {
     public ClientNode clientNode() throws Exception {
          return new ClientNode(InetAddress.getLocalHost(), NODE_GLOBAL_PORT, Generator.randomString(NODE_NAME_LENGTH));
     }
-
 }

@@ -5,6 +5,7 @@ import nintendods.ds_project.model.ANetworkNode;
 import nintendods.ds_project.model.file.AFile;
 import nintendods.ds_project.model.file.IFileConditionChecker;
 
+import org.apache.tomcat.util.http.fileupload.FileUtils;
 import org.junit.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -238,7 +239,7 @@ public class FileTranseiverServiceTest {
             // Delete the used files in the test and the directory
             
             new File(newFileObject.getAbsolutePath()).delete();
-            new File(newFileObject.getAbsolutePath()).delete();
+            //new File(newFileObject.getAbsolutePath()).delete();
             //new File(newPath).delete();
         } catch (IOException | DuplicateFileException e) {
             assertTrue(false);
@@ -274,7 +275,7 @@ public class FileTranseiverServiceTest {
 
             // Create custom folder in the same project directory
 
-            String newPath = System.getProperty("user.dir") +  "/newDir";
+            String newPath = System.getProperty("user.dir") +  "\\newDir";
 
             // Wait for an incomming message.
             while (!ok) {
@@ -291,8 +292,9 @@ public class FileTranseiverServiceTest {
             System.out.println(newFileObject.getFormattedLogs());
 
             // Delete the used files in the test and the directory
-            
             new File(newFileObject.getAbsolutePath()).delete();
+            new File(newFileObject.getAbsolutePath()).delete();
+            FileUtils.cleanDirectory(new File(newFileObject.getDirPath())); 
             new File(newPath).delete();
         } catch (IOException | DuplicateFileException e) {
             assertTrue(false);

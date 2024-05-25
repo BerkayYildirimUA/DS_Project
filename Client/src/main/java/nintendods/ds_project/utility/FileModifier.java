@@ -26,16 +26,20 @@ public class FileModifier {
                     } while (!file.createNewFile() || countIterations >= maxIterations);
 
                     //Write bytes to it
-                    FileOutputStream fos = new FileOutputStream(file);
-                    fos.write(fileBytes);
+                    try (FileOutputStream fos = new FileOutputStream(file);){
+                        fos.write(fileBytes);
+                        fos.close();
+                    }
+                    
                 } else {
                     return null;
                 }
             }
             else{
                 //Write bytes to it
-                FileOutputStream fos = new FileOutputStream(file);
-                fos.write(fileBytes);
+                try (FileOutputStream fos = new FileOutputStream(file);){
+                    fos.write(fileBytes);
+                }
             }
             return file;
 
