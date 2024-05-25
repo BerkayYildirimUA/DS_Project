@@ -120,8 +120,6 @@ public class Client {
             t_prevNodePort = 0;
             t_nextNodePort = 0;
         }
-
-        fileWatcherService.setFileChangeListener(this::onFileChanged);
     }
 
     @PreDestroy
@@ -158,6 +156,8 @@ public class Client {
         boolean isRunning = true; // Controls the main loop
         int discoveryRetries = 0; // Counter for discovery attempts
         fileWatcherService.init();
+        fileWatcherService.setFileChangeListener(this::onFileChanged);
+        logger.info("Initialized FileWatcherService");
 
 
         while (isRunning) {
@@ -272,6 +272,7 @@ public class Client {
                 case TRANSFER -> {
                     // TODO: Transfer data or handle other operations
                     //List<File> files = FileReader.getFiles(path);
+                    System.out.println("Entered TransferState");
                     List<File> files = filesToTransfer;
                     filesToTransfer.clear();
                     // System.out.println(files + "\n");
@@ -415,8 +416,10 @@ public class Client {
     }
 
     public void onFileChanged(File file) {
+        System.out.println("OnFileChanged");
         filesToTransfer.add(file);
         this.nodeState = eNodeState.TRANSFER;
+
     }
 
 
