@@ -278,12 +278,6 @@ public class FileTransceiverService {
             }
         }
 
-        if (node == null){
-            System.out.println("node was null");
-        } else {
-            System.out.println("not availble");
-        }
-
         return null;
     }
 
