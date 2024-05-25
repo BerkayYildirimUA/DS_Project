@@ -1,6 +1,5 @@
 package nintendods.ds_project.model.file;
 
-import nintendods.ds_project.model.ANetworkNode;
 import nintendods.ds_project.model.ANode;
 import nintendods.ds_project.model.file.log.ALog;
 import nintendods.ds_project.model.file.log.eLog;
@@ -164,13 +163,13 @@ public class AFile implements Serializable {
         return text;
     }
 
-    public void setReplicated(boolean isReplicated, String toNodeIp) {
+    public void setReplicated(boolean isBeenBackedUp, String toNodeIp) {
 
         if (isBeenBackedUp() == false) {
             logs.add(new ALog(getOwner(), eLog.fileReplicated,
                     "The file is replicated from node: " + getOwner().getName() + " to node with IP: " + toNodeIp));
         }
-        this.isBeenBackedUp = isReplicated;
+        this.isBeenBackedUp = isBeenBackedUp;
     }
 
     public void setDownloadLocation(String ID){

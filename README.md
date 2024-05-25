@@ -1,6 +1,6 @@
 # 6-DS project
 
-This projects will create a ring topology with clients. A Naming server that will manage the resources and namings of the nodes files in the ring topology
+This projects will create a ring topology with clients. A Naming remoteNode that will manage the resources and namings of the nodes files in the ring topology
 
 # Naming Server part
 
@@ -12,7 +12,7 @@ This projects will create a ring topology with clients. A Naming server that wil
   - [x] API
 
 - Berkay
-  - Name server:
+  - Name remoteNode:
     - [x] Map(int, ip)
     - [x] get ip from filename
     - [x] Add/Remove nodes from map
@@ -47,7 +47,7 @@ On failure of a node, the network must be self healing.
   1. [x] Method for multicast transmission developed 
   2. [x] Develop method to calc hash
   3. [x] node will send during bootstrap a multicast with its name and IP (and port for reply)
-  4. Naming server steps when recieving multicast from node
+  4. Naming remoteNode steps when recieving multicast from node
     1. [x] Calc hash of node (create node object)
     2. [x] count the known hosts in the network
     3. [x] Check if node exists (can be done in database?) and add to database
@@ -56,7 +56,7 @@ On failure of a node, the network must be self healing.
     1. [x] Calc hash of receiving name
     2. [x] Set the prev and next node based on the receiving node.
     3. [x] Response to the multicast node.
-  6. [x] Node that casts the multicast, recieves a message from the naming server containing the amount of nodes.
+  6. [x] Node that casts the multicast, recieves a message from the naming remoteNode containing the amount of nodes.
     1. [x] Wait an x amount of time before closing the readPort (and some retries)
     2. [x] Check the amount of available nodes and set the prev and next node accordingly
 
@@ -92,7 +92,7 @@ On failure of a node, the network must be self healing.
   - [x] Bootstrap
   - [ ] Failure
   - [ ] Shutdown 
-### Naming server
+### Naming remoteNode
   - [ ] Discovery
   - [ ] Bootstrap
   - [ ] Failure
@@ -101,7 +101,7 @@ On failure of a node, the network must be self healing.
 # Replication part
 We have files with a name. This name can be hashed by our simple hash algorithm. Now we can compare these hashes with the known node's ID's that are situated in the ring topology.
 
-The goal of this part is to ensure that all files, with a specific hash range, are located at the same node. Now we know through the naming server, where a file might be located.
+The goal of this part is to ensure that all files, with a specific hash range, are located at the same node. Now we know through the naming remoteNode, where a file might be located.
 
 To ensure easy coding, we'll create a file transfer class that can be used by the nodes to transfer a file over a TCP socket from node to node.
 
@@ -111,11 +111,11 @@ This will be done in 3 phases.
 All files that are stored on each node should be replicated to corresponding nodes in the ring topology. This way, a new node to which the file is replicated becomes the owner of the file.
 
 After bootstrap and discovery, the new node has to verify its local files (folder on
-the hard drive). The node will send over each file name to the naming server and the naming server will send back a destination node if the file has to be replicated. The replicated node is the first smaller hash ID node the n the file hash.
+the hard drive). The node will send over each file name to the naming remoteNode and the naming remoteNode will send back a destination node if the file has to be replicated. The replicated node is the first smaller hash ID node the n the file hash.
 
 So there are 3 nodes with the fommowing hash ID: 1 5 7. We have a file on node 1 with hash equal to 6. Then the new replication node will be node 5 because this is the 1 lesser then node based on the hash ID of the file.
 
-The naming server will respond to the original node where to transfer through. If a replication node receives the file, it adds a log to the file logging.
+The naming remoteNode will respond to the original node where to transfer through. If a replication node receives the file, it adds a log to the file logging.
 
 Each file will have a full log available to track its replications and owners of the file.
 

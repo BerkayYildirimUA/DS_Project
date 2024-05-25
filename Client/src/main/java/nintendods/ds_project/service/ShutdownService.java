@@ -36,21 +36,21 @@ public class ShutdownService {
         this.nsObject = nsObject;
     }
 
-    public void emptyFileDatabase() {
+    public void emptyFileDatabase(FileTransceiverService fileTransceiverService) {
         FileDB fileDB = FileDBService.getFileDB();
 
         List<AFile> files = fileDB.getFiles();
 
         for (AFile file : files) {
-            FileTransceiverService fileTransceiverService = new FileTransceiverService();
             String prevNodeIP = ApiUtil.NameServer_GET_NodeIPfromID(Integer.toString(node.getPrevNodeId()));
+            logger.info("send " + file.getName());
             fileTransceiverService.sendFile(file, prevNodeIP);
         }
     }
 
 
     public void updateNodesInSystem() {
-        RestTemplate restTemplate = new RestTemplate();
+        RestTemplate restTemplate = ApiUtil.getRestTemplate();
 
         //if you are alone in the network then skip
         if (node.getId() != node.getPrevNodeId()) {

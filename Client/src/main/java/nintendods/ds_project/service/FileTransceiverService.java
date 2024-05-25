@@ -1,18 +1,19 @@
 package nintendods.ds_project.service;
 
-import nintendods.ds_project.config.ClientNodeConfig;
 import nintendods.ds_project.database.FileDB;
 import nintendods.ds_project.exeption.DuplicateFileException;
+import nintendods.ds_project.model.ANetworkNode;
 import nintendods.ds_project.model.ANode;
+import nintendods.ds_project.model.ClientNode;
 import nintendods.ds_project.model.file.AFile;
 import nintendods.ds_project.model.file.IFileConditionChecker;
 import nintendods.ds_project.model.message.FileMessage;
+import nintendods.ds_project.utility.ApiUtil;
 import nintendods.ds_project.utility.FileModifier;
 
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -25,6 +26,7 @@ public class FileTransceiverService {
     private static BlockingQueue<FileMessage> receiveQueue;
     private Thread receiverThread;
 
+    public boolean testing_justReadFiles = false;
     /**
      * Create a File tranceiver object that will automatically create a thread where
      * it wil listen for file receives.
@@ -47,7 +49,6 @@ public class FileTransceiverService {
         // return;
         // running = true;
         this.port = port;
-
        receiveQueue = new LinkedBlockingQueue<>(buffer);
        this.receiverThread = new Thread(() -> receiveFile(port));
        this.receiverThread.start();
@@ -94,6 +95,35 @@ public class FileTransceiverService {
         return true; // Succeeded
     }
 
+    private boolean sendVirtualFile(AFile fileObject, String receiverAddress, byte[] fileInBytes) {
+        Socket socket = null;
+
+        try {
+            if (fileObject == null) {
+                return false;
+            }
+
+            FileMessage message = new FileMessage(fileObject, fileInBytes);
+
+            socket = new Socket(receiverAddress, this.port); // We assume that the receiver side uses the same port.
+            OutputStream outputStream = socket.getOutputStream(); // get the output stream from the socket.
+            // create an object output stream from the output stream so we can send an
+            // object through it
+            ObjectOutputStream objectOutputStream = new ObjectOutputStream(outputStream);
+
+            // Write the message over
+            objectOutputStream.writeObject(message);
+            socket.close();
+
+            // File is replicated towards another node
+            // fileObject.setReplicated(true);
+        } catch (Exception ex) {
+            return false;
+        }
+
+        return true; // Succeeded
+    }
+
     /**
      * A receiving method that will loop to infinity and listens onto the given
      * port.
@@ -103,6 +133,7 @@ public class FileTransceiverService {
     private void receiveFile(int port) {
         try {
             ServerSocket ss = new ServerSocket(port);
+            System.out.println("made a socket");
             Socket socket;
             InputStream inputStream;
             ObjectInputStream objectInputStream;
@@ -118,12 +149,18 @@ public class FileTransceiverService {
                     // read the list of messages from the socket and cast to FileMessage object
                     FileMessage receiveMessage = (FileMessage) objectInputStream.readObject();
                     receiveQueue.add(receiveMessage);
+
+                    //I added some code cause inputStream not closing cause issue for my tests, sorry of this breaks anything - berkay
+                    inputStream.close();
+                    socket.close();
                 } catch (Exception ex) {
                     error = true;
                 }
             }
 
             ss.close();
+
+
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -165,7 +202,7 @@ public class FileTransceiverService {
         }
 
         if (checker.getFileCondition(fm.getFileObject()))
-            return saveIncomingFile(node, directoryPath);
+            return saveIncomingFile((ClientNode) node, directoryPath);
 
         if (delete) {
             this.getFileMessage();
@@ -181,7 +218,7 @@ public class FileTransceiverService {
      * @return null if nothing has arrived and an object if something has arrived.
      */
     public AFile saveIncomingFile(ANode node) throws DuplicateFileException {
-        return saveIncomingFile(node, "");
+        return saveIncomingFile((ClientNode) node, "");
     }
 
     /**
@@ -192,14 +229,18 @@ public class FileTransceiverService {
      * @param directoryPath The new directory path to save the file in
      * @return null if nothing has arrived and an object if something has arrived.
      */
-    public AFile saveIncomingFile(ANode node, String directoryPath) throws DuplicateFileException{
+    public AFile saveIncomingFile(ANetworkNode node, String directoryPath) throws DuplicateFileException{
         if (available() && node != null) {
             FileMessage m = getFileMessage();
 
             if (m != null) {
                 AFile fileObject = m.getFileObject();
 
-                if(!fileChecker(fileObject)) {return null;};
+                if((!fileChecker(node, fileObject)) && !testing_justReadFiles) {
+                    String ipOfPrevNode = ApiUtil.NameServer_GET_NodeIPfromID(((ClientNode) node).getPrevNodeId());
+                    sendVirtualFile(fileObject, ipOfPrevNode, m.getFileInByte());
+                    return null;
+                };
 
 
                 // Set the new owner of the file
@@ -219,18 +260,26 @@ public class FileTransceiverService {
                 return fileObject;
             }
         }
+
+        if (node == null){
+            System.out.println("node was null");
+        } else {
+            System.out.println("not availble");
+        }
+
         return null;
     }
 
-    private boolean fileChecker(AFile incomingFile){
+    private boolean fileChecker(ANetworkNode node, AFile incomingFile){
         if (incomingFile.isBeenBackedUp()){ //If Original file
             // contact backup
-
+            ApiUtil.Client_Put_changeFileOwner(incomingFile.getName(), incomingFile.getAbsolutePath(), ((ClientNode) node).getPrevNodeId());
             return true;
         } else {
             FileDB db = FileDBService.getFileDB();
 
-            return db.getFiles().stream().anyMatch(file -> file.getAbsolutePath().equals(incomingFile.getAbsolutePath()));
+            boolean nodeHasOriginalFile =  db.getFiles().stream().anyMatch(file -> file.getAbsolutePath().equals(incomingFile.getAbsolutePath()));
+            return !nodeHasOriginalFile;
         }
     }
 

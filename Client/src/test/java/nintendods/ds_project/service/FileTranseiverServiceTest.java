@@ -4,7 +4,6 @@ import nintendods.ds_project.exeption.DuplicateFileException;
 import nintendods.ds_project.model.ANetworkNode;
 import nintendods.ds_project.model.file.AFile;
 import nintendods.ds_project.model.file.IFileConditionChecker;
-
 import org.junit.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -159,7 +158,7 @@ public class FileTranseiverServiceTest {
             ftss.sendFile(fileObj, nodeSend.getAddress().getHostAddress());
 
             //Delete so we can simulate a new node.
-            testFile.delete();
+            boolean fileWasDeleted = testFile.delete();
 
             //create new node
             ANetworkNode nodeRec = new ANetworkNode(InetAddress.getLocalHost(), 21, "Robbe receive");
@@ -180,18 +179,21 @@ public class FileTranseiverServiceTest {
             }
 
             // Check if file exists on the system
-            assertTrue(new File(newFileObject.getAbsolutePath()).exists());
+            File file = new File(newFileObject.getAbsolutePath());
+            assertTrue(file.exists());
 
             // show logs of file
             System.out.println(newFileObject.getFormattedLogs());
 
             // Delete the used files in the test and the directory
-            new File(newFileObject.getAbsolutePath()).delete();
+            file.delete();
             new File(newPath).delete();
+
         } catch (IOException | DuplicateFileException e) {
             assertTrue(false);
         }
     }
+
 
 
     @Test

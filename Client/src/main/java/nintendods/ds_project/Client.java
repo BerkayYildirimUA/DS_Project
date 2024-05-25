@@ -1,6 +1,5 @@
 package nintendods.ds_project;
 
-import com.google.gson.Gson;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import nintendods.ds_project.config.ClientNodeConfig;
@@ -12,9 +11,10 @@ import nintendods.ds_project.model.ClientNode;
 import nintendods.ds_project.model.file.AFile;
 import nintendods.ds_project.model.message.UNAMObject;
 import nintendods.ds_project.service.*;
-import nintendods.ds_project.utility.JsonConverter;
-import nintendods.ds_project.utility.Generator;
 import nintendods.ds_project.utility.ApiUtil;
+import nintendods.ds_project.utility.FileReader;
+import nintendods.ds_project.utility.Generator;
+import nintendods.ds_project.utility.JsonConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,27 +24,19 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.event.EventListener;
-
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.File;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-
-import java.util.List;
-
-
 import java.io.IOException;
+import java.net.UnknownHostException;
 import java.sql.Timestamp;
 import java.time.Instant;
-
-import java.util.Objects;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 
@@ -52,6 +44,7 @@ import java.util.concurrent.TimeUnit;
  * Spring Boot application for managing a distributed system node's lifecycle excluding database auto-configuration.
  */
 @SpringBootApplication(exclude = { DataSourceAutoConfiguration.class })
+@Import(ClientNodeConfig.class)
 public class Client {
 
     @Autowired
@@ -90,8 +83,16 @@ public class Client {
     private final String path = System.getProperty("user.dir") + "/assets";
     private final FileDB fileDB = FileDBService.getFileDB();
     private final RestTemplate restTemplate = new RestTemplate();
-    private final FileTransceiverService fileTransceiver = new FileTransceiverService();
+    private FileTransceiverService fileTransceiver = new FileTransceiverService();
 
+
+    public FileTransceiverService getFileTransceiver() {
+        return fileTransceiver;
+    }
+
+    public void setFileTransceiver(FileTransceiverService fileTransceiver) {
+        this.fileTransceiver = fileTransceiver;
+    }
 
     //vars needed for testing
     private int testing;
@@ -103,6 +104,9 @@ public class Client {
         SpringApplication.run(Client.class, args);
     }
 
+    public void setNsObject(UNAMObject nsObject) {
+        this.nsObject = nsObject;
+    }
 
     @PostConstruct
     private void init() throws UnknownHostException {
@@ -123,15 +127,17 @@ public class Client {
 
     @PreDestroy
     public void prepareForShutdown() throws InterruptedException {
-        if (nodeState != eNodeState.DISCOVERY) {
+        if ((nodeState != eNodeState.DISCOVERY) || (testing == 1)) {
             System.out.println("Preparing for shutdown...");
             ShutdownService shutdownService;
+
             if (testing == 1){
                 shutdownService = new ShutdownService(node, nsObject, t_nextNodePort, t_prevNodePort);
             } else {
                 shutdownService = new ShutdownService(node, nsObject);
             }
 
+            shutdownService.emptyFileDatabase(fileTransceiver);
             shutdownService.updateNodesInSystem();
             System.out.println("Nodes prepared.");
             isRunning = false;
@@ -236,7 +242,7 @@ public class Client {
                     try {
                         AFile file = null;
 
-                        file = fileTransceiver.saveFileWithConditions(node, path + "/replicated");
+                        file = fileTransceiver.saveIncomingFile(node, path + "/replicated");
                         System.out.println("LISTENING:\t get files\n" + file);
                     } catch (DuplicateFileException e) {
                         throw new RuntimeException(e);

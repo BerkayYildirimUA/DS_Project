@@ -1,9 +1,7 @@
 package nintendods.ds_project.utility;
 
 import nintendods.ds_project.config.ClientNodeConfig;
-import nintendods.ds_project.model.ANode;
 import nintendods.ds_project.model.ClientNode;
-import nintendods.ds_project.model.file.AFile;
 import nintendods.ds_project.model.message.UNAMObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +16,10 @@ public class ApiUtil {
     protected static RestTemplate restTemplate = new RestTemplate();
     protected static UNAMObject nsObject;
     protected static String nameSeverAdress;
+
+    public static RestTemplate getRestTemplate() {
+        return restTemplate;
+    }
 
     public static UNAMObject getNsObject() {
         return nsObject;
@@ -243,20 +245,22 @@ public class ApiUtil {
         }
     }
 
-    public static boolean Client_Put_changeFileOwnerWithID(int ID, AFile file, ANode node){
-        String nodeIP = NameServer_GET_NodeIPfromID(ID);
-        return Client_Put_changeFileOwner(nodeIP, file, node);
+    public static boolean Client_Put_changeFileOwner(String fileName, String absolutePath, int nodeID){
+        return Client_Put_changeFileOwner(fileName, absolutePath, Integer.toString(nodeID));
     }
 
-    public static boolean Client_Put_changeFileOwner(String ip, AFile file, ANode node){
+    public static boolean Client_Put_changeFileOwner(String fileName, String absolutePath, String nodeID){
 
-        String url = "Http://" + ip + ":" + ClientNodeConfig.getApiPort() + "/api/files/" + file.getName() + "/downloadLocation";
+        String ip = NameServer_GET_NodeIPfromID(nodeID);
+
+        String url = "Http://" + ip + ":" + ClientNodeConfig.getApiPort() + "/api/files/" + fileName + "/downloadLocation";
 
         HttpHeaders headers = new HttpHeaders();
-
         headers.set("Content-Type", "application/json");
 
-        HttpEntity<ANode> requestEntity = new HttpEntity<>(node, headers);
+        String requestBody = String.format("{\"absolutePath\":\"%s\", \"nodeID\":%s}", absolutePath, nodeID);
+
+        HttpEntity<String> requestEntity = new HttpEntity<>(requestBody, headers);
 
         ResponseEntity<String> response = restTemplate.exchange(
                     url,
@@ -272,5 +276,7 @@ public class ApiUtil {
 
 
     }
+
+
 
 }

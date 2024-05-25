@@ -17,6 +17,32 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class ClientTest {
 
+
+
+    public Map<Integer, SimpleNode> getCurenntNodes(List<CompletableFuture<ConfigurableApplicationContext>> futures) throws ExecutionException, InterruptedException {
+        Map<Integer, SimpleNode> nodes = new HashMap<>();
+
+        //loop to read the data of all the nodes all the nodes
+        for (CompletableFuture<ConfigurableApplicationContext> future : futures) {
+            ClientNode node = future.get().getBean(Client.class).getNode();
+            SimpleNode data = new SimpleNode(future, node);
+            nodes.put(node.getId(), data);
+        }
+
+        //loop to fill in next and prev node ports
+        System.out.println(nodes);
+
+        for (Integer id : nodes.keySet()) {
+            SimpleNode node = nodes.get(id);
+            System.out.println(node.toString());
+            System.out.println(id);
+            node.prevPort = nodes.get(node.prevID).myPort;
+            node.nextPort = nodes.get(node.nextID).myPort;
+        }
+
+        return nodes;
+    }
+
     @Test
     void contextLoads() {
     }
@@ -67,7 +93,7 @@ class ClientTest {
             Map<Integer, SimpleNode> nodesBeforeDestruction = getCurenntNodes(futureContexts);
 
             //if these fail then something went wrong in the setup
-            for(SimpleNode controlNodes: nodesBeforeDestruction.values()){
+            for (SimpleNode controlNodes : nodesBeforeDestruction.values()) {
                 // if these fail it's because discovry went wrong because if the threads
                 assertEquals(nodesBeforeDestruction.get(controlNodes.nextID).prevID, controlNodes.myID);
                 assertEquals(nodesBeforeDestruction.get(controlNodes.prevID).nextID, controlNodes.myID);
@@ -114,29 +140,9 @@ class ClientTest {
         }
     }
 
-    public Map<Integer, SimpleNode> getCurenntNodes(List<CompletableFuture<ConfigurableApplicationContext>> futures) throws ExecutionException, InterruptedException {
-        Map<Integer, SimpleNode> nodes = new HashMap<>();
 
-        //loop to read the data of all the nodes all the nodes
-        for (CompletableFuture<ConfigurableApplicationContext> future : futures) {
-            ClientNode node = future.get().getBean(Client.class).getNode();
-            SimpleNode data = new SimpleNode(future, node);
-            nodes.put(node.getId(), data);
-        }
 
-        //loop to fill in next and prev node ports
-        System.out.println(nodes);
 
-        for (Integer id : nodes.keySet()) {
-            SimpleNode node = nodes.get(id);
-            System.out.println(node.toString());
-            System.out.println(id);
-            node.prevPort = nodes.get(node.prevID).myPort;
-            node.nextPort = nodes.get(node.nextID).myPort;
-        }
-
-        return nodes;
-    }
 
     //basically gewoon een struct. Maakt het makelijker om de data op te halen
     public class SimpleNode {

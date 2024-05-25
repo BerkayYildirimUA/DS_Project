@@ -1,13 +1,11 @@
 package nintendods.ds_project.controller;
-import jakarta.servlet.http.HttpServletRequest;
+
 import nintendods.ds_project.database.FileDB;
-import nintendods.ds_project.model.ANode;
 import nintendods.ds_project.model.file.AFile;
 import nintendods.ds_project.service.FileDBService;
 import nintendods.ds_project.utility.JsonConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -75,8 +73,8 @@ public class ClientFileAPI {
     }
 
     @PutMapping("/{fileName}/downloadLocation")
-    public ResponseEntity<String> changeOwner(@PathVariable("fileName") String fileName, @RequestBody String absultePath, @RequestBody int nodeID){
-        Optional<AFile> fileOptional = fileDB.getFileByAbsolutePath(absultePath);
+    public ResponseEntity<String> changeOwner(@PathVariable("fileName") String fileName, @RequestBody String absolutePath, @RequestBody int nodeID){
+        Optional<AFile> fileOptional = fileDB.getFileByAbsolutePath(absolutePath);
 
         if (fileOptional.isEmpty()){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(jsonConverter.toJson("File not found"));
