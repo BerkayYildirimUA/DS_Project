@@ -17,6 +17,11 @@ import java.net.Socket;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 /**
  * Transfer/ receive a file to/from another node.
  */
@@ -27,19 +32,22 @@ public class FileTransceiverService {
     private Thread receiverThread;
 
     public boolean testing_justReadFiles = false;
+    private static final Logger logger = LoggerFactory.getLogger(FileTransceiverService.class);
+
     /**
      * Create a File tranceiver object that will automatically create a thread where
      * it wil listen for file receives.
      * The default TCP port is 12346 and the file capacity is 50.
      */
     public FileTransceiverService() {
-        this(12346, 50);
+        this(12347, 50);
+        logger.info(String.format("Initialize FileTransceiverService with port %d and buffer size %d", 12347, 50));
     }
 
     /**
      * Create a File tranceiver object that will automatically create a thread where
      * it wil listen for file receives.
-     * 
+     *
      * @param port   the receiving port to listen on
      * @param buffer the amount of files that can be buffered
      */
@@ -57,7 +65,7 @@ public class FileTransceiverService {
     /**
      * Sends a file with its file object to a given address. The port is the default
      * one eg. 12346
-     * 
+     *
      * @param fileObject      the object that contains the file information. Will be
      *                        used to retrieve the file itself.
      * @param receiverAddress the address of the receiver
@@ -76,7 +84,9 @@ public class FileTransceiverService {
 
             FileMessage message = new FileMessage(fileObject);
 
-            socket = new Socket(receiverAddress, this.port); // We assume that the receiver side uses the same port.
+            logger.info(String.format("before create socket to %s - %d",receiverAddress.replace("/", ""), this.port));
+            socket = new Socket(receiverAddress.replace("/", ""), this.port); // We assume that the receiver side uses the same port.
+            logger.info("socker OK");
             OutputStream outputStream = socket.getOutputStream(); // get the output stream from the socket.
             // create an object output stream from the output stream so we can send an
             // object through it
@@ -89,6 +99,7 @@ public class FileTransceiverService {
             // File is replicated towards another node
             // fileObject.setReplicated(true);
         } catch (Exception ex) {
+            System.out.println(ex);
             return false;
         }
 
@@ -127,33 +138,38 @@ public class FileTransceiverService {
     /**
      * A receiving method that will loop to infinity and listens onto the given
      * port.
-     * 
+     *
      * @param port
      */
     private void receiveFile(int port) {
         try {
+            logger.info(String.format("Starting receive thread on port %d",port));
             ServerSocket ss = new ServerSocket(port);
             System.out.println("made a socket");
             Socket socket;
             InputStream inputStream;
             ObjectInputStream objectInputStream;
             boolean error = false;
+            logger.info("Done initializing");
 
             while (!error) {
                 try {
+                    logger.info("Wait for file message");
                     socket = ss.accept(); // blocking call, this will wait until a connection is attempted on this port.
-
+                    logger.info("file message recieved");
                     inputStream = socket.getInputStream();
                     objectInputStream = new ObjectInputStream(inputStream);
 
                     // read the list of messages from the socket and cast to FileMessage object
                     FileMessage receiveMessage = (FileMessage) objectInputStream.readObject();
                     receiveQueue.add(receiveMessage);
+                    logger.info("message saved");
 
                     //I added some code cause inputStream not closing cause issue for my tests, sorry of this breaks anything - berkay
                     inputStream.close();
                     socket.close();
                 } catch (Exception ex) {
+                    System.out.println(ex);
                     error = true;
                 }
             }
@@ -162,6 +178,7 @@ public class FileTransceiverService {
 
 
         } catch (IOException e) {
+            System.out.println(e);
             throw new RuntimeException(e);
         }
     }
@@ -213,7 +230,7 @@ public class FileTransceiverService {
 
     /**
      * Save a file that is present in the incoming buffer.
-     * 
+     *
      * @param node the issuer who saves the file
      * @return null if nothing has arrived and an object if something has arrived.
      */
@@ -224,7 +241,7 @@ public class FileTransceiverService {
     /**
      * Save a file that is present in the incoming buffer. If a file is present, we
      * save it in the given directory.
-     * 
+     *
      * @param node          the issuer who saves the file
      * @param directoryPath The new directory path to save the file in
      * @return null if nothing has arrived and an object if something has arrived.
@@ -249,7 +266,7 @@ public class FileTransceiverService {
                 File f = FileModifier.createFile(directoryPath, m.getFileObject().getName(), m.getFileInByte(), false);
 
                 if (f == null){
-                    throw new DuplicateFileException();
+                    throw new DuplicateFileException("file " + fileObject.getName() + " on location " +fileObject.getAbsolutePath() + " is already present on the system!");
                 }
 
                 // set file path and name
