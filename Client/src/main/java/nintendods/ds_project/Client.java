@@ -120,6 +120,8 @@ public class Client {
             t_prevNodePort = 0;
             t_nextNodePort = 0;
         }
+
+        fileWatcherService.setFileChangeListener(this::onFileChanged);
     }
 
     @PreDestroy
@@ -413,13 +415,8 @@ public class Client {
     }
 
     public void onFileChanged(File file) {
-        // Assuming AFile has a constructor that takes File as an argument
-        //AFile aFile = new AFile(file);
         filesToTransfer.add(file);
-
-        // Assuming you have a method to change the state
         this.nodeState = eNodeState.TRANSFER;
-        // Ahmad: clear filesToTransfer after sending
     }
 
 

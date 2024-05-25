@@ -4,12 +4,15 @@ import org.springframework.stereotype.Service;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
+
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.*;
 
 import org.springframework.beans.factory.annotation.Value;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.function.Consumer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,8 +27,14 @@ public class FileWatcherService {
     private ExecutorService executorService;
     private boolean running;
 
+    private Consumer<File> fileChangeListener;
+
     public FileWatcherService(@Value("${file.watcher.directory}") String directoryToWatch) {
         this.directoryToWatch = directoryToWatch;
+    }
+
+    public void setFileChangeListener(Consumer<File> listener) {
+        this.fileChangeListener = listener;
     }
 
     @PostConstruct
@@ -65,7 +74,9 @@ public class FileWatcherService {
                         WatchEvent.Kind<?> kind = event.kind();
                         Path filePath = (Path) event.context();
                         logger.info("Event kind: " + kind + ". File affected: " + filePath + ".");
-                        // Here you can add the logic to replicate the file changes.
+                        if (fileChangeListener != null) {
+                            fileChangeListener.accept(filePath.toFile());
+                        }
                     }
                     key.reset();
                 }
