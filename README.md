@@ -171,12 +171,13 @@ I'am confused by the given specifications, so this section has to be revised.
 - [] Update state File
 
 ### Berkay
-
-- [] shutdown
-  - [] when terminated it should move it's replicated files to the prev node
-  - [] if a node receives a repliceted file it should check if they have the Originals
-    - [] if they do: send the file to the it's prev node
-    - [] if they don't: save file
-  - [] if a node with an Original file gets shut down:
-      - [] tell the node with the replicated file that it's the only one now --> becomes new local file, needs a new replication?
-      - []  
+- [x] make util class so easly use REST api of client/nameserver
+- [x] shutdown
+  - [x] when terminated it should move it's replicated files to the prev node
+  - [x] if a node receives a repliceted file it should check if they have the Originals
+    - [x] if they do: send the file to the it's prev node
+    - [x] if they don't: save file
+  - [x] if a node with an Original file gets shut down:
+      - [x] send file to prev node 
+      - [x] prev ndoe will rell the backup file that it is the new download location
+  - [x] tests
