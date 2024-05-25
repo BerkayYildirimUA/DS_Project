@@ -218,7 +218,7 @@ public class FileTransceiverService {
      * @return null if nothing has arrived and an object if something has arrived.
      */
     public AFile saveIncomingFile(ANode node) throws DuplicateFileException {
-        return saveIncomingFile((ClientNode) node, "");
+        return saveIncomingFile((ANetworkNode) node, "");
     }
 
     /**
