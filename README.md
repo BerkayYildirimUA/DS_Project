@@ -126,7 +126,7 @@ When we add a local file, this should be replicated immediately. We can startup 
 
 The replication can be used from the starting phase where we send the file name to the namingserver API and then determine where to transfer it to over a TCP socket.
 
-###Shutdown
+## Shutdown
 When the node is terminated, all files on this node need to be sent to the previous node.
 
 The previous node will check and handle the files based on the following conditions:
