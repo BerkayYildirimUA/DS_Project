@@ -131,9 +131,9 @@ When the node is terminated, all files on this node need to be sent to the previ
 
 The previous node will check and handle the files based on the following conditions:
 
-If the file is a backup file and the node does not have the original, the file will be saved.
-If the file is a backup file and the node DOES have the original, the file will be sent to the next previous node.
-If the file is an original file, the node will contact the node with the backup file and update the download location in the logs.
+If the file is a backup file and the node does not have the original, the file will be saved.  
+If the file is a backup file and the node DOES have the original, the file will be sent to the next previous node.  
+If the file is an original file, the node will contact the node with the backup file and update the download location in the logs.  
 
 ## Group division
 
