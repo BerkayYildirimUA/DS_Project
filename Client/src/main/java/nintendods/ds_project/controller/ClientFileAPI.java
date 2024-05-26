@@ -1,4 +1,5 @@
 package nintendods.ds_project.controller;
+
 import nintendods.ds_project.database.FileDB;
 import nintendods.ds_project.model.file.AFile;
 import nintendods.ds_project.service.FileDBService;
@@ -91,5 +92,19 @@ public class ClientFileAPI {
             logger.error("Error deleting file: {}", e.getMessage());
             return ResponseEntity.badRequest().body(jsonConverter.toJson(e.getMessage()));
         }
+    }
+
+    @PutMapping("/{fileName}/downloadLocation")
+    public ResponseEntity<String> changeOwner(@PathVariable("fileName") String fileName, @RequestBody String absolutePath, @RequestBody int nodeID){
+        Optional<AFile> fileOptional = fileDB.getFileByAbsolutePath(absolutePath);
+
+        if (fileOptional.isEmpty()){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(jsonConverter.toJson("File not found"));
+        }
+
+        AFile file = fileOptional.get();
+        file.setDownloadLocation(Integer.toString(nodeID));
+        logger.info("changed download location of:" + fileName +"\n to: " + nodeID);
+        return ResponseEntity.ok().body(jsonConverter.toJson("file changes successfully"));
     }
 }

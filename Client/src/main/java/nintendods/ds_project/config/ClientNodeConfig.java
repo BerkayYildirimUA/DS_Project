@@ -33,17 +33,70 @@ public class ClientNodeConfig {
     @Value("${server.port}")
     private int apiPort;
 
-    public static int NODE_NAME_LENGTH; // Length of the random node name
-    public static int NODE_GLOBAL_PORT; //Fixed port for node operations
-    public static int DISCOVERY_RETRIES; // Maximum number of retries for discovery
-    public static int DISCOVERY_ADDITION_TIMEOUT; //In microseconds
-    public static int LISTENER_BUFFER_SIZE; // Buffer size for the listener service
-    public static String MULTICAST_ADDRESS; // Multicast address for network communication
-    public static int MULTICAST_PORT; // Port for multicast communication
+
+    //public static int NODE_NAME_LENGTH; // Length of the random node name
+    //public static int NODE_GLOBAL_PORT; //Fixed port for node operations
+   // public static int DISCOVERY_RETRIES; // Maximum number of retries for discovery
+   // public static int DISCOVERY_ADDITION_TIMEOUT; //In microseconds
+   // public static int LISTENER_BUFFER_SIZE; // Buffer size for the listener service
+    //public static String MULTICAST_ADDRESS; // Multicast address for network communication
+    //public static int MULTICAST_PORT; // Port for multicast communication
     // public static int TCP_FILE_RECEIVE_PORT;
     // public static int TCP_FILE_RECEIVE_BUFFER;
-    public static int TESTING;
-    public static int API_PORT;
+    //public static int TESTING;
+    //public static int API_PORT;
+
+    private static int NODE_NAME_LENGTH; // Length of the random node name
+    private static int NODE_GLOBAL_PORT; //Fixed port for node operations
+    private static int DISCOVERY_RETRIES; // Maximum number of retries for discovery
+    private static int DISCOVERY_ADDITION_TIMEOUT; //In microseconds
+    private static int LISTENER_BUFFER_SIZE; // Buffer size for the listener service
+    private static String MULTICAST_ADDRESS; // Multicast address for network communication
+    private static int MULTICAST_PORT; // Port for multicast communication
+    private static int TCP_FILE_RECEIVE_PORT;
+    private static int TESTING;
+    private static int API_PORT;
+
+    public static int getNodeNameLength() {
+        return NODE_NAME_LENGTH;
+    }
+
+    public static int getNodeGlobalPort() {
+        return NODE_GLOBAL_PORT;
+    }
+
+    public static int getDiscoveryRetries() {
+        return DISCOVERY_RETRIES;
+    }
+
+    public static int getDiscoveryAdditionTimeout() {
+        return DISCOVERY_ADDITION_TIMEOUT;
+    }
+
+    public static int getListenerBufferSize() {
+        return LISTENER_BUFFER_SIZE;
+    }
+
+    public static String getMulticastAddress() {
+        return MULTICAST_ADDRESS;
+    }
+
+    public static int getMulticastPort() {
+        return MULTICAST_PORT;
+    }
+
+    public static int getTcpFileReceivePort() {
+        return TCP_FILE_RECEIVE_PORT;
+    }
+
+    public static int getTESTING() {
+        return TESTING;
+    }
+
+    public static int getApiPort() {
+        return API_PORT;
+    }
+
 
     @PostConstruct
     private void init() {

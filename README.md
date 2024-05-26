@@ -1,6 +1,6 @@
 # 6-DS project
 
-This projects will create a ring topology with clients. A Naming server that will manage the resources and namings of the nodes files in the ring topology
+This projects will create a ring topology with clients. A Naming remoteNode that will manage the resources and namings of the nodes files in the ring topology
 
 # Naming Server part
 
@@ -12,7 +12,7 @@ This projects will create a ring topology with clients. A Naming server that wil
   - [x] API
 
 - Berkay
-  - Name server:
+  - Name remoteNode:
     - [x] Map(int, ip)
     - [x] get ip from filename
     - [x] Add/Remove nodes from map
@@ -47,7 +47,7 @@ On failure of a node, the network must be self healing.
   1. [x] Method for multicast transmission developed 
   2. [x] Develop method to calc hash
   3. [x] node will send during bootstrap a multicast with its name and IP (and port for reply)
-  4. Naming server steps when recieving multicast from node
+  4. Naming remoteNode steps when recieving multicast from node
     1. [x] Calc hash of node (create node object)
     2. [x] count the known hosts in the network
     3. [x] Check if node exists (can be done in database?) and add to database
@@ -56,7 +56,7 @@ On failure of a node, the network must be self healing.
     1. [x] Calc hash of receiving name
     2. [x] Set the prev and next node based on the receiving node.
     3. [x] Response to the multicast node.
-  6. [x] Node that casts the multicast, recieves a message from the naming server containing the amount of nodes.
+  6. [x] Node that casts the multicast, recieves a message from the naming remoteNode containing the amount of nodes.
     1. [x] Wait an x amount of time before closing the readPort (and some retries)
     2. [x] Check the amount of available nodes and set the prev and next node accordingly
 
@@ -92,7 +92,7 @@ On failure of a node, the network must be self healing.
   - [x] Bootstrap
   - [ ] Failure
   - [ ] Shutdown 
-### Naming server
+### Naming remoteNode
   - [ ] Discovery
   - [ ] Bootstrap
   - [ ] Failure
@@ -101,7 +101,7 @@ On failure of a node, the network must be self healing.
 # Replication part
 We have files with a name. This name can be hashed by our simple hash algorithm. Now we can compare these hashes with the known node's ID's that are situated in the ring topology.
 
-The goal of this part is to ensure that all files, with a specific hash range, are located at the same node. Now we know through the naming server, where a file might be located.
+The goal of this part is to ensure that all files, with a specific hash range, are located at the same node. Now we know through the naming remoteNode, where a file might be located.
 
 To ensure easy coding, we'll create a file transfer class that can be used by the nodes to transfer a file over a TCP socket from node to node.
 
@@ -111,11 +111,11 @@ This will be done in 3 phases.
 All files that are stored on each node should be replicated to corresponding nodes in the ring topology. This way, a new node to which the file is replicated becomes the owner of the file.
 
 After bootstrap and discovery, the new node has to verify its local files (folder on
-the hard drive). The node will send over each file name to the naming server and the naming server will send back a destination node if the file has to be replicated. The replicated node is the first smaller hash ID node the n the file hash.
+the hard drive). The node will send over each file name to the naming remoteNode and the naming remoteNode will send back a destination node if the file has to be replicated. The replicated node is the first smaller hash ID node the n the file hash.
 
 So there are 3 nodes with the fommowing hash ID: 1 5 7. We have a file on node 1 with hash equal to 6. Then the new replication node will be node 5 because this is the 1 lesser then node based on the hash ID of the file.
 
-The naming server will respond to the original node where to transfer through. If a replication node receives the file, it adds a log to the file logging.
+The naming remoteNode will respond to the original node where to transfer through. If a replication node receives the file, it adds a log to the file logging.
 
 Each file will have a full log available to track its replications and owners of the file.
 
@@ -126,21 +126,14 @@ When we add a local file, this should be replicated immediately. We can startup 
 
 The replication can be used from the starting phase where we send the file name to the namingserver API and then determine where to transfer it to over a TCP socket.
 
-## shutdown
-If needed, all files locally stored on a node that is about to shutdown should be transferred to other nodes. Otherwise, they can be deleted and this change needs to be synced as described above in the Update.
+## Shutdown
+When the node is terminated, all files on this node need to be sent to the previous node.
 
-Shutdown has a couple of steps:
+The previous node will check and handle the files based on the following conditions:
 
-### shutdown of replication node
-When the node is terminated, the files that are replicated on this node, needs to be replicated to the previous node (because this will be the smallest hash ID in line now).
-
-If the previous node has a locally stored file of the receiving files, it will send it to his previous node. (remember -> node.id < file.id).
-
-When transfering the files, we must include the logging file as well.
-
-### shutdown of owner node
-
-I'am confused by the given specifications, so this section has to be revised.
+If the file is a backup file and the node does not have the original, the file will be saved.  
+If the file is a backup file and the node DOES have the original, the file will be sent to the next previous node.  
+If the file is an original file, the node will contact the node with the backup file and update the download location in the logs.  
 
 ## Group division
 
@@ -171,6 +164,34 @@ I'am confused by the given specifications, so this section has to be revised.
 - [] Update state File
 
 ### Berkay
+- [x] make util class so easly use REST api of client/nameserver
+- [x] shutdown
+  - [x] when terminated it should move it's replicated files to the prev node
+  - [x] if a node receives a repliceted file it should check if they have the Originals
+    - [x] if they do: send the file to the it's prev node
+    - [x] if they don't: save file
+  - [x] if a node with an Original file gets shut down:
+      - [x] send file to prev node 
+      - [x] prev ndoe will rell the backup file that it is the new download location
+  - [x] tests
+
+
+# sync and failure agents
+
+We have to create 2 types of agents. A synchronize agent and a failure agent. This to ensure that we have a fully synchronized distributed file access (by the sync agent) and a failure event where the failure agent will come in to make sure no files are lost during the steps of the shutdown.
+
+## Sync (Robbe)
+The sync or synchronize agent will hold all the files that are currently in the topology. We'll transfer this agent list through a REST call from the next node of the current node.
+
+The sync agent is present on each node. This agent will be called in an interval of X seconds. When called, the sync agent begins his run method. This include checking his own files on changes, the next node’s sync agent files on changes, checking if there’s a request on a file lock and lastly check if there’s a request on an unlocking of a file.
+
+The sync or synchronize agent will have a data structure that holds the filename and the lock of that file. When running, we'll check the files of that node with the database and update accordingly if any changes have occurred. This are only adding changes and no delete changes.
+
+Each node will have 2 queues where it can request a file lock or unlock (only after a lock of course). These queues will be checked by the sync agent when activated by the interval. If something is in the lock request queue, the agent can check this if the file is somewhere else already locked or not. if not, the file gets locked by this node and the sync agent updates its database. When a lock is not required anymore, the node can request an unlock and place this in the queue. The sync agent again will check if the file was locked and then unlock this.
+
+A client can check his lock request in a read only queue where all the accepted lock request are listed. When a client asks for an unlock, the queue data structure, will check if there were any accepted locks on this file. This to prevent unneeded items in the queue.
+
+## Failure
 
 - [] shutdown
   - [] when terminated it should move it's replicated files to the prev node
@@ -205,3 +226,26 @@ For now we leave security out of the picture because we do not have the time to 
 ## failure agent
 
 ...
+=======
+...
+
+## Group division
+
+### Robbe
+- [x] sync agent
+  - [x] check current node files
+  - [x] check next node files
+  - [x] check lock requests and update local db
+  - [x] when lock approved, add to accepted queue
+  - [x] check unlock requests and update local db
+- [x] handle sync agent db GET from REST call
+- [x] provide data structure for client to request locks, unlocks check accepted locks.
+
+
+### Tom
+
+
+### Ahmad
+
+
+### Berkay

@@ -17,12 +17,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class ClientTest {
 
-    @Test
-    void contextLoads() {
-    }
-
-    @Test
-        //if it fails, try running it a few more times. First time I'm working with threads this complex so sometimes things don't proparly work because of the way the threads interact, not because of the project itself. It seems pretty stable now though.
+    @Test //if it fails, try running it a few more times. First time I'm working with threads this complex so sometimes things don't proparly work because of the way the threads interact, not because of the project itself. It seems pretty stable now though.
     void shutdownTest() throws InterruptedException, ExecutionException {
         System.out.println("START NAMESERVER FOR THIS TEST BY HAND ");
 
@@ -67,7 +62,7 @@ class ClientTest {
             Map<Integer, SimpleNode> nodesBeforeDestruction = getCurenntNodes(futureContexts);
 
             //if these fail then something went wrong in the setup
-            for(SimpleNode controlNodes: nodesBeforeDestruction.values()){
+            for (SimpleNode controlNodes : nodesBeforeDestruction.values()) {
                 // if these fail it's because discovry went wrong because if the threads
                 assertEquals(nodesBeforeDestruction.get(controlNodes.nextID).prevID, controlNodes.myID);
                 assertEquals(nodesBeforeDestruction.get(controlNodes.prevID).nextID, controlNodes.myID);
@@ -113,6 +108,8 @@ class ClientTest {
             }
         }
     }
+
+
 
     public Map<Integer, SimpleNode> getCurenntNodes(List<CompletableFuture<ConfigurableApplicationContext>> futures) throws ExecutionException, InterruptedException {
         Map<Integer, SimpleNode> nodes = new HashMap<>();
