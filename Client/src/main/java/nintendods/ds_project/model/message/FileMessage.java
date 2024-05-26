@@ -7,16 +7,16 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.Serializable;
 
-public class FileMessage implements Serializable{
-    byte[] fileInByte;
+public class FileMessage implements Serializable {
+    byte[] fileInBytes;
     AFile fileObject;
 
-    public FileMessage(AFile fileObject){
+    public FileMessage(AFile fileObject) {
         //Create bytes
         try {
             FileInputStream temp = new FileInputStream(fileObject.getAbsolutePath());
-            this.fileInByte = new byte[(int) fileObject.getFile().length()];
-            temp.read(this.fileInByte);
+            this.fileInBytes = new byte[(int) fileObject.getFile().length()];
+            temp.read(this.fileInBytes);
             this.fileObject = fileObject;
             temp.close();
         } catch (FileNotFoundException e) {
@@ -28,11 +28,17 @@ public class FileMessage implements Serializable{
         }
     }
 
-    public byte[] getFileInByte(){
-        return this.fileInByte;
+    public FileMessage(AFile fileObject, byte[] fileInBytes) {
+        this.fileInBytes = fileInBytes;
+        this.fileObject = fileObject;
     }
 
-    public AFile getFileObject(){
+
+    public byte[] getFileInByte() {
+        return this.fileInBytes;
+    }
+
+    public AFile getFileObject() {
         return this.fileObject;
     }
 }

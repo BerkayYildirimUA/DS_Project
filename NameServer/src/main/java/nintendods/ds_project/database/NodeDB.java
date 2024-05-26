@@ -113,29 +113,13 @@ public class NodeDB {
         Integer tempID = NameToHash.convert(name);
 
         Integer floor = nodeID_to_nodeIP.floorKey(tempID);
-        Integer ceiling = nodeID_to_nodeIP.ceilingKey(tempID);
-
-        // if no upper key, then we loop back to beginning
-        if (ceiling == null) {
-            ceiling = nodeID_to_nodeIP.firstKey();
-        }
 
         // if no lower key, then we loop to end
         if (floor == null) {
             floor = nodeID_to_nodeIP.lastKey();
         }
 
-        int distToFloor = (tempID - floor + (NameToHash.MAX_NODES + 1)) % (NameToHash.MAX_NODES + 1); // Wrap-around distance to floor
-        int distToCeiling = (ceiling - tempID + (NameToHash.MAX_NODES + 1)) % (NameToHash.MAX_NODES + 1); // Wrap-around distance to ceiling
-
-        int closestKey;
-        if (distToFloor <= distToCeiling) {
-            closestKey = floor;
-        } else {
-            closestKey = ceiling;
-        }
-
-        return closestKey;
+        return floor;
     }
 
     public int getPreviousId(int id) {

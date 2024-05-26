@@ -33,11 +33,7 @@ public class NameServerAPI {
     public ResponseEntity<String> getFileAddressByName(@PathVariable("file_name") String name) {
         printAndLog("GET:\t IP by file ID");
         int closestId = nodeDB.getClosestIdFromName(name);
-        int id = NameToHash.convert(name);
-        if (closestId > id) {
-            // If closestId is higher, than it is the id of the next node
-            closestId = nodeDB.getPreviousId(closestId);
-        }
+
         String ip = nodeDB.getIpFromId(closestId);
         printAndLog("GET:\t IP=" + ip);
 
