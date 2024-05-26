@@ -35,6 +35,9 @@ import org.springframework.web.client.RestTemplate;
 import java.io.File;
 import java.io.IOException;
 import java.net.UnknownHostException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 import java.io.IOException;
@@ -134,6 +137,7 @@ public class Client {
     @PreDestroy
     public void prepareForShutdown() throws InterruptedException {
         if ((nodeState != eNodeState.DISCOVERY) || (testing == 1)) {
+            fileWatcherService.stopWatching();
             System.out.println("Preparing for shutdown...");
             ShutdownService shutdownService;
 
@@ -375,17 +379,29 @@ public class Client {
     }
 
     public void onFileChanged(File file) {
-        try {
-            AFile a_file = null;
-            a_file = fileTransceiver.saveIncomingFile(node, path + "/local");
-            if(a_file != null){
-                System.out.println("LISTENING:\t get files\n" + file);
-            }
-        } catch (DuplicateFileException e) {
-            throw new RuntimeException(e);
-        }
-
+        fileDB.addOrUpdateFile(file, node);
         this.nodeState = eNodeState.TRANSFER;
 
+        String targetDirectoryPath = path + File.separator + "local";
+        moveFileToLocalDirectory(file, targetDirectoryPath);
+
+    }
+
+    private void moveFileToLocalDirectory(File file, String targetDirectoryPath) {
+        try {
+            // Create the target directory if it does not exist
+            Path targetDirectory = Paths.get(targetDirectoryPath);
+            if (!Files.exists(targetDirectory)) {
+                Files.createDirectories(targetDirectory);
+            }
+
+            // Define the target file path
+            Path targetFilePath = targetDirectory.resolve(file.getName());
+
+            // Move the file to the target directory
+            Files.move(file.toPath(), targetFilePath);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
