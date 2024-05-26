@@ -265,16 +265,16 @@ public class Client {
                 case TRANSFER -> {
                     logger.info("Entered TransferState");
                     List<File> files = null;
-                    if (TransferWholeDirectory) {
-                        files = FileReader.getFiles(path);
-                        TransferWholeDirectory = false;
-                        logger.info("Transfering whole directory");
-                    } else if (TransferUpdatedFile){
+                    if (TransferUpdatedFile){
                         logger.info("Transfering added file:");
                         for (String file_path: filesToTransfer) {
                             logger.info(file_path);
                             files = FileReader.getFiles(file_path);
                         }
+                    } else if (TransferWholeDirectory) {
+                        files = FileReader.getFiles(path);
+                        TransferWholeDirectory = false;
+                        logger.info("Transfering whole directory");
                     }
                     //List<File> files = filesToTransfer;
                     filesToTransfer.clear();
