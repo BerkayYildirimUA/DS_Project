@@ -181,3 +181,44 @@ I'am confused by the given specifications, so this section has to be revised.
       - [x] send file to prev node 
       - [x] prev ndoe will rell the backup file that it is the new download location
   - [x] tests
+
+
+# sync and failure agents
+
+We have to create 2 types of agents. A synchronize agent and a failure agent. This to ensure that we have a fully synchronized distributed file access (by the sync agent) and a failure event where the failure agent will come in to make sure no files are lost during the steps of the shutdown.
+
+## Sync (Robbe)
+The sync or synchronize agent will hold all the files that are currently in the topology. We'll transfer this agent list through a REST call from the next node of the current node.
+
+The sync agent is present on each node. This agent will be called in an interval of X seconds. When called, the sync agent begins his run method. This include checking his own files on changes, the next node’s sync agent files on changes, checking if there’s a request on a file lock and lastly check if there’s a request on an unlocking of a file.
+
+The sync or synchronize agent will have a data structure that holds the filename and the lock of that file. When running, we'll check the files of that node with the database and update accordingly if any changes have occurred. This are only adding changes and no delete changes.
+
+Each node will have 2 queues where it can request a file lock or unlock (only after a lock of course). These queues will be checked by the sync agent when activated by the interval. If something is in the lock request queue, the agent can check this if the file is somewhere else already locked or not. if not, the file gets locked by this node and the sync agent updates its database. When a lock is not required anymore, the node can request an unlock and place this in the queue. The sync agent again will check if the file was locked and then unlock this.
+
+A client can check his lock request in a read only queue where all the accepted lock request are listed. When a client asks for an unlock, the queue data structure, will check if there were any accepted locks on this file. This to prevent unneeded items in the queue.
+
+## Failure
+
+...
+
+## Group division
+
+### Robbe
+- [x] sync agent
+  - [x] check current node files
+  - [x] check next node files
+  - [x] check lock requests and update local db
+  - [x] when lock approved, add to accepted queue
+  - [x] check unlock requests and update local db
+- [x] handle sync agent db GET from REST call
+- [x] provide data structure for client to request locks, unlocks check accepted locks.
+
+
+### Tom
+
+
+### Ahmad
+
+
+### Berkay
