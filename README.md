@@ -126,21 +126,14 @@ When we add a local file, this should be replicated immediately. We can startup 
 
 The replication can be used from the starting phase where we send the file name to the namingserver API and then determine where to transfer it to over a TCP socket.
 
-## shutdown
-If needed, all files locally stored on a node that is about to shutdown should be transferred to other nodes. Otherwise, they can be deleted and this change needs to be synced as described above in the Update.
+###Shutdown
+When the node is terminated, all files on this node need to be sent to the previous node.
 
-Shutdown has a couple of steps:
+The previous node will check and handle the files based on the following conditions:
 
-### shutdown of replication node
-When the node is terminated, the files that are replicated on this node, needs to be replicated to the previous node (because this will be the smallest hash ID in line now).
-
-If the previous node has a locally stored file of the receiving files, it will send it to his previous node. (remember -> node.id < file.id).
-
-When transfering the files, we must include the logging file as well.
-
-### shutdown of owner node
-
-I'am confused by the given specifications, so this section has to be revised.
+If the file is a backup file and the node does not have the original, the file will be saved.
+If the file is a backup file and the node DOES have the original, the file will be sent to the next previous node.
+If the file is an original file, the node will contact the node with the backup file and update the download location in the logs.
 
 ## Group division
 
