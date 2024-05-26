@@ -56,9 +56,10 @@ public class Client {
 
     @Autowired
     FileWatcherService fileWatcherService;
-    private boolean firstTimeTransfer = true;
+    private boolean TransferWholeDirectory = false;
+    private boolean TransferUpdatedFile = false;
 
-    private List<File> filesToTransfer = new ArrayList<>();
+    private List<String> filesToTransfer = new ArrayList<>();
     public ClientNode getNode() {
         return node;
     }
@@ -219,7 +220,7 @@ public class Client {
                 case LISTENING -> {
                     //System.out.println("Entering Listening");
                     // Listen for multicast
-                    if (multicastListener == null){
+                    if (multicastListener == null) {
                         multicastListener = new MulticastListenerService(MULTICAST_ADDRESS, MULTICAST_PORT, LISTENER_BUFFER_SIZE);
                         multicastListener.initialize_multicast();
                     }
@@ -230,14 +231,16 @@ public class Client {
                     }
 
                     // Listen for file transfers
+                    AFile file = null;
                     try {
-                        AFile file = null;
+                        file = null;
                         file = fileTransceiver.saveIncomingFile(node, path + "/replicated");
-                        if(file != null){
-                            System.out.println("LISTENING:\t get files\n" + file);
+                        if (file != null) {
+                            logger.info("LISTENING:\t get files\n" + file);
                         }
                     } catch (DuplicateFileException e) {
-                        throw new RuntimeException(e);
+                        //throw new RuntimeException(e);
+                        logger.info("File is already present: " + file);
                     }
 
                     // Update if needed
@@ -248,42 +251,30 @@ public class Client {
                         e.printStackTrace();
                         nodeState = eNodeState.ERROR; // Move to Error state on exception
                     }
-                    if (    (node.getPrevNodeId() != -1 && node.getNextNodeId() != -1) &&
-                            (node.getPrevNodeId() != node.getId() && node.getNextNodeId() != node.getId()) && firstTimeTransfer){
+                    if ((node.getPrevNodeId() != -1 && node.getNextNodeId() != -1) &&
+                            (node.getPrevNodeId() != node.getId() && node.getNextNodeId() != node.getId())) {
                         try {
                             TimeUnit.SECONDS.sleep(3);
                         } catch (InterruptedException e) {
                             throw new RuntimeException(e);
                         }
                         nodeState = eNodeState.TRANSFER;
+                        TransferWholeDirectory = true;
                     }
-                    /*
-
-                    if (node.getId() < node.getPrevNodeId())    {  // ---> gaat altijd een error geven vanaf je netwerk meer dan 2 nodes heeft
-                        System.out.println("LISTENING:\t Client sleep");
-                        try {
-                            TimeUnit.SECONDS.sleep(15);
-                        } catch (InterruptedException e) {
-                            throw new RuntimeException(e);
-                        }
-                        nodeState = eNodeState.ERROR;
-                    } else nodeState = eNodeState.TRANSFER;
-                    */
                 }
                 case TRANSFER -> {
-                    // TODO: Transfer data or handle other operations
+                    logger.info("Entered TransferState");
                     List<File> files = null;
-                    System.out.println("Entered TransferState");
-                    if (firstTimeTransfer) {
+                    if (TransferWholeDirectory) {
                         files = FileReader.getFiles(path);
-                        firstTimeTransfer = false;
-                        System.out.println("Transfering initial files");
-                    } else {
-                        files = filesToTransfer;
-                        System.out.println("Transfering added files");
-                    }
-                    for (File file: files){
-                        System.out.println(file.getAbsolutePath());
+                        TransferWholeDirectory = false;
+                        logger.info("Transfering whole directory");
+                    } else if (TransferUpdatedFile){
+                        logger.info("Transfering added file:");
+                        for (String file_path: filesToTransfer) {
+                            logger.info(file_path);
+                            files = FileReader.getFiles(file_path);
+                        }
                     }
                     //List<File> files = filesToTransfer;
                     filesToTransfer.clear();
@@ -292,8 +283,8 @@ public class Client {
                     // Add files to DB
                     for (File file: files) fileDB.addOrUpdateFile(file, node);
                     // logger.info("TRANSFER:\t DB " + fileDB.getFiles());
-                    System.out.println("TRANSFER:\t node=" + node);
-                    System.out.println("TRANSFER:\t files read \n" + fileDB.getFiles());
+                    logger.info("TRANSFER:\t node=" + node);
+                    logger.info("TRANSFER:\t files read \n" + fileDB.getFiles());
 
                     // Transfer files
                     String transferIp, url;
@@ -309,17 +300,17 @@ public class Client {
                         System.out.println("GET from: " + url);
                         response = restTemplate.getForEntity(url, String.class);
                         transferIp = response.getBody();
-                         System.out.println("Send file to " + transferIp);
-                        
-                        System.out.println("TRANSFER:\t received=" + transferIp + "\n\t\t own=" + node.getAddress().getHostAddress());
+                        logger.info("Send file to " + transferIp);
+
+                        logger.info("TRANSFER:\t received=" + transferIp + "\n\t\t own=" + node.getAddress().getHostAddress());
                         if (("/"+node.getAddress().getHostAddress()).equals(transferIp)) {
                             // Node to send is self --> send to previous node
                             url = "http://" + nsObject.getNSAddress() + ":8089/node/" + node.getPrevNodeId();
                             // logger.info("GET from: " + url);
-                            System.out.println("GET from: " + url);
+                            logger.info("GET from: " + url);
                             response = restTemplate.getForEntity(url, String.class);
                             transferIp = response.getBody();
-                            System.out.println("Can't send to self, redirect to " + transferIp);
+                            logger.info("Can't send to self, redirect to " + transferIp);
                         }
 
                        // Send file to that node
@@ -327,10 +318,16 @@ public class Client {
                     }
 
                     System.out.println("TRANSFER:\t files added \n" + fileDB.getFiles());
+                    if (TransferWholeDirectory){
+                        TransferWholeDirectory = false;
+                    }
+                    if (TransferUpdatedFile) {
+                        TransferUpdatedFile = false;
+                    }
                     nodeState = eNodeState.LISTENING; // Loop back to Listening for simplicity
                 }
                 case SHUTDOWN -> {
-                    System.out.println("SHUTDOWN:\t Start:" + Timestamp.from(Instant.now()));
+                    logger.info("SHUTDOWN:\t Start:" + Timestamp.from(Instant.now()));
             /*        System.out.println("Prepare nodes for shutdown");
                     System.out.println("Nodes prepared. Latch Down");
                     latch.countDown();
@@ -344,7 +341,7 @@ public class Client {
                      */
                 }
                 case ERROR -> {
-                    System.out.println("ERROR:\t Start:" + Timestamp.from(Instant.now()));
+                    logger.info("ERROR:\t Start:" + Timestamp.from(Instant.now()));
                     // TODO: Handle error state, possibly attempt to recover or shutdown gracefully
                     // Hard, only transmit to naming server and the naming server needs to deal with
                     // it.
@@ -428,8 +425,11 @@ public class Client {
     }
 
     public void onFileChanged(File file) {
-        System.out.println("OnFileChanged");
-        filesToTransfer.add(file);
+        filesToTransfer.add(file.getAbsolutePath());
+        for (String file_path: filesToTransfer){
+            logger.info("Updated File: " + file_path);
+        }
+        TransferUpdatedFile = true;
         this.nodeState = eNodeState.TRANSFER;
 
     }
