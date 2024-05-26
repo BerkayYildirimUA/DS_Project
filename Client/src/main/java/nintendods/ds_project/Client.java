@@ -35,6 +35,9 @@ import org.springframework.web.client.RestTemplate;
 import java.io.File;
 import java.io.IOException;
 import java.net.UnknownHostException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 import java.io.IOException;
@@ -54,6 +57,8 @@ public class Client {
     @Autowired
     ClientNode node; // Ahmad_merge: this or node = new ClientNode(InetAddress.getLocalHost(), NODE_GLOBAL_PORT, generateRandomString(NODE_NAME_LENGTH));
 
+    @Autowired
+    FileWatcherService fileWatcherService;
     public ClientNode getNode() {
         return node;
     }
@@ -132,6 +137,7 @@ public class Client {
     @PreDestroy
     public void prepareForShutdown() throws InterruptedException {
         if ((nodeState != eNodeState.DISCOVERY) || (testing == 1)) {
+            fileWatcherService.stopWatching();
             System.out.println("Preparing for shutdown...");
             ShutdownService shutdownService;
 
@@ -170,6 +176,9 @@ public class Client {
         nodeState = eNodeState.DISCOVERY; // Initial state of the node
         boolean isRunning = true; // Controls the main loop
         int discoveryRetries = 0; // Counter for discovery attempts
+        fileWatcherService.init();
+        fileWatcherService.setFileChangeListener(this::onFileChanged);
+        logger.info("Initialized FileWatcherService");
 
 
         while (isRunning) {
@@ -367,5 +376,32 @@ public class Client {
         }
 
         System.out.println("Main Done");
+    }
+
+    public void onFileChanged(File file) {
+        fileDB.addOrUpdateFile(file, node);
+        this.nodeState = eNodeState.TRANSFER;
+
+        String targetDirectoryPath = path + File.separator + "local";
+        moveFileToLocalDirectory(file, targetDirectoryPath);
+
+    }
+
+    private void moveFileToLocalDirectory(File file, String targetDirectoryPath) {
+        try {
+            // Create the target directory if it does not exist
+            Path targetDirectory = Paths.get(targetDirectoryPath);
+            if (!Files.exists(targetDirectory)) {
+                Files.createDirectories(targetDirectory);
+            }
+
+            // Define the target file path
+            Path targetFilePath = targetDirectory.resolve(file.getName());
+
+            // Move the file to the target directory
+            Files.move(file.toPath(), targetFilePath);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
