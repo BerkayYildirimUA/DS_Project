@@ -254,7 +254,7 @@ public class Client {
                     if ((node.getPrevNodeId() != -1 && node.getNextNodeId() != -1) &&
                             (node.getPrevNodeId() != node.getId() && node.getNextNodeId() != node.getId())) {
                         try {
-                            TimeUnit.SECONDS.sleep(3);
+                            TimeUnit.SECONDS.sleep(10);
                         } catch (InterruptedException e) {
                             throw new RuntimeException(e);
                         }
