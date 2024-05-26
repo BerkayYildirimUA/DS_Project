@@ -47,7 +47,7 @@ public class ShutdownUtests {
     void replicationShutdownTest_EmptyDataBase() throws Exception { //if the test fails check if "test/repliaction/" or any sub dirs have txt files. If yes -> delete them
 
         UNAMObject unamObject = new UNAMObject(1, eMessageTypes.UnicastNamingServerToNode, 1, "127.0.0.1", 10);
-        FileTransceiverService fileTransceiverService = new FileTransceiverService(12347, 1000);
+        FileTransceiverService fileTransceiverService = new FileTransceiverService(200, 1000);
         client.setFileTransceiver(fileTransceiverService);
         client.setNsObject(unamObject);
 
@@ -55,6 +55,7 @@ public class ShutdownUtests {
 
         List<AFile> original_files = new ArrayList<>();
 
+        //creating files and adding them to the database
         for (int i = 1; i <= 10; i++) {
             String fileName = "testFile" + i + ".txt";
             String absolutePath = System.getProperty("user.dir") + "/test/replication/" + fileName;
@@ -66,24 +67,20 @@ public class ShutdownUtests {
                 fw.close();
             }
 
-
             AFile file = new AFile(testFile.getAbsolutePath(), testFile.getName(), client.node);
             original_files.add(file);
             fileDB.addOrUpdateFile(file);
         }
 
-
+        // mocking rest requests
         RestTemplate mockRestTemplate = mock(RestTemplate.class);
-
         when(mockRestTemplate.getForEntity(anyString(), eq(String.class))).thenReturn(ResponseEntity.ok("127.0.0.1"));
-
         ApiUtil.setRestTemplate(mockRestTemplate);
 
         client.prepareForShutdown();
 
+        fileTransceiverService.testing_justReadFiles = true; //turn off the check
 
-        // Wait for an incomming message.
-        fileTransceiverService.testing_justReadFiles = true;
         int fileCounter = 0;
         List<AFile> newfiles = new ArrayList<>();
         while (true) {
@@ -106,7 +103,7 @@ public class ShutdownUtests {
     void replicationShutdownTest_RecieveOriginalFile() throws Exception { //if the test fails check if "test/repliaction/" or any sub dirs have txt files. If yes -> delete them
 
         UNAMObject unamObject = new UNAMObject(1, eMessageTypes.UnicastNamingServerToNode, 1, "127.0.0.1", 10);
-        FileTransceiverService fileTransceiverService = new FileTransceiverService(12347, 1000);
+        FileTransceiverService fileTransceiverService = new FileTransceiverService(200, 1000);
         client.setFileTransceiver(fileTransceiverService);
         client.setNsObject(unamObject);
 
@@ -160,7 +157,7 @@ public class ShutdownUtests {
     void replicationShutdownTest_RecieveBackUpFile_OriginalNotInDB() throws Exception { //if the test fails check if "test/repliaction/" or any sub dirs have txt files. If yes -> delete them
 
         UNAMObject unamObject = new UNAMObject(1, eMessageTypes.UnicastNamingServerToNode, 1, "127.0.0.1", 10);
-        FileTransceiverService fileTransceiverService = new FileTransceiverService(12347, 1000);
+        FileTransceiverService fileTransceiverService = new FileTransceiverService(200, 1000);
         client.setFileTransceiver(fileTransceiverService);
         client.setNsObject(unamObject);
 
@@ -200,7 +197,7 @@ public class ShutdownUtests {
     void replicationShutdownTest_RecieveBackUpFile_OriginalInDB() throws Exception { //if the test fails check if "test/repliaction/" or any sub dirs have txt files. If yes -> delete them
 
         UNAMObject unamObject = new UNAMObject(1, eMessageTypes.UnicastNamingServerToNode, 1, "127.0.0.1", 10);
-        FileTransceiverService fileTransceiverService = new FileTransceiverService(12347, 1000);
+        FileTransceiverService fileTransceiverService = new FileTransceiverService(200, 1000);
         client.setFileTransceiver(fileTransceiverService);
         client.setNsObject(unamObject);
 
