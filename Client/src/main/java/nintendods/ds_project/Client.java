@@ -54,6 +54,8 @@ public class Client {
     @Autowired
     ClientNode node; // Ahmad_merge: this or node = new ClientNode(InetAddress.getLocalHost(), NODE_GLOBAL_PORT, generateRandomString(NODE_NAME_LENGTH));
 
+    @Autowired
+    FileWatcherService fileWatcherService;
     public ClientNode getNode() {
         return node;
     }
@@ -170,6 +172,9 @@ public class Client {
         nodeState = eNodeState.DISCOVERY; // Initial state of the node
         boolean isRunning = true; // Controls the main loop
         int discoveryRetries = 0; // Counter for discovery attempts
+        fileWatcherService.init();
+        fileWatcherService.setFileChangeListener(this::onFileChanged);
+        logger.info("Initialized FileWatcherService");
 
 
         while (isRunning) {
@@ -367,5 +372,20 @@ public class Client {
         }
 
         System.out.println("Main Done");
+    }
+
+    public void onFileChanged(File file) {
+        try {
+            AFile a_file = null;
+            a_file = fileTransceiver.saveIncomingFile(node, path + "/local");
+            if(a_file != null){
+                System.out.println("LISTENING:\t get files\n" + file);
+            }
+        } catch (DuplicateFileException e) {
+            throw new RuntimeException(e);
+        }
+
+        this.nodeState = eNodeState.TRANSFER;
+
     }
 }
