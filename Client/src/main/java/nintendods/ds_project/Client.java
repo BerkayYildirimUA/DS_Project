@@ -56,6 +56,7 @@ public class Client {
 
     @Autowired
     FileWatcherService fileWatcherService;
+    private boolean firstTimeTransfer = true;
 
     private List<File> filesToTransfer = new ArrayList<>();
     public ClientNode getNode() {
@@ -248,7 +249,7 @@ public class Client {
                         nodeState = eNodeState.ERROR; // Move to Error state on exception
                     }
                     if (    (node.getPrevNodeId() != -1 && node.getNextNodeId() != -1) &&
-                            (node.getPrevNodeId() != node.getId() && node.getNextNodeId() != node.getId())){
+                            (node.getPrevNodeId() != node.getId() && node.getNextNodeId() != node.getId()) && firstTimeTransfer){
                         try {
                             TimeUnit.SECONDS.sleep(3);
                         } catch (InterruptedException e) {
@@ -271,10 +272,18 @@ public class Client {
                 }
                 case TRANSFER -> {
                     // TODO: Transfer data or handle other operations
-                    List<File> files = FileReader.getFiles(path);
+                    List<File> files = null;
                     System.out.println("Entered TransferState");
-                    for (File file: filesToTransfer){
-                        System.out.println(file.getName());
+                    if (firstTimeTransfer) {
+                        files = FileReader.getFiles(path);
+                        firstTimeTransfer = false;
+                        System.out.println("Transfering initial files");
+                    } else {
+                        files = filesToTransfer;
+                        System.out.println("Transfering added files");
+                    }
+                    for (File file: files){
+                        System.out.println(file.getAbsolutePath());
                     }
                     //List<File> files = filesToTransfer;
                     filesToTransfer.clear();
