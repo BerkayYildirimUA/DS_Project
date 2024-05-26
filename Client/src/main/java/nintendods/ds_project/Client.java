@@ -323,6 +323,8 @@ public class Client {
                     }
                     if (TransferUpdatedFile) {
                         TransferUpdatedFile = false;
+                        TransferWholeDirectory = true;
+                        nodeState = eNodeState.TRANSFER;
                     }
                     nodeState = eNodeState.LISTENING; // Loop back to Listening for simplicity
                 }
