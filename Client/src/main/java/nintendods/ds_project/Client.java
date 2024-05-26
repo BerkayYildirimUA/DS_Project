@@ -432,6 +432,18 @@ public class Client {
             logger.info("Updated File: " + file_path);
         }
         TransferUpdatedFile = true;
+
+        AFile file_update = null;
+        try {
+            file_update = null;
+            file_update = fileTransceiver.saveIncomingFile(node, path + "/replicated");
+            if (file_update != null) {
+                logger.info("LISTENING:\t get files\n" + file);
+            }
+        } catch (DuplicateFileException e) {
+            //throw new RuntimeException(e);
+            logger.info("File is already present: " + file);
+        }
         this.nodeState = eNodeState.TRANSFER;
 
     }
