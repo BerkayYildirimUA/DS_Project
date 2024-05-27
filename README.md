@@ -75,12 +75,12 @@ On failure of a node, the network must be self healing.
 
 ## Failure (Tom)
 ### Naming Server
-  - [] Needs to be able to receive a request for the closest ID's of nodes based on the received node id.
+  - [x] Needs to be able to receive a request for the closest ID's of nodes based on the received node id.
     - This means, send out 2 node objects to the requester
 
 
 ### Node
-  - needs to have a failback method at every exception to transmit the ID's to the next and previous.
+  - [] Needs to have a failback method at every exception to transmit the ID's to the next and previous.
     - The node is suddenly gone so the neighbour nodes must detect these with a ping or alive packet.
 
 ## DsProjectApplication (Ahmad)
@@ -107,7 +107,7 @@ To ensure easy coding, we'll create a file transfer class that can be used by th
 
 This will be done in 3 phases.
 
-## starting (Robbe)
+## starting (Robbe & Tom)
 All files that are stored on each node should be replicated to corresponding nodes in the ring topology. This way, a new node to which the file is replicated becomes the owner of the file.
 
 After bootstrap and discovery, the new node has to verify its local files (folder on
@@ -148,16 +148,14 @@ If the file is an original file, the node will contact the node with the backup 
 
 ### Tom
 
-- [] Startup
-  - [] Extra state toevoegen
-  - [] Bekijkt bestand (in specifieke directory)
-  - [] Verwerkt bestanden en voegt toe aan database
-  - [] Stuurt data over bestanden naar NS
-  - [] NS zoekt naar de eerste id die boven de file id staat
-    - [] Als dit de originele verzend node is dan sturen naar prev node
-  - [] Indien kleiner, stuur naar NS voor correcte node IP
-  - [] Stuur naar juiste node via FileTranscieverService
-  - [] Aan ontvangende node bestand opslaan
+- [x] Look for and load in all files in a specific directory (/assets) on startup.
+- [x] Place files in local database.
+- [x] Add a GET-request to the NameServer to ask for the right node to which the files should be replicated to.
+  - [x] In case this node is the same as the one who performed the request, send the file to the previous node.
+- [x]  Send files to the right node.
+  - Done using Robbe's FileTransceiver class.
+- [x]  Listen for any incoming files and save incoming files.
+  - Done using Robbe's FileTransceiver class.
 
 ### Ahmad
 
@@ -209,9 +207,10 @@ A client can check his lock request in a read only queue where all the accepted 
 
 
 ### Tom
-
+/
 
 ### Ahmad
-
+/
 
 ### Berkay
+/
