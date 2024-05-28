@@ -82,8 +82,8 @@ public class ApiUtil {
         return removeLeadingSlash(Objects.requireNonNull(Response_NodeIPfromID.getBody()));
     }
 
-    public static String NameServer_GET_NodeIPfromID(int id) {
-        return NameServer_GET_NodeIPfromID(Integer.toString(id));
+    public static String NameServer_GET_NodeIPfromID(String id) {
+        return NameServer_GET_NodeIPfromID(Integer.valueOf(id));
     }
 
     //TODO: write test, might not work

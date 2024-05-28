@@ -54,12 +54,12 @@ public class SyncAgent implements Runnable, Serializable {
             Type syncAgentFileListType = new TypeToken<HashMap<String, Boolean>>() {}.getType();
 
             // Load all files of the local node
-            List<AFile> allFiles = ApiUtil.clientGetAllFiles(InetAddress.getLocalHost().getHostAddress(), ClientNodeConfig.API_PORT);
+            List<AFile> allFiles = ApiUtil.clientGetAllFiles(InetAddress.getLocalHost().getHostAddress(), ClientNodeConfig.getApiPort());
 
             if(allFiles == null) return;
 
             // Only keep the one that are not replicated (so owned by the node itself).
-            List<AFile> ownedFiles = allFiles.stream().filter(f -> f.isReplicated() == false).toList();
+            List<AFile> ownedFiles = allFiles.stream().filter(f -> f.isBeenBackedUp() == false).toList();
 
             // update local files
             updateFileList(ownedFiles);
@@ -70,7 +70,7 @@ public class SyncAgent implements Runnable, Serializable {
             String nextNodeIP = ApiUtil.NameServer_GET_NodeIPfromID(nextNodeId);
 
             //get the files from the next nodes of that sync agent
-            Map<String, Boolean> nextNodeAllFiles = ApiUtil.getSyncAgentFiles(nextNodeIP, ClientNodeConfig.API_PORT);
+            Map<String, Boolean> nextNodeAllFiles = ApiUtil.getSyncAgentFiles(nextNodeIP, ClientNodeConfig.getApiPort());
 
             // Check if we have new files on the next node that are not present on the
             // current node.
