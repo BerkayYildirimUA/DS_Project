@@ -2,12 +2,23 @@ package nintendods.ds_project.utility;
 
 import nintendods.ds_project.config.ClientNodeConfig;
 import nintendods.ds_project.model.ClientNode;
+import nintendods.ds_project.model.file.AFile;
 import nintendods.ds_project.model.message.UNAMObject;
+import nintendods.ds_project.service.SyncAgent;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.*;
 import org.springframework.web.client.RestTemplate;
 
+import com.google.gson.reflect.TypeToken;
+
+
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 public class ApiUtil {
@@ -16,6 +27,7 @@ public class ApiUtil {
     protected static RestTemplate restTemplate = new RestTemplate();
     protected static UNAMObject nsObject;
     protected static String nameSeverAdress;
+    protected static JsonConverter jsonConverter = new JsonConverter();
 
     public static RestTemplate getRestTemplate() {
         return restTemplate;
@@ -61,17 +73,17 @@ public class ApiUtil {
     }
 
     //TODO: write test, might not work
-    public static String NameServer_GET_NodeIPfromID(String id) {
+    public static String NameServer_GET_NodeIPfromID(int id) {
         checkNsObjectIsNotNull();
 
-        String URL_NodeIPfromID = nameSeverAdress + "node/" + id;
+        String URL_NodeIPfromID = nameSeverAdress + "node/" + Integer.toString(id);
         logger.info("GET from: " + URL_NodeIPfromID);
         ResponseEntity<String> Response_NodeIPfromID = restTemplate.getForEntity(URL_NodeIPfromID, String.class);
         return removeLeadingSlash(Objects.requireNonNull(Response_NodeIPfromID.getBody()));
     }
 
-    public static String NameServer_GET_NodeIPfromID(int id) {
-        return NameServer_GET_NodeIPfromID(Integer.toString(id));
+    public static String NameServer_GET_NodeIPfromID(String id) {
+        return NameServer_GET_NodeIPfromID(Integer.valueOf(id));
     }
 
     //TODO: write test, might not work
@@ -167,6 +179,7 @@ public class ApiUtil {
 // ------------------------------------------- CLIENT API ----------------------------------------------------------------
 
     //TODO: write test, might not work
+
     public static String Client_GET_getFileLocation(String filename, String nodeID) {
         checkNsObjectIsNotNull();
 
@@ -202,6 +215,7 @@ public class ApiUtil {
     }
 
     //TODO: write test, might not work
+
     public static String Client_DELETE_file(String filename, String nodeID) {
         checkNsObjectIsNotNull();
 
@@ -216,7 +230,7 @@ public class ApiUtil {
     //TODO: write test, might not work
     public static boolean Client_PUT_changeMyNextNodesNeighbor(int prevNodeID, int prevNodePort, int nextNodeID) {
         checkNsObjectIsNotNull();
-        String prevNodeIP = ApiUtil.NameServer_GET_NodeIPfromID(String.valueOf(prevNodeID));
+        String prevNodeIP = ApiUtil.NameServer_GET_NodeIPfromID(prevNodeID);
 
         String UrlForPrevNode = "http://" + prevNodeIP + ":" + prevNodePort + "/api/Management/nextNodeID/?ID=" + nextNodeID;
         logger.info("PUT to: " + UrlForPrevNode);
@@ -233,7 +247,7 @@ public class ApiUtil {
     public static boolean Client_PUT_changeMyPrevNodesNeighbor(int nextNodeID, int nextNodePort, int prevNodeID) {
         ApiUtil.checkNsObjectIsNotNull();
 
-        String nextNodeIP = ApiUtil.NameServer_GET_NodeIPfromID(String.valueOf(nextNodeID));
+        String nextNodeIP = ApiUtil.NameServer_GET_NodeIPfromID(nextNodeID);
         String urlForNextNode = "http://" + nextNodeIP + ":" + nextNodePort + "/api/Management/prevNodeID/?ID=" + prevNodeID;
         logger.info("PUT to: " + urlForNextNode);
         try {
@@ -243,6 +257,28 @@ public class ApiUtil {
             System.out.println(e.getMessage());
             return false;
         }
+    }
+
+    public static List<AFile> clientGetAllFiles(String address, int port) {
+        String url = "http://" + address + ":" + Integer.toString(port) + "/api/files";
+        logger.info("GET from: " + url);
+        ResponseEntity<String> files = restTemplate.getForEntity(url, String.class);
+        Type localFileListType = new TypeToken<ArrayList<AFile>>() {}.getType();
+        return (List<AFile>) jsonConverter.toObject(files.getBody(), localFileListType);
+
+        //Beter to use WebClient? RestTemplate wil be deprecated .
+    }
+
+    public static Map<String, Boolean> getSyncAgentFiles(String address, int port) {
+
+        String url = "http://" + address + ":" + Integer.toString(port) + "/api/agent/sync";
+        logger.info("GET from: " + url);
+
+        ResponseEntity<String> responseEntityStr = restTemplate.getForEntity(url, String.class);
+        Type syncAgentFileListType = new TypeToken<HashMap<String, Boolean>>() {}.getType();
+        return (Map<String, Boolean>) jsonConverter.toObject(responseEntityStr.getBody(),syncAgentFileListType);
+
+        //Beter to use WebClient? RestTemplate wil be deprecated .
     }
 
     public static boolean Client_Put_changeFileOwner(String fileName, String absolutePath, int nodeID){
@@ -276,7 +312,4 @@ public class ApiUtil {
 
 
     }
-
-
-
 }

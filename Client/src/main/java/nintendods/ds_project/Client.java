@@ -3,6 +3,7 @@ package nintendods.ds_project;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import nintendods.ds_project.config.ClientNodeConfig;
+import nintendods.ds_project.database.FileControl;
 import nintendods.ds_project.database.FileDB;
 import nintendods.ds_project.exeption.DuplicateFileException;
 import nintendods.ds_project.exeption.DuplicateNodeException;
@@ -14,6 +15,7 @@ import nintendods.ds_project.service.*;
 import nintendods.ds_project.utility.ApiUtil;
 import nintendods.ds_project.utility.FileReader;
 import nintendods.ds_project.utility.Generator;
+import nintendods.ds_project.utility.ApiUtil;
 import nintendods.ds_project.utility.JsonConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,6 +32,7 @@ import org.springframework.context.event.EventListener;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.File;
@@ -50,6 +53,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Spring Boot application for managing a distributed system node's lifecycle excluding database auto-configuration.
  */
+@EnableScheduling
 @SpringBootApplication(exclude = { DataSourceAutoConfiguration.class })
 @Import(ClientNodeConfig.class)
 public class Client {
@@ -80,6 +84,12 @@ public class Client {
     private UNAMObject nsObject;
     private boolean isRunning = true;
 
+    private SyncAgent syncAgent = null;
+
+    public SyncAgent getSyncAgent(){
+        return syncAgent;
+    }
+
     MulticastListenerService multicastListener = null;
     UnicastListenerService unicastListener = null;
 
@@ -107,7 +117,6 @@ public class Client {
     private int testing;
     public int t_nextNodePort;
     public int t_prevNodePort;
-
 
     public static void main(String[] args) throws UnknownHostException, IOException {
         SpringApplication.run(Client.class, args);
@@ -180,7 +189,6 @@ public class Client {
         fileWatcherService.setFileChangeListener(this::onFileChanged);
         logger.info("Initialized FileWatcherService");
 
-
         while (isRunning) {
 
             // Finite state machine with eNodeState states
@@ -231,7 +239,6 @@ public class Client {
                     API.setIp(nsObject.getNSAddress());
                     API.setPort(nsObject.getNSPort());
 
-
                     logger.info(node.toString());
                     logger.info("Successfully reply in " + discoveryRetries + " discoveries.");
                     nodeState = eNodeState.LISTENING; // Move to Listening state after successful discovery
@@ -264,10 +271,13 @@ public class Client {
                     try {
                         multicastListener.listenAndUpdate(node);
                         unicastListener.listenAndUpdate(node);
+                        nodeState = eNodeState.TRANSFER;
+
                     } catch (Exception e) {
                         e.printStackTrace();
                         nodeState = eNodeState.ERROR; // Move to Error state on exception
                     }
+                    
                     if (    (node.getPrevNodeId() != -1 && node.getNextNodeId() != -1) &&
                             (node.getPrevNodeId() != node.getId() && node.getNextNodeId() != node.getId())){
                         try {
@@ -333,6 +343,13 @@ public class Client {
 
                     System.out.println("TRANSFER:\t files added \n" + fileDB.getFiles());
                     nodeState = eNodeState.LISTENING; // Loop back to Listening for simplicity
+
+                    //At the end of the transfer, we launch the sync agent towards the next node
+                    if (syncAgent == null){
+                        syncAgent = new SyncAgent(this.context);
+                    }
+
+                    nodeState = eNodeState.LISTENING;
                 }
                 case SHUTDOWN -> {
                     System.out.println("SHUTDOWN:\t Start:" + Timestamp.from(Instant.now()));
@@ -350,9 +367,7 @@ public class Client {
                 }
                 case ERROR -> {
                     System.out.println("ERROR:\t Start:" + Timestamp.from(Instant.now()));
-                    // TODO: Handle error state, possibly attempt to recover or shutdown gracefully
-                    // Hard, only transmit to naming server and the naming server needs to deal with
-                    // it.
+
                     if (unicastListener != null)
                         unicastListener.stopListening();
                     if (multicastListener != null)
