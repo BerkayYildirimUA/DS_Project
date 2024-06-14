@@ -3,12 +3,15 @@ package nintendods.ds_project.database;
 import com.google.gson.reflect.TypeToken;
 import nintendods.ds_project.Exeptions.EntryNotInDBExeption;
 import nintendods.ds_project.Exeptions.IDTakenExeption;
+import nintendods.ds_project.model.ClientNode;
 import nintendods.ds_project.utility.JsonConverter;
 import nintendods.ds_project.utility.NameToHash;
 import org.springframework.stereotype.Repository;
 
 import java.lang.reflect.Type;
+import java.util.List;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 @Repository
 public class NodeDB {
@@ -156,5 +159,11 @@ public class NodeDB {
 //        JsonConverter jsonConverter = new JsonConverter(fileName);
 //
 //        jsonConverter.toFile(nodeID_to_nodeIP);
+    }
+
+    public List<ClientNode> getAllNodes() {
+        return nodeID_to_nodeIP.entrySet().stream()
+                .map(entry -> new ClientNode(entry.getValue(), entry.getKey()))
+                .collect(Collectors.toList());
     }
 }
