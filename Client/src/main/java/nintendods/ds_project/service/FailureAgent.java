@@ -73,13 +73,15 @@ public class FailureAgent implements Runnable, Serializable {
 
             if (logsReadedMap.get("downloadLocation").equals(Integer.valueOf(failingNodeId))){
                 entry.setDownloadLocation(currentNodeId);
-                // Thy become the primoridial one, the pregenitor of this file. Dethrowing the old guard who has failed
-                // They shall spread thy spawn to new lands, and shall make certain and new genration shall spring forth if thy join the ancients
+                // Thy become the primordial one, the progenitor of this file. Dethroning the old guard who has failed.
+                // They shall spread thy spawn to new lands, and shall make certain a new generation shall spring forth if thy join the ancients.
             }
 
             if (logsReadedMap.get("fileReplicated").equals(Integer.valueOf(failingNodeId))){
-                entry.setReplicated( false, failingNodeId); //thy are not repliacted anyome
-                // replicatre thy self to new node, but remember, thy ID needs to be the next one from the failed Server
+                entry.setReplicated( false, failingNodeId); // Thy are not replicated anymore.
+                // Replicate thy self to a new node, but remember, thy ID needs to be the prev one from the failed throne.
+                //Thy old spawn may be lost, but a new genration shall take it's place.
+
             }
 
         }
