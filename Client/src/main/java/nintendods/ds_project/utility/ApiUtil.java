@@ -88,6 +88,15 @@ public class ApiUtil {
         return NameServer_GET_NodeIPfromID(Integer.valueOf(id));
     }
 
+    public static String NameServer_GET_NodeIDfromIP(String ip) {
+        checkNsObjectIsNotNull();
+
+        String URL_NodeIPfromID = nameSeverAdress + "node/?ip=" + ip;
+        logger.info("GET from: " + URL_NodeIPfromID);
+        ResponseEntity<String> Response_NodeIPfromID = restTemplate.getForEntity(URL_NodeIPfromID, String.class);
+        return removeLeadingSlash(Objects.requireNonNull(Response_NodeIPfromID.getBody()));
+    }
+
     //TODO: write test, might not work
     public static String NameServer_POST_Node(ClientNode newNode) {
         checkNsObjectIsNotNull();
@@ -313,7 +322,7 @@ public class ApiUtil {
         }
     }
 
-    public static void Client_POST_sendFailureAgent(FailureAgent agent, String nodeID) throws IOException {
+    public static void Client_PUT_sendFailureAgent(FailureAgent agent, String nodeID) throws IOException {
         String ip = NameServer_GET_NodeIPfromID(nodeID);
         byte[] agentData = agent.serialize();
 

@@ -165,13 +165,16 @@ public class AFile implements Serializable {
         return text;
     }
 
-    public void setReplicated(boolean isBeenBackedUp, String nodeID) { // --> I am a original, this is location of copy
+    public void setReplicated(boolean hasBeenBackedUp, String nodeID) { // --> I am a original, this is location of copy
 
-        if (isBeenBackedUp() == false) {
+        if (!isBeenBackedUp() && hasBeenBackedUp) {
             logs.add(new ALog(getOwner(), eLog.fileReplicated,
-                    "The file is replicated from node: " + getOwner().getName() + " to node with ID: " + nodeID));
+                    "The file is replicated to node with ID: " + nodeID));
+        } else if (isBeenBackedUp() && !hasBeenBackedUp){
+            logs.add(new ALog(getOwner(), eLog.fileReplicated,
+                    "The file is no longer replicated"));
         }
-        this.isBeenBackedUp = isBeenBackedUp;
+        this.isBeenBackedUp = hasBeenBackedUp;
     }
 
     public void setDownloadLocation(String ID){ // --> I am a copy, this is location of original

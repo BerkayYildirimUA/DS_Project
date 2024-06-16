@@ -8,6 +8,7 @@ import nintendods.ds_project.utility.NameToHash;
 import org.springframework.stereotype.Repository;
 
 import java.lang.reflect.Type;
+import java.util.Map;
 import java.util.TreeMap;
 
 @Repository
@@ -91,6 +92,15 @@ public class NodeDB {
     }
     public String getIpFromId(int id) {
         return nodeID_to_nodeIP.get(id);
+    }
+
+    public String getIdFromIp(String ip) {
+        for (Map.Entry<Integer, String> entry : nodeID_to_nodeIP.entrySet()) {
+            if (entry.getValue().equals(ip)) {
+                return entry.getKey().toString();
+            }
+        }
+        return null; // Return null or throw an exception if the IP is not found
     }
 
     /**

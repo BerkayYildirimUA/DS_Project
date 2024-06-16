@@ -1,11 +1,14 @@
 package nintendods.ds_project.service;
 
+import nintendods.ds_project.Client;
 import nintendods.ds_project.database.FileDB;
 import nintendods.ds_project.model.file.AFile;
 import nintendods.ds_project.model.file.log.ALog;
 import nintendods.ds_project.model.file.log.eLog;
 import nintendods.ds_project.utility.ApiUtil;
+import nintendods.ds_project.utility.NameToHash;
 import org.antlr.v4.runtime.misc.Pair;
+import org.springframework.context.ConfigurableApplicationContext;
 
 import java.io.*;
 import java.util.HashMap;
@@ -18,10 +21,14 @@ import java.util.regex.Pattern;
 public class FailureAgent implements Runnable, Serializable {
     private final String failingNodeId;
     private String currentNodeId;
+    private FileTransceiverService fileTransceiverService;
+    private ConfigurableApplicationContext context;
 
-    public FailureAgent(String failingNodeId, String currentNodeId) {
+    public FailureAgent(String failingNodeId, String currentNodeId, FileTransceiverService fileTransceiverService, ConfigurableApplicationContext context) {
         this.failingNodeId = failingNodeId;
         this.currentNodeId = currentNodeId;
+        this.fileTransceiverService = fileTransceiverService;
+        this.context = context;
     }
 
     public static Object deserialize(byte[] data) throws IOException, ClassNotFoundException {
@@ -41,14 +48,27 @@ public class FailureAgent implements Runnable, Serializable {
         return Optional.of(this);
     }
 
+    public void setFileTransceiverService(FileTransceiverService fileTransceiverService){
+        this.fileTransceiverService = fileTransceiverService;
+    }
+
+    public void setContext(ConfigurableApplicationContext context) {
+        this.context = context;
+    }
+
+    public void setContextAndFileTransceiverService(ConfigurableApplicationContext context){
+        setContext(context);
+        setFileTransceiverService(context.getBean(Client.class).getFileTransceiver());
+    }
+
     @Override
     public void run() {
         // Step 1: Read the file list of the current node
         FileDB dataBase = FileDBService.getFileDB();
 
 
-        for (AFile entry : dataBase.getFiles()) {
-            List<ALog> logs = entry.getLogs();
+        for (AFile file : dataBase.getFiles()) {
+            List<ALog> logs = file.getLogs();
             Map<String, ALog> logMap = new HashMap<>();
             logMap.put("downloadLocation", null);
             logMap.put("fileReplicated", null);
@@ -72,15 +92,20 @@ public class FailureAgent implements Runnable, Serializable {
             logsReadedMap.put("fileReplicated", getIDsFromLogs(logMap.get("fileReplicated")));
 
             if (logsReadedMap.get("downloadLocation").equals(Integer.valueOf(failingNodeId))){
-                entry.setDownloadLocation(currentNodeId);
-                // Thy become the primordial one, the progenitor of this file. Dethroning the old guard who has failed.
-                // They shall spread thy spawn to new lands, and shall make certain a new generation shall spring forth if thy join the ancients.
-            }
+                file.setDownloadLocation(currentNodeId);
 
-            if (logsReadedMap.get("fileReplicated").equals(Integer.valueOf(failingNodeId))){
-                entry.setReplicated( false, failingNodeId); // Thy are not replicated anymore.
-                // Replicate thy self to a new node, but remember, thy ID needs to be the prev one from the failed throne.
-                //Thy old spawn may be lost, but a new genration shall take it's place.
+                String ip = ApiUtil.NameServer_GET_NodeIPfromID(NameToHash.convert(file.getName()));
+                fileTransceiverService.sendFile(file, ip);
+                String id = ApiUtil.NameServer_GET_NodeIDfromIP(ip);
+                file.setReplicated(true, id);
+
+            } else if (logsReadedMap.get("fileReplicated").equals(Integer.valueOf(failingNodeId))){
+                file.setReplicated( false, failingNodeId);
+                String ip = ApiUtil.NameServer_GET_NodeIPfromID(NameToHash.convert(file.getName()));
+                fileTransceiverService.sendFile(file, ip);
+                String id = ApiUtil.NameServer_GET_NodeIDfromIP(ip);
+                file.setReplicated(true, id);
+
 
             }
 
@@ -98,35 +123,6 @@ public class FailureAgent implements Runnable, Serializable {
             id = Integer.parseInt(matcher.group(1));
         }
         return id;
-    }
-
-    private void transferFile(String fileName) {
-        // Step 2.1: Check if the new owner already has a copy of the file
-        boolean newOwnerHasFile = checkIfNewOwnerHasFile(fileName);
-
-        if (!newOwnerHasFile) {
-            // Option 1: Transfer the file to the new owner
-            System.out.println("Transferring file " + fileName + " to new owner");
-            updateLogs(fileName, true);
-        } else {
-            // Option 2: Only update the log
-            System.out.println("File " + fileName + " already exists with new owner. Updating logs only.");
-            updateLogs(fileName, false);
-        }
-    }
-
-    private boolean checkIfNewOwnerHasFile(String fileName) {
-        // This method should check if the new owner already has the file
-        // For the purpose of this example, we'll assume it returns false
-        return false;
-    }
-
-    private void updateLogs(String fileName, boolean fileTransferred) {
-        if (fileTransferred) {
-            System.out.println("Log: File " + fileName + " transferred to new owner");
-        } else {
-            System.out.println("Log: Ownership of file " + fileName + " updated to new owner in logs");
-        }
     }
 
     public byte[] serialize() throws IOException {

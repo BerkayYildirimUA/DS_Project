@@ -23,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.couchbase.CouchbaseProperties;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationContext;
@@ -355,6 +356,12 @@ public class Client {
                 }
                 case ERROR -> {
                     System.out.println("ERROR:\t Start:" + Timestamp.from(Instant.now()));
+
+                    try {
+                        ApiUtil.Client_POST_createFailureAgent(String.valueOf(node.getId()), String.valueOf(node.getPrevNodeId()));
+                    } catch (IOException e){
+                        logger.error(e.getMessage());
+                    }
 
                     if (unicastListener != null)
                         unicastListener.stopListening();

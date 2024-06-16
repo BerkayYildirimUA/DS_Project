@@ -53,6 +53,16 @@ public class NameServerAPI {
         else            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
     }
 
+    @GetMapping("/node/")
+    public ResponseEntity<String> getNodeIpFromId(@RequestParam("ip") String ip) {
+        printAndLog("GET:\t ID by IP");
+        String id = nodeDB.getIdFromIp(ip);
+        printAndLog("GET:\t ID=" + id);
+
+        if (ip != null && !ip.isEmpty()) return ResponseEntity.status(HttpStatus.OK).body(id);
+        else            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+    }
+
     @PostMapping("/nodes")
     public ResponseEntity<String> postNode(@RequestBody ClientNode newNode) {
         printAndLog("POST: Add client node to database");
