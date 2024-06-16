@@ -45,7 +45,6 @@ public class SyncAgent implements Runnable, Serializable {
         syncFiles();
         processLockRequest();
         processUnlockRequest();
-        return;
     }
 
     private void syncFiles() {
@@ -153,7 +152,7 @@ public class SyncAgent implements Runnable, Serializable {
                 // Lock is present so remove lock
                 this.files.replace(fileNameUnlockRequest, true, false);
             }
-            // else, No Lock is is present so do nothing
+            // else, No Lock is present so do nothing
         }
     }
 

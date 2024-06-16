@@ -13,6 +13,8 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class AFile implements Serializable {
     String path = ""; // The path
@@ -20,7 +22,7 @@ public class AFile implements Serializable {
     int id = -1; // the hashed id of the filename
     List<ALog> logs; // All the logs that happend with the file
     ANode owner = null; // The owner of the file where the file is hosted.
-    boolean isBeenBackedUp; // If the file has been replicated from the creating node
+    boolean isBeenBackedUp; // If the file has been replicated, does it have a copy? will be false for the copy itself
 
     /**
      * Create a new file object that creates a log with the provided ABaseNode. It
@@ -163,20 +165,22 @@ public class AFile implements Serializable {
         return text;
     }
 
-    public void setReplicated(boolean isBeenBackedUp, String toNodeIp) {
+    public void setReplicated(boolean isBeenBackedUp, String nodeID) { // --> I am a original, this is location of copy
 
         if (isBeenBackedUp() == false) {
             logs.add(new ALog(getOwner(), eLog.fileReplicated,
-                    "The file is replicated from node: " + getOwner().getName() + " to node with IP: " + toNodeIp));
+                    "The file is replicated from node: " + getOwner().getName() + " to node with ID: " + nodeID));
         }
         this.isBeenBackedUp = isBeenBackedUp;
     }
 
-    public void setDownloadLocation(String ID){
+    public void setDownloadLocation(String ID){ // --> I am a copy, this is location of original
         logs.add(new ALog(getOwner(), eLog.downloadLocation, "Download location changed to Node with ID:" + ID));
     }
 
     public boolean isBeenBackedUp() {
         return this.isBeenBackedUp;
     }
+
+
 }

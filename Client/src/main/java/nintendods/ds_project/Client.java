@@ -278,8 +278,7 @@ public class Client {
                         nodeState = eNodeState.ERROR; // Move to Error state on exception
                     }
                     
-                    if (    (node.getPrevNodeId() != -1 && node.getNextNodeId() != -1) &&
-                            (node.getPrevNodeId() != node.getId() && node.getNextNodeId() != node.getId())){
+                    if ( (node.getPrevNodeId() != -1 && node.getNextNodeId() != -1) && (node.getPrevNodeId() != node.getId() && node.getNextNodeId() != node.getId())){
                         try {
                             TimeUnit.SECONDS.sleep(3);
                         } catch (InterruptedException e) {
@@ -353,17 +352,6 @@ public class Client {
                 }
                 case SHUTDOWN -> {
                     System.out.println("SHUTDOWN:\t Start:" + Timestamp.from(Instant.now()));
-            /*        System.out.println("Prepare nodes for shutdown");
-                    System.out.println("Nodes prepared. Latch Down");
-                    latch.countDown();
-                    isRunning = false;*/
-                    // TODO: Handle shutdown process, ensuring all connections are closed properly
-                    // Gracefully, update the side nodes on its own and leave the ring topology.
-                    /**
-                     * When the node gets in the Shutdown state inside the discovery service, we'll access the
-                     * NamingServer API to handle everything from here.
-                     * call: {NSAddress}:{NSPort}/nodes/{id}/shutdown
-                     */
                 }
                 case ERROR -> {
                     System.out.println("ERROR:\t Start:" + Timestamp.from(Instant.now()));

@@ -4,6 +4,7 @@ import nintendods.ds_project.config.ClientNodeConfig;
 import nintendods.ds_project.model.ClientNode;
 import nintendods.ds_project.model.file.AFile;
 import nintendods.ds_project.model.message.UNAMObject;
+import nintendods.ds_project.service.FailureAgent;
 import nintendods.ds_project.service.SyncAgent;
 
 import org.slf4j.Logger;
@@ -14,6 +15,7 @@ import org.springframework.web.client.RestTemplate;
 import com.google.gson.reflect.TypeToken;
 
 
+import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -309,7 +311,54 @@ public class ApiUtil {
         } else {
             return false;
         }
+    }
+
+    public static void Client_POST_sendFailureAgent(FailureAgent agent, String nodeID) throws IOException {
+        String ip = NameServer_GET_NodeIPfromID(nodeID);
+        byte[] agentData = agent.serialize();
+
+        String url = "Http://" + ip + ":" + ClientNodeConfig.getApiPort() + "/api/agent/failure";
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+
+        HttpEntity<byte[]> requestEntity = new HttpEntity<>(agentData, headers);
+
+        ResponseEntity<String> response = restTemplate.exchange(
+                url,
+                HttpMethod.PUT,
+                requestEntity,
+                String.class
+
+        );
+
+        System.out.println("Response: " + response.getBody());
 
 
     }
+
+    public static void Client_POST_createFailureAgent(String failedNodeID, String sendNodeID) throws IOException {
+        String ip = NameServer_GET_NodeIPfromID(sendNodeID);
+
+        String url = "Http://" + ip + ":" + ClientNodeConfig.getApiPort() + "/api/agent/failure/?ID=" + failedNodeID;
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        HttpEntity<String> requestEntity = new HttpEntity<>(headers);
+
+        ResponseEntity<String> response = restTemplate.exchange(
+                url,
+                HttpMethod.POST,
+                requestEntity,
+                String.class
+
+        );
+
+        System.out.println("Response: " + response.getBody());
+
+
+    }
+
+
 }
