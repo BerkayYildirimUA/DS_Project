@@ -308,8 +308,8 @@ public class Client {
                     // Add files to DB
                     for (File file: files) fileDB.addOrUpdateFile(file, node);
                     // logger.info("TRANSFER:\t DB " + fileDB.getFiles());
-                    System.out.println("TRANSFER:\t node=" + node);
-                    System.out.println("TRANSFER:\t files read \n" + fileDB.getFiles());
+                   // System.out.println("TRANSFER:\t node=" + node);
+                   // System.out.println("TRANSFER:\t files read \n" + fileDB.getFiles());
 
                     // Transfer files
                     String transferIp, url;
@@ -342,7 +342,7 @@ public class Client {
                        logger.info(String.format("return of send %b ",fileTransceiver.sendFile(file, transferIp)));
                     }
 */
-                    System.out.println("TRANSFER:\t files added \n" + fileDB.getFiles());
+                   // System.out.println("TRANSFER:\t files added \n" + fileDB.getFiles());
                     nodeState = eNodeState.LISTENING; // Loop back to Listening for simplicity
 
                     //At the end of the transfer, we launch the sync agent towards the next node
