@@ -327,7 +327,7 @@ public class ApiUtil {
         byte[] agentData = agent.serialize();
 
         String url = "Http://" + ip + ":" + ClientNodeConfig.getApiPort() + "/api/agent/failure";
-        logger.info(url);
+
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
 
@@ -349,25 +349,25 @@ public class ApiUtil {
     public static void Client_POST_createFailureAgent(String failedNodeID, String sendNodeID) throws IOException {
         String ip = NameServer_GET_NodeIPfromID(sendNodeID);
 
-        String url = "Http://" + ip + ":" + ClientNodeConfig.getApiPort() + "/api/agent/failure";
+        String url = "Http://" + ip + ":" + ClientNodeConfig.getApiPort() + "/api/agent/failure?ID=" + failedNodeID;
 
         HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+        headers.setContentType(MediaType.APPLICATION_JSON);
 
-        Map<String, String> params = new HashMap<>();
-        params.put("ID", failedNodeID);
+        HttpEntity<String> requestEntity = new HttpEntity<>(headers);
 
-        HttpEntity<Map<String, String>> requestEntity = new HttpEntity<>(params, headers);
+        ResponseEntity<String> response = restTemplate.exchange(
+                url,
+                HttpMethod.POST,
+                requestEntity,
+                String.class
 
-        ResponseEntity<String> response = restTemplate.postForEntity(url, requestEntity, String.class);
+        );
 
-        if (response.getStatusCode().is2xxSuccessful()) {
-            logger.info("Success: " + response.getBody());
-        } else {
-            logger.info("Error: " + response.getStatusCode() + " - " + response.getBody());
-        }
+        System.out.println("Response: " + response.getBody());
+
+
     }
-
 
 
 }
