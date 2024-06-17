@@ -189,6 +189,7 @@ public class Client {
         fileWatcherService.init();
         fileWatcherService.setFileChangeListener(this::onFileChanged);
         logger.info("Initialized FileWatcherService");
+        logger.info("Node IP:" + node.getAddress().toString());
 
         while (isRunning) {
 
@@ -349,7 +350,7 @@ public class Client {
                         syncAgent = new SyncAgent(this.context);
                     }
 
-                    if (node.getAddress().toString().equals())
+                    //if (node.getAddress().toString().equals())
                     nodeState = eNodeState.LISTENING;
                 }
                 case SHUTDOWN -> {
