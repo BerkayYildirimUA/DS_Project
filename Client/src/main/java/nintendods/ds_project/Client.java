@@ -351,12 +351,7 @@ public class Client {
                         syncAgent = new SyncAgent(this.context);
                     }
 
-                    if (node.getAddress().toString().equals("g3c1.6dist/172.30.0.5")) {
-                        if ( LocalTime.now().getMinute() % 5 == 0){
-                            this.nodeState = eNodeState.ERROR;
-                        }
-                    }
-                    this.nodeState = eNodeState.LISTENING;
+                    this.nodeState = eNodeState.ERROR;
                 }
                 case SHUTDOWN -> {
                     System.out.println("SHUTDOWN:\t Start:" + Timestamp.from(Instant.now()));
