@@ -316,7 +316,7 @@ public class Client {
                     HttpHeaders headers = new HttpHeaders();
                     headers.setContentType(MediaType.APPLICATION_JSON);
                     ResponseEntity<String> response;
-
+/*
                     for (AFile file: fileDB.getFiles()) {
 
                         // Get ip if the right node
@@ -341,7 +341,7 @@ public class Client {
                        // Send file to that node
                        logger.info(String.format("return of send %b ",fileTransceiver.sendFile(file, transferIp)));
                     }
-
+*/
                     System.out.println("TRANSFER:\t files added \n" + fileDB.getFiles());
                     nodeState = eNodeState.LISTENING; // Loop back to Listening for simplicity
 
