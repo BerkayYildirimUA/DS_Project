@@ -133,6 +133,9 @@ public class FailureAgent implements Runnable, Serializable {
     }
 
     public byte[] serialize() throws IOException {
+        this.fileTransceiverService = null;
+        this.context = null;
+
         try (ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
              ObjectOutputStream out = new ObjectOutputStream(byteOut)) {
             out.writeObject(this);

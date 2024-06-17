@@ -27,6 +27,7 @@ import org.springframework.boot.autoconfigure.couchbase.CouchbaseProperties;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.event.EventListener;
 
@@ -351,8 +352,8 @@ public class Client {
                         syncAgent = new SyncAgent(this.context);
                     }
 
-                    //this.nodeState = eNodeState.LISTENING;
-                    this.nodeState = eNodeState.ERROR;
+                    this.nodeState = eNodeState.LISTENING;
+                    //this.nodeState = eNodeState.ERROR;
                 }
                 case SHUTDOWN -> {
                     System.out.println("SHUTDOWN:\t Start:" + Timestamp.from(Instant.now()));
