@@ -42,6 +42,7 @@ import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalTime;
 import java.util.List;
 
 import java.io.IOException;
@@ -350,8 +351,12 @@ public class Client {
                         syncAgent = new SyncAgent(this.context);
                     }
 
-                    //if (node.getAddress().toString().equals())
-                    nodeState = eNodeState.LISTENING;
+                    if (node.getAddress().toString().equals("g3c1.6dist/172.30.0.5")) {
+                        if ( LocalTime.now().getMinute() % 5 == 0){
+                            this.nodeState = eNodeState.ERROR;
+                        }
+                    }
+                    this.nodeState = eNodeState.LISTENING;
                 }
                 case SHUTDOWN -> {
                     System.out.println("SHUTDOWN:\t Start:" + Timestamp.from(Instant.now()));
