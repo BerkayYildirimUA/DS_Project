@@ -1,6 +1,7 @@
 package nintendods.ds_project.service;
 
 import nintendods.ds_project.Client;
+import nintendods.ds_project.controller.ClientAgentAPI;
 import nintendods.ds_project.database.FileDB;
 import nintendods.ds_project.model.file.AFile;
 import nintendods.ds_project.model.file.log.ALog;
@@ -8,6 +9,8 @@ import nintendods.ds_project.model.file.log.eLog;
 import nintendods.ds_project.utility.ApiUtil;
 import nintendods.ds_project.utility.NameToHash;
 import org.antlr.v4.runtime.misc.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ConfigurableApplicationContext;
 
 import java.io.*;
@@ -21,12 +24,15 @@ import java.util.regex.Pattern;
 public class FailureAgent implements Runnable, Serializable {
     private final String failingNodeId;
     private String currentNodeId;
+    private final String startNode;
     private FileTransceiverService fileTransceiverService;
     private ConfigurableApplicationContext context;
+    protected static final Logger logger = LoggerFactory.getLogger(FailureAgent.class);
 
     public FailureAgent(String failingNodeId, String currentNodeId, FileTransceiverService fileTransceiverService, ConfigurableApplicationContext context) {
         this.failingNodeId = failingNodeId;
         this.currentNodeId = currentNodeId;
+        this.startNode = currentNodeId;
         this.fileTransceiverService = fileTransceiverService;
         this.context = context;
     }
@@ -40,8 +46,9 @@ public class FailureAgent implements Runnable, Serializable {
 
     public Optional<FailureAgent> setCurrentNodeId(String currentNodeId) {
         this.currentNodeId = currentNodeId;
-
-        if (currentNodeId.equals(failingNodeId)) {
+        logger.info("setting current node ID of failure agent");
+        if (currentNodeId.equals(failingNodeId) || currentNodeId.equals(startNode)) {
+            logger.info("ending failure agent");
             return Optional.empty();
         }
 
@@ -63,10 +70,7 @@ public class FailureAgent implements Runnable, Serializable {
 
     @Override
     public void run() {
-        // Step 1: Read the file list of the current node
         FileDB dataBase = FileDBService.getFileDB();
-
-
         for (AFile file : dataBase.getFiles()) {
             List<ALog> logs = file.getLogs();
             Map<String, ALog> logMap = new HashMap<>();
@@ -86,20 +90,23 @@ public class FailureAgent implements Runnable, Serializable {
                     break;
                 }
             }
+            logger.info("downloadLocation log:" + logMap.get("downloadLocation"));
+            logger.info("fileReplicated log:" + logMap.get("fileReplicated"));
 
             Map<String, Integer> logsReadedMap = new HashMap<>();
             logsReadedMap.put("downloadLocation", getIDsFromLogs(logMap.get("downloadLocation")));
             logsReadedMap.put("fileReplicated", getIDsFromLogs(logMap.get("fileReplicated")));
 
             if (logsReadedMap.get("downloadLocation").equals(Integer.valueOf(failingNodeId))){
+                logger.info("failed node was download location");
                 file.setDownloadLocation(currentNodeId);
-
                 String ip = ApiUtil.NameServer_GET_NodeIPfromID(NameToHash.convert(file.getName()));
                 fileTransceiverService.sendFile(file, ip);
                 String id = ApiUtil.NameServer_GET_NodeIDfromIP(ip);
                 file.setReplicated(true, id);
 
             } else if (logsReadedMap.get("fileReplicated").equals(Integer.valueOf(failingNodeId))){
+                logger.info("failed node was file owner (had backup file)");
                 file.setReplicated( false, failingNodeId);
                 String ip = ApiUtil.NameServer_GET_NodeIPfromID(NameToHash.convert(file.getName()));
                 fileTransceiverService.sendFile(file, ip);
@@ -112,7 +119,7 @@ public class FailureAgent implements Runnable, Serializable {
         }
 
         // Log: The FailureAgent has completed its run on this node
-        System.out.println("FailureAgent completed on node: " + currentNodeId);
+        logger.info("FailureAgent completed on node: " + currentNodeId);
     }
 
     private Integer getIDsFromLogs(ALog log) {

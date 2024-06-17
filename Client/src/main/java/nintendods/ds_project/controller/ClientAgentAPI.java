@@ -55,29 +55,34 @@ public class ClientAgentAPI {
     @PutMapping("failure")
     public ResponseEntity<String> receiveFailureAgent(@RequestBody byte[] agentData) {
 
+        logger.info("received failure agent");
+
         try {
             FailureAgent agent = (FailureAgent) FailureAgent.deserialize(agentData);
+            logger.info("deserialized failure agent");
             ClientNode node = context.getBean(Client.class).getNode();
             Optional<FailureAgent> agentOptional = agent.setCurrentNodeId(String.valueOf(node.getId()));
             if (agentOptional.isEmpty()) {
+                logger.info("FailureAgent returned to start");
                 return ResponseEntity.ok("FailureAgent returned to start");
             }
 
             agent = agentOptional.get();
             agent.setContextAndFileTransceiverService(context);
+            logger.info("run failure agent");
             Future<FailureAgent> future = agentService.runAgent(agentOptional.get());
             future.get();
+            logger.info("failure agent done running");
 
             FailureAgent finalAgent = agent;
-            Thread sendToNextNode = new Thread() {
-                public void run(){
-                    try {
-                        ApiUtil.Client_PUT_sendFailureAgent(finalAgent, String.valueOf(node.getPrevNodeId()));
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
+            Thread sendToNextNode = new Thread(() -> {
+                try {
+                    logger.info("send failure agent to next node");
+                    ApiUtil.Client_PUT_sendFailureAgent(finalAgent, String.valueOf(node.getPrevNodeId()));
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
                 }
-            };
+            });
 
             sendToNextNode.start();
             return ResponseEntity.ok("FailureAgent received and executed");
@@ -92,12 +97,16 @@ public class ClientAgentAPI {
 
     @PostMapping("failure/{ID}")
     public ResponseEntity<String> creatFailureAgent(@PathVariable("ID") String failedNodeID) {
+        logger.info("create failure agent request");
         try {
             String thisNode = String.valueOf(context.getBean(Client.class).getNode().getId());
             FileTransceiverService fileTransceiverService = context.getBean(Client.class).getFileTransceiver();
             FailureAgent agent = new FailureAgent(failedNodeID, thisNode, fileTransceiverService, context);
+            logger.info("created failure agent");
             Future<FailureAgent> future = agentService.runAgent(agent);
+            logger.info("run failure agent");
             future.get(); // Wait for the agent to complete execution
+            logger.info("send failure agent");
             return ResponseEntity.ok("FailureAgent received and executed");
         } catch (InterruptedException | ExecutionException e) {
             Thread.currentThread().interrupt();

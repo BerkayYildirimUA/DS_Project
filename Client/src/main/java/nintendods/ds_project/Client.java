@@ -349,6 +349,7 @@ public class Client {
                         syncAgent = new SyncAgent(this.context);
                     }
 
+                    if (node.getAddress().toString().equals())
                     nodeState = eNodeState.LISTENING;
                 }
                 case SHUTDOWN -> {

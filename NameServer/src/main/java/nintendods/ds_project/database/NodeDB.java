@@ -155,16 +155,13 @@ public class NodeDB {
     }
 
     public void loadDB(String fileName) {
-//        JsonConverter jsonConverter = new JsonConverter(fileName);
-//
-//        Type type = new TypeToken<TreeMap<Integer, String>>() {}.getType();
-//
-//        nodeID_to_nodeIP = (TreeMap<Integer, String>) jsonConverter.fromFile(type);
+        JsonConverter jsonConverter = new JsonConverter(fileName);
+        Type type = new TypeToken<TreeMap<Integer, String>>() {}.getType();
+        nodeID_to_nodeIP = (TreeMap<Integer, String>) jsonConverter.fromFile(type);
     }
 
     public void saveDB(String fileName) {
-//        JsonConverter jsonConverter = new JsonConverter(fileName);
-//
-//        jsonConverter.toFile(nodeID_to_nodeIP);
+        JsonConverter jsonConverter = new JsonConverter(fileName);
+        jsonConverter.toFile(nodeID_to_nodeIP);
     }
 }

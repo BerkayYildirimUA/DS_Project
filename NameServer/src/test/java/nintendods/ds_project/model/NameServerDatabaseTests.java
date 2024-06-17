@@ -30,21 +30,22 @@ public class NameServerDatabaseTests {
         assertEquals(node1.getAddress().getHostAddress(), nodeDB.getClosestIpFromName(createStringWithKnownHash(12)));
     }
 
-    @Test
-    public void getNodeIDTest_WrapFromTop() throws Exception {
-        NodeDB nodeDB = new NodeDB();
+//@Test
+//@Deprecated //Algo of picking node ID changed, you can't wrap from top anymore
+//public void getNodeIDTest_WrapFromTop() throws Exception {
+//    NodeDB nodeDB = new NodeDB();
 
-        ClientNode node1 = new ClientNode(InetAddress.getByName("10.10.10.10"), 100, createStringWithKnownHash(10));
-        ClientNode node2 = new ClientNode(InetAddress.getByName("10.10.10.11"), 100, createStringWithKnownHash(32000));
-        ClientNode node3 = new ClientNode(InetAddress.getByName("10.10.10.12"), 100, createStringWithKnownHash(15));
+//    ClientNode node1 = new ClientNode(InetAddress.getByName("10.10.10.10"), 100, createStringWithKnownHash(10));
+//    ClientNode node2 = new ClientNode(InetAddress.getByName("10.10.10.11"), 100, createStringWithKnownHash(32000));
+//    ClientNode node3 = new ClientNode(InetAddress.getByName("10.10.10.12"), 100, createStringWithKnownHash(15));
 
-        nodeDB.addNode(node1.getName(), node1.getAddress().getHostAddress());
-        nodeDB.addNode(node2.getName(), node2.getAddress().getHostAddress());
-        nodeDB.addNode(node3.getName(), node3.getAddress().getHostAddress());
+//    nodeDB.addNode(node1.getName(), node1.getAddress().getHostAddress());
+//    nodeDB.addNode(node2.getName(), node2.getAddress().getHostAddress());
+//    nodeDB.addNode(node3.getName(), node3.getAddress().getHostAddress());
 
-        assertEquals(10, nodeDB.getClosestIdFromName(createStringWithKnownHash(32760)));
-        assertEquals(node1.getAddress().getHostAddress(), nodeDB.getClosestIpFromName(createStringWithKnownHash(32760)));
-    }
+//    assertEquals(10, nodeDB.getClosestIdFromName(createStringWithKnownHash(32000)));
+//    assertEquals(node1.getAddress().getHostAddress(), nodeDB.getClosestIpFromName(createStringWithKnownHash(32000)));
+//}
 
     @Test
     public void getNodeIDTest_WrapFromBottom() throws Exception {
@@ -108,8 +109,8 @@ public class NameServerDatabaseTests {
 
         nodeDB.deleteNode(node1.getAddress().getHostAddress());
 
-        assertEquals(15, nodeDB.getClosestIdFromName(createStringWithKnownHash(12)));
-        assertEquals(node3.getAddress().getHostAddress(), nodeDB.getClosestIpFromName(createStringWithKnownHash(12)));
+        assertEquals(32000, nodeDB.getClosestIdFromName(createStringWithKnownHash(12)));
+        assertEquals(node2.getAddress().getHostAddress(), nodeDB.getClosestIpFromName(createStringWithKnownHash(12)));
     }
 
 
