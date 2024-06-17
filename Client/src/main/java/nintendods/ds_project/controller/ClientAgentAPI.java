@@ -95,8 +95,8 @@ public class ClientAgentAPI {
         }
     }
 
-    @PostMapping("failure/{ID}")
-    public ResponseEntity<String> creatFailureAgent(@PathVariable("ID") String failedNodeID) {
+    @PostMapping("failure")
+    public ResponseEntity<String> creatFailureAgent(@RequestParam("ID") String failedNodeID) {
         logger.info("create failure agent request");
         try {
             String thisNode = String.valueOf(context.getBean(Client.class).getNode().getId());
