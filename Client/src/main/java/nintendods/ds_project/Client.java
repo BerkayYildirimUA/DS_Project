@@ -371,10 +371,10 @@ public class Client {
                     if (multicastListener != null)
                         multicastListener.stopListening();
 
-                    if (API.hasAddress()) {
+                    /*if (API.hasAddress()) {
                         System.out.println("ERROR:\t Client: Send error");
                         API.executeErrorDelete("/nodes/" + node.getId() + "/error");
-                    }
+                    }*/
                     /**
                      * When the node gets in the Error state, we'll access the
                      * NamingServer API to handle everything from here.

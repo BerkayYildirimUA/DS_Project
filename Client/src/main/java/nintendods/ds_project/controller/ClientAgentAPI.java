@@ -107,6 +107,19 @@ public class ClientAgentAPI {
             logger.info("run failure agent");
             future.get(); // Wait for the agent to complete execution
             logger.info("send failure agent");
+            ClientNode node = context.getBean(Client.class).getNode();
+
+            FailureAgent finalAgent = agent;
+            Thread sendToNextNode = new Thread(() -> {
+                try {
+                    logger.info("send failure agent to next node");
+                    ApiUtil.Client_PUT_sendFailureAgent(finalAgent, String.valueOf(node.getPrevNodeId()));
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+
+            sendToNextNode.start();
             return ResponseEntity.ok("FailureAgent received and executed");
         } catch (InterruptedException | ExecutionException e) {
             Thread.currentThread().interrupt();
