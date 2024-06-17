@@ -55,12 +55,12 @@ public class FileDB {
             if (oldFile.isPresent()) {
                 int index = fileDB.indexOf(oldFile.get());
                 fileDB.set(index, file);
-                logger.info("File '{}' updated.", file.getName());
+                //logger.info("File '{}' updated.", file.getName());
             }
         } else {
             // File doesn't exist and needs to be added to the DB
             fileDB.add(file);
-            logger.info("File '{}' added.", file.getName());
+            //logger.info("File '{}' added.", file.getName());
         }
     }
 
@@ -80,7 +80,7 @@ public class FileDB {
 
     /**
      * Retrieves the IP address of the node storing the specified file.
-     * @param fileName The name of the file.
+     * @param abssolutePath The name of the file.
      * @return The IP address of the node or null if the file is not found.
      */
     public Optional<AFile> getFileByAbsolutePath(String abssolutePath) {
