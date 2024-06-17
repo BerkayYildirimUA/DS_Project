@@ -327,7 +327,7 @@ public class ApiUtil {
         byte[] agentData = agent.serialize();
 
         String url = "Http://" + ip + ":" + ClientNodeConfig.getApiPort() + "/api/agent/failure";
-
+        logger.info(url);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
 
@@ -350,7 +350,7 @@ public class ApiUtil {
         String ip = NameServer_GET_NodeIPfromID(sendNodeID);
 
         String url = "Http://" + ip + ":" + ClientNodeConfig.getApiPort() + "/api/agent/failure/?ID=" + failedNodeID;
-
+        logger.info(url);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
