@@ -26,15 +26,15 @@ public class FailureAgent implements Runnable, Serializable {
     private String currentNodeId;
     private final String startNode;
     private FileTransceiverService fileTransceiverService;
-    private ConfigurableApplicationContext context;
+
     protected static final Logger logger = LoggerFactory.getLogger(FailureAgent.class);
 
-    public FailureAgent(String failingNodeId, String currentNodeId, FileTransceiverService fileTransceiverService, ConfigurableApplicationContext context) {
+    public FailureAgent(String failingNodeId, String currentNodeId, FileTransceiverService fileTransceiverService) {
         this.failingNodeId = failingNodeId;
         this.currentNodeId = currentNodeId;
         this.startNode = currentNodeId;
         this.fileTransceiverService = fileTransceiverService;
-        this.context = context;
+
     }
 
     public static Object deserialize(byte[] data) throws IOException, ClassNotFoundException {
@@ -57,15 +57,6 @@ public class FailureAgent implements Runnable, Serializable {
 
     public void setFileTransceiverService(FileTransceiverService fileTransceiverService){
         this.fileTransceiverService = fileTransceiverService;
-    }
-
-    public void setContext(ConfigurableApplicationContext context) {
-        this.context = context;
-    }
-
-    public void setContextAndFileTransceiverService(ConfigurableApplicationContext context){
-        setContext(context);
-        setFileTransceiverService(context.getBean(Client.class).getFileTransceiver());
     }
 
     @Override
@@ -134,7 +125,6 @@ public class FailureAgent implements Runnable, Serializable {
 
     public byte[] serialize() throws IOException {
         this.fileTransceiverService = null;
-        this.context = null;
 
         try (ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
              ObjectOutputStream out = new ObjectOutputStream(byteOut)) {

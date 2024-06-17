@@ -68,7 +68,7 @@ public class ClientAgentAPI {
             }
 
             agent = agentOptional.get();
-            agent.setContextAndFileTransceiverService(context);
+            agent.setFileTransceiverService(context.getBean(Client.class).getFileTransceiver());
             logger.info("run failure agent");
             Future<FailureAgent> future = agentService.runAgent(agentOptional.get());
             future.get();
@@ -96,12 +96,12 @@ public class ClientAgentAPI {
     }
 
     @PostMapping("failure")
-    public ResponseEntity<String> creatFailureAgent(@RequestParam("ID") String failedNodeID) {
+    public ResponseEntity<String> createFailureAgent(@RequestParam("ID") String failedNodeID) {
         logger.info("create failure agent request");
         try {
             String thisNode = String.valueOf(context.getBean(Client.class).getNode().getId());
             FileTransceiverService fileTransceiverService = context.getBean(Client.class).getFileTransceiver();
-            FailureAgent agent = new FailureAgent(failedNodeID, thisNode, fileTransceiverService, context);
+            FailureAgent agent = new FailureAgent(failedNodeID, thisNode, fileTransceiverService);
             logger.info("created failure agent");
             Future<FailureAgent> future = agentService.runAgent(agent);
             logger.info("run failure agent");
@@ -109,11 +109,10 @@ public class ClientAgentAPI {
             logger.info("send failure agent");
             ClientNode node = context.getBean(Client.class).getNode();
 
-            FailureAgent finalAgent = agent;
             Thread sendToNextNode = new Thread(() -> {
                 try {
                     logger.info("send failure agent to next node");
-                    ApiUtil.Client_PUT_sendFailureAgent(finalAgent, String.valueOf(node.getPrevNodeId()));
+                    ApiUtil.Client_PUT_sendFailureAgent(agent, String.valueOf(node.getPrevNodeId()));
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
