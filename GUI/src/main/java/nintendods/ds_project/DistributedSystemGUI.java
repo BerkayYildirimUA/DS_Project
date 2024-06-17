@@ -14,7 +14,6 @@ public class DistributedSystemGUI {
 
     private RestTemplate restTemplate;
 
-
     public static void start() {
         EventQueue.invokeLater(() -> {
             try {
@@ -41,9 +40,15 @@ public class DistributedSystemGUI {
         JTabbedPane tabbedPane = new JTabbedPane();
         frame.getContentPane().add(tabbedPane, BorderLayout.CENTER);
 
+        // Create DashboardTab first
+        DashboardTab dashboardTab = new DashboardTab(restTemplate, null);
+        // Create FilesTab with reference to DashboardTab
+        FilesTab filesTab = new FilesTab(restTemplate, dashboardTab);
+        // Update DashboardTab with FilesTab reference
+        dashboardTab = new DashboardTab(restTemplate, filesTab);
+
         // Add tabs
-        FilesTab filesTab = new FilesTab(restTemplate);
-        tabbedPane.addTab("Dashboard", new DashboardTab(restTemplate, filesTab).getPanel());
+        tabbedPane.addTab("Dashboard", dashboardTab.getPanel());
         tabbedPane.addTab("Nodes", new NodesTab().getPanel());
         tabbedPane.addTab("Files", filesTab.getPanel());
     }
