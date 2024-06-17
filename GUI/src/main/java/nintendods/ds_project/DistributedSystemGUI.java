@@ -49,7 +49,7 @@ public class DistributedSystemGUI {
 
         // Add tabs
         tabbedPane.addTab("Dashboard", dashboardTab.getPanel());
-        tabbedPane.addTab("Nodes", new NodesTab().getPanel());
+        //tabbedPane.addTab("Nodes", new NodesTab().getPanel());
         tabbedPane.addTab("Files", filesTab.getPanel());
     }
 
