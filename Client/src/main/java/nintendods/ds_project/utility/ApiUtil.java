@@ -349,15 +349,25 @@ public class ApiUtil {
     public static void Client_POST_createFailureAgent(String failedNodeID, String sendNodeID) throws IOException {
         String ip = NameServer_GET_NodeIPfromID(sendNodeID);
 
-        String url = "Http://" + ip + ":" + ClientNodeConfig.getApiPort() + "/api/agent/failure/?ID=" + failedNodeID;
-        logger.info(url);
+        String url = "Http://" + ip + ":" + ClientNodeConfig.getApiPort() + "/api/agent/failure";
 
-        ResponseEntity<String> response = restTemplate.postForEntity(url, null, String.class);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
-        System.out.println("Response: " + response.getBody());
+        Map<String, String> params = new HashMap<>();
+        params.put("ID", failedNodeID);
 
+        HttpEntity<Map<String, String>> requestEntity = new HttpEntity<>(params, headers);
 
+        ResponseEntity<String> response = restTemplate.postForEntity(url, requestEntity, String.class);
+
+        if (response.getStatusCode().is2xxSuccessful()) {
+            logger.info("Success: " + response.getBody());
+        } else {
+            logger.info("Error: " + response.getStatusCode() + " - " + response.getBody());
+        }
     }
+
 
 
 }
