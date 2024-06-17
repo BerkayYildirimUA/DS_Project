@@ -351,18 +351,8 @@ public class ApiUtil {
 
         String url = "Http://" + ip + ":" + ClientNodeConfig.getApiPort() + "/api/agent/failure/?ID=" + failedNodeID;
         logger.info(url);
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
 
-        HttpEntity<String> requestEntity = new HttpEntity<>(headers);
-
-        ResponseEntity<String> response = restTemplate.exchange(
-                url,
-                HttpMethod.POST,
-                requestEntity,
-                String.class
-
-        );
+        ResponseEntity<String> response = restTemplate.postForEntity(url, null, String.class);
 
         System.out.println("Response: " + response.getBody());
 
