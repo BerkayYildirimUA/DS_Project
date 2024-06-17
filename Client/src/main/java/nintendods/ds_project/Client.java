@@ -352,8 +352,8 @@ public class Client {
                         syncAgent = new SyncAgent(this.context);
                     }
 
-                    this.nodeState = eNodeState.LISTENING;
-                    //this.nodeState = eNodeState.ERROR;
+                    //this.nodeState = eNodeState.LISTENING;
+                    this.nodeState = eNodeState.ERROR;
                 }
                 case SHUTDOWN -> {
                     System.out.println("SHUTDOWN:\t Start:" + Timestamp.from(Instant.now()));
