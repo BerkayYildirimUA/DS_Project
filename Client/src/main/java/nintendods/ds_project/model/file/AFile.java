@@ -22,7 +22,7 @@ public class AFile implements Serializable {
     int id = -1; // the hashed id of the filename
     List<ALog> logs; // All the logs that happend with the file
     ANode owner = null; // The owner of the file where the file is hosted.
-    boolean isBeenBackedUp; // If the file has been replicated, does it have a copy? will be false for the copy itself
+    boolean isBeenBackedUp = false; // If the file has been replicated, does it have a copy? will be false for the copy itself
 
     /**
      * Create a new file object that creates a log with the provided ABaseNode. It
@@ -40,11 +40,12 @@ public class AFile implements Serializable {
         this.name = name;
         setId(name);
         this.path = path;
-        //setReplicated(false);
 
         // Set a new log of initial creation with the owner of the file
         logs.add(new ALog(getOwner(), eLog.fileCreation, "initial creation of the file"));
         logs.add(new ALog(getOwner(), eLog.downloadLocation, "Initial Download location is Node with ID: " + NameToHash.convert(creator.getName())));
+
+        setReplicated(false, "-1");
     }
 
     /**
@@ -173,12 +174,15 @@ public class AFile implements Serializable {
         } else if (isBeenBackedUp() && !hasBeenBackedUp){
             logs.add(new ALog(getOwner(), eLog.fileReplicated,
                     "The file is no longer replicated"));
+        } else if (!isBeenBackedUp() && !hasBeenBackedUp){
+            logs.add(new ALog(getOwner(), eLog.fileReplicated,
+                    "The file is not replicated"));
         }
         this.isBeenBackedUp = hasBeenBackedUp;
     }
 
     public void setDownloadLocation(String ID){ // --> I am a copy, this is location of original
-        logs.add(new ALog(getOwner(), eLog.downloadLocation, "Download location changed to Node with ID:" + ID));
+        logs.add(new ALog(getOwner(), eLog.downloadLocation, "Download location changed to Node with ID: " + ID));
     }
 
     public boolean isBeenBackedUp() {

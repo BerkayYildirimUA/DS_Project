@@ -69,11 +69,11 @@ public class FailureAgent implements Runnable, Serializable {
             logMap.put("fileReplicated", null);
 
             for (int i = logs.size() - 1; i >= 0; i--) {
-                if (logs.get(i).getType().equals(eLog.downloadLocation) && logMap.get("downloadLocation") != null) {
+                if (logs.get(i).getType().equals(eLog.downloadLocation) && logMap.get("downloadLocation") == null) {
                     logMap.put("downloadLocation", logs.get(i));
                 }
 
-                if (logs.get(i).getType().equals(eLog.fileReplicated) && logMap.get("fileReplicated") != null) {
+                if (logs.get(i).getType().equals(eLog.fileReplicated) && logMap.get("fileReplicated") == null) {
                     logMap.put("fileReplicated", logs.get(i));
                 }
 
@@ -81,12 +81,13 @@ public class FailureAgent implements Runnable, Serializable {
                     break;
                 }
             }
-            logger.info("downloadLocation log:" + logMap.get("downloadLocation"));
-            logger.info("fileReplicated log:" + logMap.get("fileReplicated"));
+            logger.info("downloadLocation log:" + logMap.get("downloadLocation").getMessage());
+            logger.info("fileReplicated log:" + logMap.get("fileReplicated").getMessage());
 
             Map<String, Integer> logsReadedMap = new HashMap<>();
             logsReadedMap.put("downloadLocation", getIDsFromLogs(logMap.get("downloadLocation")));
             logsReadedMap.put("fileReplicated", getIDsFromLogs(logMap.get("fileReplicated")));
+
 
             if (logsReadedMap.get("downloadLocation").equals(Integer.valueOf(failingNodeId))){
                 logger.info("failed node was download location");
@@ -115,7 +116,7 @@ public class FailureAgent implements Runnable, Serializable {
 
     private Integer getIDsFromLogs(ALog log) {
         int id = -1;
-        Pattern pattern = Pattern.compile("Node with ID: (\\d+)");
+        Pattern pattern = Pattern.compile("with ID: (\\d+)");
         Matcher matcher = pattern.matcher(log.getMessage());
         while (matcher.find()) {
             id = Integer.parseInt(matcher.group(1));
