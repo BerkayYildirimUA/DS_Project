@@ -10,6 +10,8 @@ import nintendods.ds_project.exeption.DuplicateNodeException;
 import nintendods.ds_project.exeption.NotEnoughMessageException;
 import nintendods.ds_project.model.ClientNode;
 import nintendods.ds_project.model.file.AFile;
+import nintendods.ds_project.model.file.WatchObject;
+import nintendods.ds_project.model.file.eEvent;
 import nintendods.ds_project.model.message.UNAMObject;
 import nintendods.ds_project.service.*;
 import nintendods.ds_project.utility.ApiUtil;
@@ -413,35 +415,39 @@ public class Client {
         System.out.println("Main Done");
     }
 
-    public void onFileChanged(File file) {
-        logger.error("A file onFileChanged: " + file);
-        fileDB.addOrUpdateFile(file, node);
-        this.nodeState = eNodeState.TRANSFER;
+    public void onFileChanged(WatchObject file) {
+        logger.error("A file onFileChanged: " + file.getFileWithChange() + " with event: " + file.getKindOfChange());
 
-        String targetDirectoryPath = path + File.separator + "local";
-        moveFileToLocalDirectory(file, targetDirectoryPath);
+        if (file.getKindOfChange() == eEvent.CHANGE || file.getKindOfChange() == eEvent.CREATE)
+            fileDB.addOrUpdateFile(file.getFileWithChange(), node);
+        // this.nodeState = eNodeState.TRANSFER;
+
+        if (file.getKindOfChange() == eEvent.CREATE) {
+
+            String targetDirectoryPath = path + File.separator + "local";
+            moveFileToLocalDirectory(file.getFileWithChange(), targetDirectoryPath);
+        }
+
+        if(file.getKindOfChange() == eEvent.DELETE){
+            fileDB.removeFile(file.getFileWithChange().getName());
+        }
     }
 
     private void moveFileToLocalDirectory(File file, String targetDirectoryPath) {
         try {
-            logger.error("moveFileToLocalDirectory from: " + file + " to: "+ targetDirectoryPath);
+            logger.error("moveFileToLocalDirectory from: " + file + " to: " + targetDirectoryPath);
             // Create the target directory if it does not exist
             Path targetDirectory = Paths.get(targetDirectoryPath);
-            System.out.println(1);
             if (!Files.exists(targetDirectory)) {
                 Files.createDirectories(targetDirectory);
                 System.out.println(2);
             }
 
             // Define the target file path
-            System.out.println(3);
             Path targetFilePath = targetDirectory.resolve(file.getName());
-            System.out.println(4);
-            System.out.println(Paths.get(path + File.separator + file));
-            System.out.println(targetFilePath);
             // Move the file to the target directory
             Files.move(Paths.get(path + File.separator + file), targetFilePath);
-            System.out.println(5);
+
         } catch (IOException e) {
             e.printStackTrace();
         }

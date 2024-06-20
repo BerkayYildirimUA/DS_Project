@@ -4,6 +4,8 @@ import org.springframework.stereotype.Service;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
+import nintendods.ds_project.model.file.WatchObject;
+import nintendods.ds_project.model.file.eEvent;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,13 +29,13 @@ public class FileWatcherService {
     private ExecutorService executorService;
     private boolean running;
 
-    private Consumer<File> fileChangeListener;
+    private Consumer<WatchObject> fileChangeListener;
 
     public FileWatcherService(@Value("${file.watcher.directory}") String directoryToWatch) {
         this.directoryToWatch = directoryToWatch;
     }
 
-    public void setFileChangeListener(Consumer<File> listener) {
+    public void setFileChangeListener(Consumer<WatchObject> listener) {
         this.fileChangeListener = listener;
     }
 
@@ -79,7 +81,15 @@ public class FileWatcherService {
                         Path filePath = (Path) event.context();
                         logger.info("Event kind: " + kind + ". File affected: " + filePath + ".");
                         if (fileChangeListener != null) {
-                            fileChangeListener.accept(filePath.toFile());
+
+                            if(kind.equals(StandardWatchEventKinds.ENTRY_CREATE))
+                                fileChangeListener.accept(new WatchObject(filePath.toFile(), eEvent.CREATE));
+
+                            if(kind.equals(StandardWatchEventKinds.ENTRY_DELETE))
+                            fileChangeListener.accept(new WatchObject(filePath.toFile(), eEvent.DELETE));
+                            
+                            if(kind.equals(StandardWatchEventKinds.ENTRY_MODIFY))
+                                fileChangeListener.accept(new WatchObject(filePath.toFile(), eEvent.CHANGE));
                         }
                     }
                     key.reset();
