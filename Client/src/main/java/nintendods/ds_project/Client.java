@@ -437,6 +437,8 @@ public class Client {
             System.out.println(3);
             Path targetFilePath = targetDirectory.resolve(file.getName());
             System.out.println(4);
+            System.out.println(file.toPath());
+            System.out.println(targetFilePath);
             // Move the file to the target directory
             Files.move(file.toPath(), targetFilePath);
             System.out.println(5);
