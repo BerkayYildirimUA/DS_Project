@@ -437,10 +437,10 @@ public class Client {
             System.out.println(3);
             Path targetFilePath = targetDirectory.resolve(file.getName());
             System.out.println(4);
-            System.out.println(file.toPath());
+            System.out.println(Paths.get(path + File.separator + file));
             System.out.println(targetFilePath);
             // Move the file to the target directory
-            Files.move(file.toPath(), targetFilePath);
+            Files.move(Paths.get(path + File.separator + file), targetFilePath);
             System.out.println(5);
         } catch (IOException e) {
             e.printStackTrace();
