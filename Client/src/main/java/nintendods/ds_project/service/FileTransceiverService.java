@@ -85,9 +85,9 @@ public class FileTransceiverService {
 
             FileMessage message = new FileMessage(fileObject);
 
-            logger.info(String.format("before create socket to %s - %d",receiverAddress.replace("/", ""), this.port));
+            //logger.info(String.format("before create socket to %s - %d",receiverAddress.replace("/", ""), this.port));
             socket = new Socket(receiverAddress.replace("/", ""), this.port); // We assume that the receiver side uses the same port.
-            logger.info("socker OK");
+            //logger.info("socker OK");
             OutputStream outputStream = socket.getOutputStream(); // get the output stream from the socket.
             // create an object output stream from the output stream so we can send an
             // object through it
@@ -155,16 +155,16 @@ public class FileTransceiverService {
 
             while (!error) {
                 try {
-                    logger.info("Wait for file message");
+                    //logger.info("Wait for file message");
                     socket = ss.accept(); // blocking call, this will wait until a connection is attempted on this port.
-                    logger.info("file message recieved");
+                    //logger.info("file message recieved");
                     inputStream = socket.getInputStream();
                     objectInputStream = new ObjectInputStream(inputStream);
 
                     // read the list of messages from the socket and cast to FileMessage object
                     FileMessage receiveMessage = (FileMessage) objectInputStream.readObject();
                     receiveQueue.add(receiveMessage);
-                    logger.info("message saved");
+                    //logger.info("message saved");
 
                     //I added some code cause inputStream not closing cause issue for my tests, sorry of this breaks anything - berkay
                     inputStream.close();
