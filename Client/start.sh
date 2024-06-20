@@ -4,6 +4,8 @@
 apt update
 apt install openjdk-21-jdk
 mkdir assets
+mkdir assets/local
+mkdir assets/replicated
 
 
 # variable input

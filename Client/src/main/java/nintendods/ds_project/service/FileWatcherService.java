@@ -79,6 +79,10 @@ public class FileWatcherService {
                     for (WatchEvent<?> event : key.pollEvents()) {
                         WatchEvent.Kind<?> kind = event.kind();
                         Path filePath = (Path) event.context();
+
+                        if(filePath.toString().equals("local"))
+                            break;
+
                         logger.info("Event kind: " + kind + ". File affected: " + filePath + ".");
                         if (fileChangeListener != null) {
 
