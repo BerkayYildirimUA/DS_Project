@@ -39,7 +39,7 @@ public class FileWatcherService {
         this.fileChangeListener = listener;
     }
 
-    @PostConstruct
+    //@PostConstruct
     public void init() {
         Path path = Paths.get(directoryToWatch);
         if (!Files.exists(path) || !Files.isDirectory(path)) {
