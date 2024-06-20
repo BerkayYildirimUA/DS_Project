@@ -428,9 +428,9 @@ public class Client {
             moveFileToLocalDirectory(file.getFileWithChange(), targetDirectoryPath);
         }
 
-        if(file.getKindOfChange() == eEvent.DELETE){
-            fileDB.removeFile(file.getFileWithChange().getName());
-        }
+        //if(file.getKindOfChange() == eEvent.DELETE){
+        //    fileDB.removeFile(file.getFileWithChange().getName());
+        //}
     }
 
     private void moveFileToLocalDirectory(File file, String targetDirectoryPath) {
