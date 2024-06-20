@@ -42,6 +42,10 @@ public class FileWatcherService {
         Path path = Paths.get(directoryToWatch);
         if (!Files.exists(path) || !Files.isDirectory(path)) {
             logger.error("Directory to watch does not exist: " + directoryToWatch);
+            System.out.println(path);
+            System.out.println(directoryToWatch);
+            System.out.println(!Files.isDirectory(path));
+            System.out.println(!Files.exists(path));
             return;
         }
 
