@@ -74,7 +74,7 @@ public class SyncAgent implements Runnable, Serializable {
 
             // Check if we have new files on the next node that are not present on the
             // current node.
-
+            if(nextNodeAllFiles == null) return;
             System.out.println(nextNodeAllFiles);
 
             for (String nextNodeFileName : nextNodeAllFiles.keySet()) {
