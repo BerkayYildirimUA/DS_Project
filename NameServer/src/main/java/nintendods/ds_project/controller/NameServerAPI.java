@@ -28,7 +28,7 @@ public class NameServerAPI {
 
     private void printAndLog(String message) {
         // logger.info(message);
-        System.out.println(message);
+        //System.out.println(message);
     }
 
     
