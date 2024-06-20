@@ -1,5 +1,6 @@
 package nintendods.ds_project;
 
+import nintendods.ds_project.config.ClientNodeConfig;
 import nintendods.ds_project.database.FileDB;
 import nintendods.ds_project.model.file.AFile;
 import nintendods.ds_project.model.message.UNAMObject;
@@ -13,6 +14,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
@@ -116,7 +118,7 @@ public class ShutdownUtests {
             fw.append("This is a text in the file named: ").append(fileName);
             fw.close();
         }
-        AFile file = new AFile(testFile.getAbsolutePath(), testFile.getName(), client.node);
+        AFile file = new AFile(testFile.getAbsolutePath(), testFile.getName(), client.getNode());
 
         file.setReplicated(true, "10.10.10.10");
 

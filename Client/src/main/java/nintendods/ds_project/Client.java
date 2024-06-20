@@ -318,7 +318,7 @@ public class Client {
                     HttpHeaders headers = new HttpHeaders();
                     headers.setContentType(MediaType.APPLICATION_JSON);
                     ResponseEntity<String> response;
-/*
+
                     for (AFile file: fileDB.getFiles()) {
 
                         // Get ip if the right node
@@ -343,7 +343,7 @@ public class Client {
                        // Send file to that node
                        logger.info(String.format("return of send %b ",fileTransceiver.sendFile(file, transferIp)));
                     }
-*/
+
                    // System.out.println("TRANSFER:\t files added \n" + fileDB.getFiles());
                     nodeState = eNodeState.LISTENING; // Loop back to Listening for simplicity
 
@@ -372,10 +372,10 @@ public class Client {
                     if (multicastListener != null)
                         multicastListener.stopListening();
 
-                    /*if (API.hasAddress()) {
+                    if (API.hasAddress()) {
                         System.out.println("ERROR:\t Client: Send error");
                         API.executeErrorDelete("/nodes/" + node.getId() + "/error");
-                    }*/
+                    }
                     /**
                      * When the node gets in the Error state, we'll access the
                      * NamingServer API to handle everything from here.
