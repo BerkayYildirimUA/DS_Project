@@ -10,6 +10,8 @@ import nintendods.ds_project.exeption.DuplicateNodeException;
 import nintendods.ds_project.exeption.NotEnoughMessageException;
 import nintendods.ds_project.model.ClientNode;
 import nintendods.ds_project.model.file.AFile;
+import nintendods.ds_project.model.file.WatchObject;
+import nintendods.ds_project.model.file.eEvent;
 import nintendods.ds_project.model.message.UNAMObject;
 import nintendods.ds_project.service.*;
 import nintendods.ds_project.utility.ApiUtil;
@@ -52,9 +54,9 @@ import java.time.Instant;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-
 /**
- * Spring Boot application for managing a distributed system node's lifecycle excluding database auto-configuration.
+ * Spring Boot application for managing a distributed system node's lifecycle
+ * excluding database auto-configuration.
  */
 @EnableScheduling
 @SpringBootApplication(exclude = { DataSourceAutoConfiguration.class })
@@ -62,34 +64,39 @@ import java.util.concurrent.TimeUnit;
 public class Client {
 
     @Autowired
-    ClientNode node; // Ahmad_merge: this or node = new ClientNode(InetAddress.getLocalHost(), NODE_GLOBAL_PORT, generateRandomString(NODE_NAME_LENGTH));
+    ClientNode node; // Ahmad_merge: this or node = new ClientNode(InetAddress.getLocalHost(),
+                     // NODE_GLOBAL_PORT, generateRandomString(NODE_NAME_LENGTH));
 
     @Autowired
     FileWatcherService fileWatcherService;
+
     public ClientNode getNode() {
         return node;
     }
+
     private static final Logger logger = LoggerFactory.getLogger(Client.class);
     private static NSAPIService API = NSAPIService.getAPI();
 
     @Autowired
     ApplicationContext context;
     private eNodeState nodeState;
-    private int DISCOVERY_TIMEOUT = 8000; //In microseconds: Timeout for discovery
+    private int DISCOVERY_TIMEOUT = 8000; // In microseconds: Timeout for discovery
 
-    private int NODE_NAME_LENGTH;      // Length of the random node name
-    private int NODE_GLOBAL_PORT;      //Fixed port for node operations
-    private int DISCOVERY_RETRIES;      // Maximum number of retries for discovery
-    private int DISCOVERY_ADDITION_TIMEOUT;     //In microseconds
-    private int LISTENER_BUFFER_SIZE;     // Buffer size for the listener service
-    private String MULTICAST_ADDRESS;   // Multicast address for network communication
-    private int MULTICAST_PORT;      // Port for multicast communication
+    private int NODE_NAME_LENGTH; // Length of the random node name
+    private int NODE_GLOBAL_PORT; // Fixed port for node operations
+    private int DISCOVERY_RETRIES; // Maximum number of retries for discovery
+    private int DISCOVERY_ADDITION_TIMEOUT; // In microseconds
+    private int LISTENER_BUFFER_SIZE; // Buffer size for the listener service
+    private String MULTICAST_ADDRESS; // Multicast address for network communication
+    private int MULTICAST_PORT; // Port for multicast communication
     private UNAMObject nsObject;
     private boolean isRunning = true;
 
+    private boolean hasInitialTransfered = false;
+
     private SyncAgent syncAgent = null;
 
-    public SyncAgent getSyncAgent(){
+    public SyncAgent getSyncAgent() {
         return syncAgent;
     }
 
@@ -107,7 +114,6 @@ public class Client {
     private final RestTemplate restTemplate = new RestTemplate();
     private FileTransceiverService fileTransceiver = new FileTransceiverService();
 
-
     public FileTransceiverService getFileTransceiver() {
         return fileTransceiver;
     }
@@ -116,7 +122,7 @@ public class Client {
         this.fileTransceiver = fileTransceiver;
     }
 
-    //vars needed for testing
+    // vars needed for testing
     private int testing;
     public int t_nextNodePort;
     public int t_prevNodePort;
@@ -140,7 +146,7 @@ public class Client {
         MULTICAST_PORT = ClientNodeConfig.getMulticastPort();
         testing = ClientNodeConfig.getTESTING();
 
-        if (testing == 1){
+        if (testing == 1) {
             t_prevNodePort = 0;
             t_nextNodePort = 0;
         }
@@ -153,7 +159,7 @@ public class Client {
             System.out.println("Preparing for shutdown...");
             ShutdownService shutdownService;
 
-            if (testing == 1){
+            if (testing == 1) {
                 shutdownService = new ShutdownService(node, nsObject, t_nextNodePort, t_prevNodePort);
             } else {
                 shutdownService = new ShutdownService(node, nsObject);
@@ -171,17 +177,19 @@ public class Client {
     public void start() {
         try {
             new Thread(this::runNodeLifecycle).start();
-        }
-        catch (Exception ex){
-            //TODO handle exception
+        } catch (Exception ex) {
+            // TODO handle exception
         }
     }
 
     private void runNodeLifecycle() {
         DiscoveryService discoveryService = context.getBean(DiscoveryService.class);
-        //MulticastSendService multicastSendService = context.getBean(MulticastSendService.class);
-        //ListenerService listenerService = null; //context.getBean(ListenerService.class);
-        //TransferService transferService = context.getBean(TransferService.class); // Assuming this service exists
+        // MulticastSendService multicastSendService =
+        // context.getBean(MulticastSendService.class);
+        // ListenerService listenerService = null;
+        // //context.getBean(ListenerService.class);
+        // TransferService transferService = context.getBean(TransferService.class); //
+        // Assuming this service exists
         // Initialize the node with a random name and specific network settings
         // Create Node
         logger.info("New node with name: " + node.getName() + " And hash: " + node.getId());
@@ -216,19 +224,23 @@ public class Client {
                     } catch (Exception e) {
                         discoveryRetries++;
                         if (discoveryRetries != DISCOVERY_RETRIES + 1) {
-                            System.out.println("DISCOVERY:\t Retried discovery for the " + discoveryRetries + "(th) time");
+                            System.out.println(
+                                    "DISCOVERY:\t Retried discovery for the " + discoveryRetries + "(th) time");
                             logger.warn("Retry discovery for the" + discoveryRetries + "(th) time");
                         }
                         nodeState = eNodeState.DISCOVERY;
 
                         if (e instanceof DuplicateNodeException) {
-                            //Create new node
-                            node.setName(Generator.randomString(NODE_NAME_LENGTH)); // Ahmad_merge: this or node = new ClientNode(InetAddress.getLocalHost(), NODE_GLOBAL_PORT, generateRandomString(NODE_NAME_LENGTH));
+                            // Create new node
+                            node.setName(Generator.randomString(NODE_NAME_LENGTH)); // Ahmad_merge: this or node = new
+                                                                                    // ClientNode(InetAddress.getLocalHost(),
+                                                                                    // NODE_GLOBAL_PORT,
+                                                                                    // generateRandomString(NODE_NAME_LENGTH));
                             logger.info(node.toString());
                             logger.info("nodeName updated " + node.getName());
                         }
                         if (e instanceof NotEnoughMessageException) {
-                            //Create other timeout
+                            // Create other timeout
                             DISCOVERY_TIMEOUT += DISCOVERY_ADDITION_TIMEOUT;
                             logger.info("discoveryTimeout updated " + DISCOVERY_TIMEOUT);
                         }
@@ -237,7 +249,7 @@ public class Client {
 
                     // //Discovery has succeeded so continue
                     // //get NSObject from discovery service
-                    nsObject = ds.getNSObject(); //For later use
+                    nsObject = ds.getNSObject(); // For later use
                     ApiUtil.setNsObject(nsObject);
                     // Configure the api object
                     API.setIp(nsObject.getNSAddress());
@@ -248,10 +260,11 @@ public class Client {
                     nodeState = eNodeState.LISTENING; // Move to Listening state after successful discovery
                 }
                 case LISTENING -> {
-                    //System.out.println("Entering Listening");
+                    // System.out.println("Entering Listening");
                     // Listen for multicast
-                    if (multicastListener == null){
-                        multicastListener = new MulticastListenerService(MULTICAST_ADDRESS, MULTICAST_PORT, LISTENER_BUFFER_SIZE);
+                    if (multicastListener == null) {
+                        multicastListener = new MulticastListenerService(MULTICAST_ADDRESS, MULTICAST_PORT,
+                                LISTENER_BUFFER_SIZE);
                         multicastListener.initialize_multicast();
                     }
 
@@ -264,7 +277,7 @@ public class Client {
                     try {
                         AFile file = null;
                         file = fileTransceiver.saveIncomingFile(node, path + "/replicated");
-                        if(file != null){
+                        if (file != null) {
                             System.out.println("LISTENING:\t get files\n" + file);
                         }
                     } catch (DuplicateFileException e) {
@@ -281,8 +294,9 @@ public class Client {
                         e.printStackTrace();
                         nodeState = eNodeState.ERROR; // Move to Error state on exception
                     }
-                    
-                    if ( (node.getPrevNodeId() != -1 && node.getNextNodeId() != -1) && (node.getPrevNodeId() != node.getId() && node.getNextNodeId() != node.getId())){
+
+                    if ((node.getPrevNodeId() != -1 && node.getNextNodeId() != -1) &&
+                            (node.getPrevNodeId() != node.getId() && node.getNextNodeId() != node.getId())) {
                         try {
                             TimeUnit.SECONDS.sleep(3);
                         } catch (InterruptedException e) {
@@ -291,64 +305,70 @@ public class Client {
                         nodeState = eNodeState.TRANSFER;
                     }
                     /*
-                    if (node.getId() < node.getPrevNodeId())    {  // ---> gaat altijd een error geven vanaf je netwerk meer dan 2 nodes heeft
-                        System.out.println("LISTENING:\t Client sleep");
-                        try {
-                            TimeUnit.SECONDS.sleep(15);
-                        } catch (InterruptedException e) {
-                            throw new RuntimeException(e);
-                        }
-                        nodeState = eNodeState.ERROR;
-                    } else nodeState = eNodeState.TRANSFER;
-                    */
+                     * if (node.getId() < node.getPrevNodeId()) { // ---> gaat altijd een error
+                     * geven vanaf je netwerk meer dan 2 nodes heeft
+                     * System.out.println("LISTENING:\t Client sleep");
+                     * try {
+                     * TimeUnit.SECONDS.sleep(15);
+                     * } catch (InterruptedException e) {
+                     * throw new RuntimeException(e);
+                     * }
+                     * nodeState = eNodeState.ERROR;
+                     * } else nodeState = eNodeState.TRANSFER;
+                     */
                 }
                 case TRANSFER -> {
-                    // TODO: Transfer data or handle other operations
-                    List<File> files = FileReader.getFiles(path);
-                    // System.out.println(files + "\n");
+                    if (!hasInitialTransfered) {
+                        hasInitialTransfered = true;
+                        List<File> files = FileReader.getFiles(path);
+                        // System.out.println(files + "\n");
 
-                    // Add files to DB
-                    for (File file: files) fileDB.addOrUpdateFile(file, node);
-                    // logger.info("TRANSFER:\t DB " + fileDB.getFiles());
-                   // System.out.println("TRANSFER:\t node=" + node);
-                   // System.out.println("TRANSFER:\t files read \n" + fileDB.getFiles());
+                        // Add files to DB
+                        for (File file : files)
+                            fileDB.addOrUpdateFile(file, node);
+                        // logger.info("TRANSFER:\t DB " + fileDB.getFiles());
+                        System.out.println("TRANSFER:\t node=" + node);
+                        System.out.println("TRANSFER:\t files read \n" + fileDB.getFiles());
 
-                    // Transfer files
-                    String transferIp, url;
-                    HttpHeaders headers = new HttpHeaders();
-                    headers.setContentType(MediaType.APPLICATION_JSON);
-                    ResponseEntity<String> response;
+                        // Transfer files
+                        String transferIp, url;
+                        HttpHeaders headers = new HttpHeaders();
+                        headers.setContentType(MediaType.APPLICATION_JSON);
+                        ResponseEntity<String> response;
 
-                    for (AFile file: fileDB.getFiles()) {
+                        for (AFile file : fileDB.getFiles()) {
 
-                        // Get ip if the right node
-                        url = "http://" + nsObject.getNSAddress() + ":8089/files/" + file.getName();
-                        // logger.info("GET from: " + url);
-                        System.out.println("GET from: " + url);
-                        response = restTemplate.getForEntity(url, String.class);
-                        transferIp = response.getBody();
-                         System.out.println("Send file to " + transferIp);
-
-                        System.out.println("TRANSFER:\t received=" + transferIp + "\n\t\t own=" + node.getAddress().getHostAddress());
-                        if (("/"+node.getAddress().getHostAddress()).equals(transferIp)) {
-                            // Node to send is self --> send to previous node
-                            url = "http://" + nsObject.getNSAddress() + ":8089/node/" + node.getPrevNodeId();
+                            // Get ip if the right node
+                            url = "http://" + nsObject.getNSAddress() + ":8089/files/" + file.getName();
                             // logger.info("GET from: " + url);
                             System.out.println("GET from: " + url);
                             response = restTemplate.getForEntity(url, String.class);
                             transferIp = response.getBody();
-                            System.out.println("Can't send to self, redirect to " + transferIp);
+                            System.out.println("Send file to " + transferIp);
+
+                            System.out.println("TRANSFER:\t received=" + transferIp + "\n\t\t own="
+                                    + node.getAddress().getHostAddress());
+                            if (("/" + node.getAddress().getHostAddress()).equals(transferIp)) {
+                                // Node to send is self --> send to previous node
+                                url = "http://" + nsObject.getNSAddress() + ":8089/node/" + node.getPrevNodeId();
+                                // logger.info("GET from: " + url);
+                                System.out.println("GET from: " + url);
+                                response = restTemplate.getForEntity(url, String.class);
+                                transferIp = response.getBody();
+                                System.out.println("Can't send to self, redirect to " + transferIp);
+                            }
+
+                            // Send file to that node
+                            logger.info(
+                                    String.format("return of send %b ", fileTransceiver.sendFile(file, transferIp)));
                         }
 
-                       // Send file to that node
-                       logger.info(String.format("return of send %b ",fileTransceiver.sendFile(file, transferIp)));
+                        System.out.println("TRANSFER:\t files added \n" + fileDB.getFiles());
+
                     }
 
-                   // System.out.println("TRANSFER:\t files added \n" + fileDB.getFiles());
-                    nodeState = eNodeState.LISTENING; // Loop back to Listening for simplicity
-
-                    //At the end of the transfer, we launch the sync agent towards the next node
-                    if (syncAgent == null){
+                    // At the end of the transfer, we launch the sync agent towards the next node
+                    if (syncAgent == null) {
                         syncAgent = new SyncAgent(this.context);
                     }
 
@@ -357,6 +377,20 @@ public class Client {
                 }
                 case SHUTDOWN -> {
                     System.out.println("SHUTDOWN:\t Start:" + Timestamp.from(Instant.now()));
+                    /*
+                     * System.out.println("Prepare nodes for shutdown");
+                     * System.out.println("Nodes prepared. Latch Down");
+                     * latch.countDown();
+                     * isRunning = false;
+                     */
+                    // TODO: Handle shutdown process, ensuring all connections are closed properly
+                    // Gracefully, update the side nodes on its own and leave the ring topology.
+                    /**
+                     * When the node gets in the Shutdown state inside the discovery service, we'll
+                     * access the
+                     * NamingServer API to handle everything from here.
+                     * call: {NSAddress}:{NSPort}/nodes/{id}/shutdown
+                     */
                 }
                 case ERROR -> {
                     System.out.println("ERROR:\t Start:" + Timestamp.from(Instant.now()));
@@ -392,28 +426,39 @@ public class Client {
         System.out.println("Main Done");
     }
 
-    public void onFileChanged(File file) {
-        fileDB.addOrUpdateFile(file, node);
-        this.nodeState = eNodeState.TRANSFER;
+    public void onFileChanged(WatchObject file) {
+        logger.error("A file onFileChanged: " + file.getFileWithChange() + " with event: " + file.getKindOfChange());
 
-        String targetDirectoryPath = path + File.separator + "local";
-        moveFileToLocalDirectory(file, targetDirectoryPath);
+        if (file.getKindOfChange() == eEvent.CHANGE || file.getKindOfChange() == eEvent.CREATE)
+            fileDB.addOrUpdateFile(file.getFileWithChange(), node);
+        // this.nodeState = eNodeState.TRANSFER;
 
+        if (file.getKindOfChange() == eEvent.CREATE) {
+
+            String targetDirectoryPath = path + File.separator + "local";
+            moveFileToLocalDirectory(file.getFileWithChange(), targetDirectoryPath);
+        }
+
+        //if(file.getKindOfChange() == eEvent.DELETE){
+        //    fileDB.removeFile(file.getFileWithChange().getName());
+        //}
     }
 
     private void moveFileToLocalDirectory(File file, String targetDirectoryPath) {
         try {
+            logger.error("moveFileToLocalDirectory from: " + file + " to: " + targetDirectoryPath);
             // Create the target directory if it does not exist
             Path targetDirectory = Paths.get(targetDirectoryPath);
             if (!Files.exists(targetDirectory)) {
                 Files.createDirectories(targetDirectory);
+                System.out.println(2);
             }
 
             // Define the target file path
             Path targetFilePath = targetDirectory.resolve(file.getName());
-
             // Move the file to the target directory
-            Files.move(file.toPath(), targetFilePath);
+            Files.move(Paths.get(path + File.separator + file), targetFilePath);
+
         } catch (IOException e) {
             e.printStackTrace();
         }

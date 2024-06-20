@@ -14,6 +14,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -26,7 +28,7 @@ public class NameServerAPI {
 
     private void printAndLog(String message) {
         // logger.info(message);
-        System.out.println(message);
+        //System.out.println(message);
     }
 
     
@@ -166,5 +168,12 @@ public class NameServerAPI {
 
         nodeDB.deleteNode(id);
         return ResponseEntity.status(HttpStatus.OK).body(jsonConverter.toJson(id));
+    }
+
+    @GetMapping("/nodes")
+    public ResponseEntity<List<ClientNode>> getAllNodes() {
+        printAndLog("GET: All nodes");
+        List<ClientNode> nodes = nodeDB.getAllNodes();
+        return ResponseEntity.status(HttpStatus.OK).body(nodes);
     }
 }

@@ -57,7 +57,7 @@ public class ApiUtil {
 
     private static void checkNsObjectIsNotNull() {
         if (nsObject == null) {
-            logger.warn("Name Server Object not found");
+          //logger.warn("Name Server Object not found");
         }
     }
 
@@ -69,7 +69,7 @@ public class ApiUtil {
         checkNsObjectIsNotNull();
 
         String URL_FileAddressByName = nameSeverAdress + "/files/" + filename;
-        logger.info("GET from: " + URL_FileAddressByName);
+      //logger.info("GET from: " + URL_FileAddressByName);
         ResponseEntity<String> Response_FileAddressByName = restTemplate.getForEntity(URL_FileAddressByName, String.class);
         return Response_FileAddressByName.getBody();
     }
@@ -79,7 +79,7 @@ public class ApiUtil {
         checkNsObjectIsNotNull();
 
         String URL_NodeIPfromID = nameSeverAdress + "node/" + Integer.toString(id);
-        logger.info("GET from: " + URL_NodeIPfromID);
+      //logger.info("GET from: " + URL_NodeIPfromID);
         ResponseEntity<String> Response_NodeIPfromID = restTemplate.getForEntity(URL_NodeIPfromID, String.class);
         return removeLeadingSlash(Objects.requireNonNull(Response_NodeIPfromID.getBody()));
     }
@@ -109,10 +109,10 @@ public class ApiUtil {
         HttpEntity<String> request = new HttpEntity<>(nodeAsJson, headers);
 
         String URL_Nodes = nameSeverAdress + "/nodes";
-        logger.info("POST to: " + URL_Nodes);
+      //logger.info("POST to: " + URL_Nodes);
 
         ResponseEntity<String> response = restTemplate.postForEntity(URL_Nodes, request, String.class);
-        logger.info("Post response: " + response.getBody());
+      //logger.info("Post response: " + response.getBody());
         return response.getBody();
     }
 
@@ -124,9 +124,9 @@ public class ApiUtil {
 
 
         String URL_endError = nameSeverAdress + "/nodes/" + id + "/error";
-        logger.info("PATCH to: " + URL_endError);
+      //logger.info("PATCH to: " + URL_endError);
         ResponseEntity<String> response = restTemplate.exchange(URL_endError, HttpMethod.PATCH, request, String.class);
-        logger.info("PATCH response: " + response.getBody());
+      //logger.info("PATCH response: " + response.getBody());
         return response.getBody();
     }
 
@@ -141,9 +141,9 @@ public class ApiUtil {
         HttpEntity<String> request = new HttpEntity<>(headers);
 
         String URL_deleteFileById = nameSeverAdress + "/nodes/" + id;
-        logger.info("DELETE to: " + URL_deleteFileById);
+        //logger.info("DELETE to: " + URL_deleteFileById);
         ResponseEntity<String> response = restTemplate.exchange(URL_deleteFileById, HttpMethod.DELETE, request, String.class);
-        logger.info("DELETE response: " + response.getBody());
+        //logger.info("DELETE response: " + response.getBody());
         return response.getBody();
     }
 
@@ -158,9 +158,9 @@ public class ApiUtil {
         HttpEntity<String> request = new HttpEntity<>(headers);
 
         String URL_deleteFileById = nameSeverAdress + "/nodes/" + id + "/error";
-        logger.info("DELETE to: " + URL_deleteFileById);
+        //logger.info("DELETE to: " + URL_deleteFileById);
         ResponseEntity<String> response = restTemplate.exchange(URL_deleteFileById, HttpMethod.DELETE, request, String.class);
-        logger.info("DELETE response: " + response.getBody());
+        //logger.info("DELETE response: " + response.getBody());
         return response.getBody();
     }
 
@@ -176,9 +176,9 @@ public class ApiUtil {
         HttpEntity<String> request = new HttpEntity<>(headers);
 
         String URL_deleteFileById = nameSeverAdress + "/nodes/" + id + "/shutdown";
-        logger.info("DELETE to: " + URL_deleteFileById);
+        //logger.info("DELETE to: " + URL_deleteFileById);
         ResponseEntity<String> response = restTemplate.exchange(URL_deleteFileById, HttpMethod.DELETE, request, String.class);
-        logger.info("DELETE response: " + response.getBody());
+        //logger.info("DELETE response: " + response.getBody());
         return response.getBody();
     }
 
@@ -197,7 +197,7 @@ public class ApiUtil {
         String addres = ApiUtil.NameServer_GET_NodeIPfromID(nodeID);
 
         String url = "http://" + addres + "/api/files/" + filename;
-        logger.info("GET from: " + url);
+        //logger.info("GET from: " + url);
         ResponseEntity<String> Response_FileAddressByName = restTemplate.getForEntity(url, String.class);
         return Response_FileAddressByName.getBody();
     }
@@ -214,7 +214,7 @@ public class ApiUtil {
         String addres = ApiUtil.GET_NodeIPfromID(nodeID);
 
         String url = "http://" + addres + "/api/files/" + filename;
-        logger.info("GET from: " + url);
+      //logger.info("GET from: " + url);
         ResponseEntity<String> Response_FileAddressByName = restTemplate.getForEntity(url, String.class);
         return Response_FileAddressByName.getBody();
     }
@@ -233,7 +233,7 @@ public class ApiUtil {
         String addres = ApiUtil.NameServer_GET_NodeIPfromID(nodeID);
 
         String url = "http://" + addres + "/api/files/" + filename;
-        logger.info("DELETE from: " + url);
+        //logger.info("DELETE from: " + url);
         ResponseEntity<String> Response_FileAddressByName = restTemplate.getForEntity(url, String.class);
         return Response_FileAddressByName.getBody();
     }
@@ -244,7 +244,7 @@ public class ApiUtil {
         String prevNodeIP = ApiUtil.NameServer_GET_NodeIPfromID(prevNodeID);
 
         String UrlForPrevNode = "http://" + prevNodeIP + ":" + prevNodePort + "/api/Management/nextNodeID/?ID=" + nextNodeID;
-        logger.info("PUT to: " + UrlForPrevNode);
+        //logger.info("PUT to: " + UrlForPrevNode);
 
         try {
             restTemplate.put(UrlForPrevNode, String.class);
@@ -260,7 +260,7 @@ public class ApiUtil {
 
         String nextNodeIP = ApiUtil.NameServer_GET_NodeIPfromID(nextNodeID);
         String urlForNextNode = "http://" + nextNodeIP + ":" + nextNodePort + "/api/Management/prevNodeID/?ID=" + prevNodeID;
-        logger.info("PUT to: " + urlForNextNode);
+        //logger.info("PUT to: " + urlForNextNode);
         try {
             restTemplate.put(urlForNextNode, String.class);
             return true;
@@ -272,7 +272,7 @@ public class ApiUtil {
 
     public static List<AFile> clientGetAllFiles(String address, int port) {
         String url = "http://" + address + ":" + Integer.toString(port) + "/api/files";
-        logger.info("GET from: " + url);
+        //logger.info("GET from: " + url);
         ResponseEntity<String> files = restTemplate.getForEntity(url, String.class);
         Type localFileListType = new TypeToken<ArrayList<AFile>>() {}.getType();
         return (List<AFile>) jsonConverter.toObject(files.getBody(), localFileListType);
@@ -283,7 +283,7 @@ public class ApiUtil {
     public static Map<String, Boolean> getSyncAgentFiles(String address, int port) {
 
         String url = "http://" + address + ":" + Integer.toString(port) + "/api/agent/sync";
-        logger.info("GET from: " + url);
+        //logger.info("GET from: " + url);
 
         ResponseEntity<String> responseEntityStr = restTemplate.getForEntity(url, String.class);
         Type syncAgentFileListType = new TypeToken<HashMap<String, Boolean>>() {}.getType();

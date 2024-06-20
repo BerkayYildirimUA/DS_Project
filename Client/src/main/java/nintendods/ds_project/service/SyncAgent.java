@@ -73,12 +73,14 @@ public class SyncAgent implements Runnable, Serializable {
 
             // Check if we have new files on the next node that are not present on the
             // current node.
+            if(nextNodeAllFiles == null) return;
+            System.out.println(nextNodeAllFiles);
 
             for (String nextNodeFileName : nextNodeAllFiles.keySet()) {
                 if (!this.files.containsKey(nextNodeFileName)) {
                     // the file is not present in the local files so add to the local file with the lock of the next node
                     this.files.put(nextNodeFileName, nextNodeAllFiles.get(nextNodeFileName));
-                    logger.info(String.format("File %s is not present in local sync db. Add"));
+                    logger.info(String.format("File %s is not present in local sync db. Add", nextNodeFileName));
                 } else {
                     // File is present so check the lock value and update accordingly
                     // this.files.put(nextNodeFileName, nextNodeAllFiles.get(nextNodeAllFiles));
