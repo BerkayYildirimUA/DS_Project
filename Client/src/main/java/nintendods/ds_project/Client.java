@@ -427,15 +427,19 @@ public class Client {
             logger.error("moveFileToLocalDirectory from: " + file + " to: "+ targetDirectoryPath);
             // Create the target directory if it does not exist
             Path targetDirectory = Paths.get(targetDirectoryPath);
+            System.out.println(1);
             if (!Files.exists(targetDirectory)) {
                 Files.createDirectories(targetDirectory);
+                System.out.println(2);
             }
 
             // Define the target file path
+            System.out.println(3);
             Path targetFilePath = targetDirectory.resolve(file.getName());
-
+            System.out.println(4);
             // Move the file to the target directory
             Files.move(file.toPath(), targetFilePath);
+            System.out.println(5);
         } catch (IOException e) {
             e.printStackTrace();
         }
