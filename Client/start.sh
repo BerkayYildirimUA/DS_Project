@@ -3,6 +3,8 @@
 # installation
 apt update
 apt install openjdk-21-jdk
+mkdir assets
+
 
 # variable input
 new_port=$1
