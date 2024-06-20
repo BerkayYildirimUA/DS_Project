@@ -414,16 +414,17 @@ public class Client {
     }
 
     public void onFileChanged(File file) {
+        logger.error("A file onFileChanged: " + file);
         fileDB.addOrUpdateFile(file, node);
         this.nodeState = eNodeState.TRANSFER;
 
         String targetDirectoryPath = path + File.separator + "local";
         moveFileToLocalDirectory(file, targetDirectoryPath);
-
     }
 
     private void moveFileToLocalDirectory(File file, String targetDirectoryPath) {
         try {
+            logger.error("moveFileToLocalDirectory from: " + file + " to: "+ targetDirectoryPath);
             // Create the target directory if it does not exist
             Path targetDirectory = Paths.get(targetDirectoryPath);
             if (!Files.exists(targetDirectory)) {
