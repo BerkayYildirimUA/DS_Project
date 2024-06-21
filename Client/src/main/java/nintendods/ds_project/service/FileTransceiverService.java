@@ -253,6 +253,7 @@ public class FileTransceiverService {
 
             if (m != null) {
                 AFile fileObject = m.getFileObject();
+                if(fileObject == null) return null;
 
                 if((!fileChecker(node, fileObject)) && !testing_justReadFiles) {
                     String ipOfPrevNode = ApiUtil.NameServer_GET_NodeIPfromID(((ClientNode) node).getPrevNodeId());
